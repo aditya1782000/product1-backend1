@@ -2,18 +2,8 @@ import globals from 'globals';
 
 export default [
     {
+        files: ["src/**/*.ts"],
         languageOptions: {
-            globals: {
-                ...globals.commonjs,
-                ...globals.node,
-                _: 'readonly',
-                messages: 'readonly',
-                log: 'readonly',
-                emitter: 'readonly',
-                io: 'readonly',
-                queries: 'readonly',
-            },
-
             ecmaVersion: 12,
             sourceType: 'module',
         },

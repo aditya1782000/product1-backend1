@@ -5,8 +5,6 @@ import bodyParser from "body-parser";
 
 const app = express();
 
-const x: string = '';
-
 app.use(cors());
 app.use(bodyParser.json());
 
