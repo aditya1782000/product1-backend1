@@ -8,15 +8,8 @@
     "stop": "pm2 stop ./build/index.js",
     "dev": "env-cmd -f .env.development nodemon ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepare": "rm -rf .husky && npx husky install && npx husky add .husky/pre-commit 'npm run lint' && npx husky add .husky/pre-push 'npm run lint'"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint",
-      "pre-push": "npm run lint"
-    }
+    "eslint": "npx eslint .",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -28,8 +21,6 @@
     "ejs": "^3.1.9",
     "express": "^4.19.2",
     "express-validator": "^7.0.1",
-    "globals": "^15.9.0",
-    "husky": "^9.1.5",
     "mongodb": "^6.5.0",
     "mongoose": "^8.2.3",
     "validator": "^13.11.0"
@@ -45,9 +36,12 @@
     "dotenv": "^16.0.3",
     "env-cmd": "^10.1.0",
     "eslint": "^9.10.0",
+    "globals": "^15.9.0",
+    "husky": "^8.0.3",
     "nodemon": "^2.0.20",
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "typescript-eslint": "^8.5.0"
   }
 }
