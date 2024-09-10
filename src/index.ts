@@ -12,7 +12,7 @@ function connectToDbAndRunServer() {
         console.log(`Server is running on port ${port}`);
 
         await mongoose.connect(DATABASE_URL);
-        mongoose.connect.on('error', (error: Error) => console.log(error));
+        mongoose.connection.on('error', (error: Error) => console.log(error));
     });
 }
 
