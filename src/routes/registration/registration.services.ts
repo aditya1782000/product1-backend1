@@ -78,7 +78,7 @@ export const registerUser = async (
             'register_user.html',
             {
                 SITE_NAME: process.env.SITE_NAME,
-                USERNAME: firstName + '' + lastName,
+                USERNAME: `${firstName} ${lastName}`,
                 EMAIL: email,
                 PASSWORD: password,
             },
