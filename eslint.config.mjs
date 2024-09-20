@@ -14,8 +14,23 @@ export default [
         ],
     },
     {
-      rules: [
-        
-      ]
-    }
+        rules: {
+            indent: [
+                'error',
+                4,
+                {
+                    SwitchCase: 1,
+                    flatTernaryExpressions: true,
+                    ignoredNodes: ['ConditionalExpression'],
+                },
+            ],
+
+            'no-console': [
+                'error',
+                {
+                    allow: ['warn', 'error'],
+                },
+            ],
+        },
+    },
 ];
