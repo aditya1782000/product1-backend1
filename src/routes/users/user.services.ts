@@ -304,15 +304,15 @@ export const usersList = async (
             numberFields,
         );
 
-        let selectedFileds = '';
+        let selectedFields = '';
         if (role === 'subAdmin') {
-            selectedFileds =
+            selectedFields =
                 'firstName lastName email permissions organization';
         } else if (role == 'customer') {
-            selectedFileds =
+            selectedFields =
                 'firstName lastName email phoneNumber organization addressLineOne addressLineTwo city state pinCode';
         } else if (role === 'employee') {
-            selectedFileds =
+            selectedFields =
                 'firstName lastName email phoneNumber organization';
         }
 
@@ -326,7 +326,7 @@ export const usersList = async (
             organization: { $in: organisation },
             role,
         })
-            .select(selectedFileds)
+            .select(selectedFields)
             .sort(oData.oSortingOrder)
             .skip(start)
             .limit(limit)
@@ -340,6 +340,67 @@ export const usersList = async (
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
             recordsFiltered: userList.length || 0,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const userView = async (
+    userId: string,
+    organisation: mongoose.Types.ObjectId[],
+): Promise<AsyncResponseType> => {
+    try {
+        const selectedFields =
+            'firstName lastName email phoneNumber role permisssions isActive addressLineOne addressLineTwo city state pinCode';
+
+        const oUser = await User.findById({
+            _id: userId,
+        })
+            .populate('organization', '_id')
+            .select(selectedFields)
+            .lean();
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        const isAuthorized = Array.isArray(oUser.organization)
+            ? oUser.organization[0]?._id
+            : undefined;
+
+        if (
+            !isAuthorized ||
+            isAuthorized.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'User fetched successfully',
+            data: oUser,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

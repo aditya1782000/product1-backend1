@@ -1,4 +1,4 @@
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import enums from '../../../enum';
 
 export const addUsersValidators = [
@@ -203,4 +203,13 @@ export const usersListValidators = [
         .bail()
         .isIn(enums.role)
         .withMessage('Invalid role type'),
+];
+
+export const userViewValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
 ];

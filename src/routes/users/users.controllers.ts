@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addUsers, usersList } from './user.services';
+import { addUsers, usersList, userView } from './user.services';
 import mongoose from 'mongoose';
 
 interface RequestWithUser extends Request {
@@ -58,6 +58,20 @@ export const usersListControllers = async (req: Request, res: Response) => {
 
     const oResponse = await usersList(req, offSet, limit, role, organization);
 
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userViewController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await userView(id, organization);
+    
     return res.status(oResponse.statusCode).send({
         ...oResponse,
         statusCode: undefined,
