@@ -13,6 +13,19 @@ interface Permission {
     eType: string[];
 }
 
+type UpdateUserOption = {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: number;
+    permissions?: Permission[];
+    addressLineOne?: string;
+    addressLineTwo?: string;
+    city?: string;
+    state?: string;
+    pinCode?: number;
+};
+
 const handleSubAdminCreation = async (
     firstName: string,
     lastName: string,
@@ -307,13 +320,13 @@ export const usersList = async (
         let selectedFields = '';
         if (role === 'subAdmin') {
             selectedFields =
-                'firstName lastName email permissions organization';
+                'firstName lastName email permissions organization isActive';
         } else if (role == 'customer') {
             selectedFields =
-                'firstName lastName email phoneNumber organization addressLineOne addressLineTwo city state pinCode';
+                'firstName lastName email phoneNumber organization addressLineOne addressLineTwo city state pinCode isActive';
         } else if (role === 'employee') {
             selectedFields =
-                'firstName lastName email phoneNumber organization';
+                'firstName lastName email phoneNumber organization isActive';
         }
 
         const nRecordsTotal = await User.countDocuments({
@@ -454,6 +467,126 @@ export const userToggleStatus = async (
             success: true,
             message: 'User status toggled successfully',
         };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+const updateUser = async (
+    userId: string,
+    updateUser: UpdateUserOption,
+    organisation: mongoose.Types.ObjectId[],
+): Promise<AsyncResponseType> => {
+    if (updateUser.email) {
+        const existingUser = await User.findOne({ email: updateUser.email });
+        if (existingUser && existingUser._id !== userId) {
+            return {
+                statusCode: 409,
+                success: false,
+                message: 'User with this email already exists',
+            };
+        }
+    }
+
+    const updateUserData = await User.findByIdAndUpdate(userId, updateUser, {
+        new: true,
+    }).populate('organization', '_id');
+
+    if (!updateUser) {
+        return {
+            statusCode: 404,
+            success: false,
+            message: 'User not found',
+        };
+    }
+
+    if (
+        updateUserData?.organization.some(
+            (org) => org._id.toString() !== organisation.toString(),
+        )
+    ) {
+        return {
+            statusCode: 403,
+            success: false,
+            message: 'Unauthorized access',
+        };
+    }
+
+    return {
+        statusCode: 200,
+        success: true,
+        message: 'User updated successfully',
+    };
+};
+
+export const userEdit = async (
+    userId: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    phoneNumber: number,
+    role: string,
+    permissions: Permission[],
+    organisation: mongoose.Types.ObjectId[],
+    addressLineOne: string,
+    addressLineTwo: string,
+    city: string,
+    state: string,
+    pinCode: number,
+): Promise<AsyncResponseType> => {
+    try {
+        if (role === 'customer') {
+            return await updateUser(
+                userId,
+                {
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    addressLineOne,
+                    addressLineTwo,
+                    city,
+                    state,
+                    pinCode,
+                },
+                organisation,
+            );
+        } else if (role === 'employee') {
+            return await updateUser(
+                userId,
+                {
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                },
+                organisation,
+            );
+        } else {
+            return await updateUser(
+                userId,
+                {
+                    firstName,
+                    lastName,
+                    email,
+                    phoneNumber,
+                    permissions,
+                },
+                organisation,
+            );
+        }
     } catch (error: unknown) {
         if (error instanceof Error) {
             return {

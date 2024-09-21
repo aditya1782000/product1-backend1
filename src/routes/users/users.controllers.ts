@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
     addUsers,
+    userEdit,
     usersList,
     userToggleStatus,
     userView,
@@ -93,6 +94,47 @@ export const userToggleStatusController = async (
     const { id } = req.params;
 
     const oResponse = await userToggleStatus(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userEditController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+    const {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        role,
+        permissions,
+        addressLineOne,
+        addressLineTwo,
+        city,
+        state,
+        pinCode,
+    } = req.body;
+
+    const oResponse = await userEdit(
+        id,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        role,
+        permissions,
+        organization,
+        addressLineOne,
+        addressLineTwo,
+        city,
+        state,
+        pinCode,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
