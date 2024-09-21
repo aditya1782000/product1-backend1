@@ -81,6 +81,10 @@ export const addUsersValidators = [
                 throw new Error('Invalid phone number');
             }
         } else if (body.role === 'customer') {
+            if (!body.type) {
+                throw new Error('Type is required');
+            }
+
             if (!body.phoneNumber) {
                 throw new Error('Phone number is required');
             }
@@ -310,6 +314,10 @@ export const userEditValidators = [
                 throw new Error('Invalid phone number');
             }
         } else if (body.role === 'customer') {
+            if (!body.type) {
+                throw new Error('Type is required');
+            }
+
             if (!body.phoneNumber) {
                 throw new Error('Phone number is required');
             }

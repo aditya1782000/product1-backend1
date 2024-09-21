@@ -8,6 +8,7 @@ export interface IUser extends Document {
     phoneNumber: number;
     hash: string;
     role: string;
+    type: string;
     permissions: IPermission[];
     organization: mongoose.Types.ObjectId[];
     resetPasswordToken?: string;
@@ -56,6 +57,9 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         role: {
             type: String,
             enum: data.role,
+        },
+        type: {
+            type: String,
         },
         permissions: { type: [permissionSchema] },
         organization: {

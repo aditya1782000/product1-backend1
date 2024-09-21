@@ -1,5 +1,5 @@
 import User from '../../models/user';
-import { AsyncResponseType } from '../../test/async';
+import { AsyncResponseType } from '../../types/async';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';

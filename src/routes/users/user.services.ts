@@ -4,7 +4,7 @@ import User from '../../models/user';
 import generatepassword from 'generate-password';
 import bcrypt from 'bcrypt';
 import nodemailer from '../../utils/nodemailer';
-import { AsyncResponseType } from '../../test/async';
+import { AsyncResponseType } from '../../types/async';
 import Organisation from '../../models/organisation';
 import dataTable from '../../utils/dataTable';
 import enums from '../../../enum';
@@ -18,6 +18,7 @@ type UpdateUserOption = {
     firstName?: string;
     lastName?: string;
     email?: string;
+    type?: string;
     phoneNumber?: number;
     permissions?: Permission[];
     addressLineOne?: string;
@@ -101,6 +102,7 @@ const handleCutomerCreation = async (
     email: string,
     phoneNumber: number,
     role: string,
+    type: string,
     organisation: mongoose.Types.ObjectId[],
     addressLineOne: string,
     addressLineTwo: string,
@@ -135,6 +137,7 @@ const handleCutomerCreation = async (
         phoneNumber,
         hash,
         role,
+        type,
         organization: [organisation],
         addressLineOne,
         addressLineTwo,
@@ -241,6 +244,7 @@ export const addUsers = async (
     email: string,
     phoneNumber: number,
     role: string,
+    type: string,
     permissions: Permission[],
     organisation: mongoose.Types.ObjectId[],
     addressLineOne: string,
@@ -257,6 +261,7 @@ export const addUsers = async (
                 email,
                 phoneNumber,
                 role,
+                type,
                 organisation,
                 addressLineOne,
                 addressLineTwo,
@@ -324,7 +329,7 @@ export const usersList = async (
                 'firstName lastName email permissions organization isActive';
         } else if (role == 'customer') {
             selectedFields =
-                'firstName lastName email phoneNumber organization addressLineOne addressLineTwo city state pinCode isActive';
+                'firstName lastName email phoneNumber organization type addressLineOne addressLineTwo city state pinCode isActive';
         } else if (role === 'employee') {
             selectedFields =
                 'firstName lastName email phoneNumber organization isActive';
@@ -539,6 +544,7 @@ export const userEdit = async (
     email: string,
     phoneNumber: number,
     role: string,
+    type: string,
     permissions: Permission[],
     organisation: mongoose.Types.ObjectId[],
     addressLineOne: string,
@@ -555,6 +561,7 @@ export const userEdit = async (
                     firstName,
                     lastName,
                     email,
+                    type,
                     phoneNumber,
                     addressLineOne,
                     addressLineTwo,
