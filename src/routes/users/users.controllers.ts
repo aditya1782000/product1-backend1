@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import {
     addUsers,
+    editUserProfile,
     userDelete,
     userEdit,
     userPermissions,
+    userProfile,
     usersList,
     userToggleStatus,
     userView,
@@ -163,6 +165,41 @@ export const userPermissionsController = async (
     res: Response,
 ) => {
     const oResponse = await userPermissions();
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userProfileController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).userId;
+
+    const oResponse = await userProfile(userId);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userProfileUpdateController = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).userId;
+
+    const { firstName, lastName, email, phoneNumber } = req.body;
+
+    const oResponse = await editUserProfile(
+        userId,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

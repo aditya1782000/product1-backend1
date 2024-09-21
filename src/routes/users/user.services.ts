@@ -682,3 +682,92 @@ export const userPermissions = async (): Promise<AsyncResponseType> => {
         };
     }
 };
+
+export const userProfile = async (
+    userId: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const oUser = await User.findById(userId)
+            .select('firstName lastName email phoneNumber')
+            .lean();
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'User profile fetched successfully',
+            data: oUser,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const editUserProfile = async (
+    userId: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    phoneNumber?: number,
+): Promise<AsyncResponseType> => {
+    try {
+        const oUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+            },
+            { new: true },
+        );
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'User profile updated successfully',
+            data: oUser,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

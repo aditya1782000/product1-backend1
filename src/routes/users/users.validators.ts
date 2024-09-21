@@ -375,3 +375,30 @@ export const userDeleteValidator = [
         .isMongoId()
         .withMessage('Invalid Id'),
 ];
+
+export const userProfileEditValidators = [
+    body('firstName')
+        .notEmpty()
+        .withMessage('First name is required')
+        .bail()
+        .isString()
+        .withMessage('First name must be a string')
+        .bail()
+        .isLength({ min: 3, max: 25 }),
+
+    body('lastName')
+        .notEmpty()
+        .withMessage('Last name is required')
+        .bail()
+        .isString()
+        .withMessage('Last name must be a string')
+        .bail()
+        .isLength({ min: 3, max: 25 }),
+
+    body('email')
+        .notEmpty()
+        .withMessage('Email is required')
+        .bail()
+        .isEmail()
+        .withMessage('Please enter a valid email'),
+];
