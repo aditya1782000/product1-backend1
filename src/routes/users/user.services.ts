@@ -603,3 +603,52 @@ export const userEdit = async (
         };
     }
 };
+
+export const userDelete = async (
+    userId: string,
+    organisation: mongoose.Types.ObjectId[],
+): Promise<AsyncResponseType> => {
+    try {
+        const oUser = await User.findByIdAndDelete(userId);
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        if (
+            oUser.organization.some(
+                (org) => org._id.toString() !== organisation.toString(),
+            )
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'User deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

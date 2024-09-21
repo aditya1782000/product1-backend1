@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     addUsersControlller,
+    userDeleteController,
     userEditController,
     usersListControllers,
     userToggleStatusController,
@@ -9,6 +10,7 @@ import {
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     addUsersValidators,
+    userDeleteValidator,
     userEditValidators,
     usersListValidators,
     userToggleStatusValidators,
@@ -50,6 +52,13 @@ router.patch(
     userEditValidators,
     isAdmin('', 'E'),
     userEditController,
+);
+
+router.delete(
+    '/admin/user/:id/delete',
+    userDeleteValidator,
+    isAdmin('', 'D'),
+    userDeleteController,
 );
 
 export default router;

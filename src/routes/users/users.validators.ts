@@ -366,3 +366,12 @@ export const userEditValidators = [
         return true;
     }),
 ];
+
+export const userDeleteValidator = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];

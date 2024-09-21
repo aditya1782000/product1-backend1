@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
     addUsers,
+    userDelete,
     userEdit,
     usersList,
     userToggleStatus,
@@ -135,6 +136,20 @@ export const userEditController = async (req: Request, res: Response) => {
         state,
         pinCode,
     );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userDeleteController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await userDelete(id, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
