@@ -1,6 +1,6 @@
 import Registration from '../../models/register';
 import User from '../../models/user';
-import { AsyncResponseType } from '../../test/async';
+import { AsyncResponseType } from '../../types/async';
 import generatepassword from 'generate-password';
 import bcrypt from 'bcrypt';
 import nodemailer from '../../utils/nodemailer';
