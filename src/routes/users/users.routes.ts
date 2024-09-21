@@ -2,12 +2,14 @@ import express from 'express';
 import {
     addUsersControlller,
     usersListControllers,
+    userToggleStatusController,
     userViewController,
 } from './users.controllers';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     addUsersValidators,
     usersListValidators,
+    userToggleStatusValidators,
     userViewValidators,
 } from './users.validators';
 
@@ -32,6 +34,13 @@ router.get(
     userViewValidators,
     isAdmin('', 'V'),
     userViewController,
+);
+
+router.patch(
+    '/admin/user/:id/toggle',
+    userToggleStatusValidators,
+    isAdmin('', 'AD'),
+    userToggleStatusController,
 );
 
 export default router;

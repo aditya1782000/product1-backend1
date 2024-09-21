@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { addUsers, usersList, userView } from './user.services';
+import {
+    addUsers,
+    usersList,
+    userToggleStatus,
+    userView,
+} from './user.services';
 import mongoose from 'mongoose';
 
 interface RequestWithUser extends Request {
@@ -71,7 +76,24 @@ export const userViewController = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await userView(id, organization);
-    
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userToggleStatusController = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await userToggleStatus(id, organization);
+
     return res.status(oResponse.statusCode).send({
         ...oResponse,
         statusCode: undefined,

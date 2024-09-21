@@ -381,13 +381,10 @@ export const userView = async (
             };
         }
 
-        const isAuthorized = Array.isArray(oUser.organization)
-            ? oUser.organization[0]?._id
-            : undefined;
-
         if (
-            !isAuthorized ||
-            isAuthorized.toString() !== organisation.toString()
+            oUser.organization.some(
+                (org) => org._id.toString() !== organisation.toString(),
+            )
         ) {
             return {
                 statusCode: 403,
@@ -401,6 +398,61 @@ export const userView = async (
             success: true,
             message: 'User fetched successfully',
             data: oUser,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const userToggleStatus = async (
+    userId: string,
+    organisation: mongoose.Types.ObjectId[],
+): Promise<AsyncResponseType> => {
+    try {
+        const oUser = await User.findById({ _id: userId }).populate(
+            'organization',
+            '_id',
+        );
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        if (
+            oUser.organization.some(
+                (org) => org._id.toString() !== organisation.toString(),
+            )
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        oUser.isActive = !oUser.isActive;
+
+        await oUser.save();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'User status toggled successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

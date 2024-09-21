@@ -213,3 +213,12 @@ export const userViewValidators = [
         .isMongoId()
         .withMessage('Invalid Id'),
 ];
+
+export const userToggleStatusValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];
