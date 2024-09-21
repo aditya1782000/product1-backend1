@@ -7,6 +7,7 @@ import nodemailer from '../../utils/nodemailer';
 import { AsyncResponseType } from '../../test/async';
 import Organisation from '../../models/organisation';
 import dataTable from '../../utils/dataTable';
+import enums from '../../../enum';
 
 interface Permission {
     eKey: string;
@@ -635,6 +636,35 @@ export const userDelete = async (
             statusCode: 200,
             success: true,
             message: 'User deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const userPermissions = async (): Promise<AsyncResponseType> => {
+    try {
+        const aPermission = enums.permission.map((permission) => {
+            return { ekey: permission, eType: [] };
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Permissions fetched successfully',
+            data: aPermission,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

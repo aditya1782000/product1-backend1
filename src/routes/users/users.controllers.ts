@@ -3,6 +3,7 @@ import {
     addUsers,
     userDelete,
     userEdit,
+    userPermissions,
     usersList,
     userToggleStatus,
     userView,
@@ -150,6 +151,18 @@ export const userDeleteController = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await userDelete(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const userPermissionsController = async (
+    _req: Request,
+    res: Response,
+) => {
+    const oResponse = await userPermissions();
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

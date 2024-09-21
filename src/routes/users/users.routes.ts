@@ -3,6 +3,7 @@ import {
     addUsersControlller,
     userDeleteController,
     userEditController,
+    userPermissionsController,
     usersListControllers,
     userToggleStatusController,
     userViewController,
@@ -60,5 +61,7 @@ router.delete(
     isAdmin('', 'D'),
     userDeleteController,
 );
+
+router.get('/admin/users/permissions', isAdmin(), userPermissionsController );
 
 export default router;
