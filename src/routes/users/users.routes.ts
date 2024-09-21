@@ -4,6 +4,8 @@ import {
     userDeleteController,
     userEditController,
     userPermissionsController,
+    userProfileController,
+    userProfileUpdateController,
     usersListControllers,
     userToggleStatusController,
     userViewController,
@@ -13,10 +15,12 @@ import {
     addUsersValidators,
     userDeleteValidator,
     userEditValidators,
+    userProfileEditValidators,
     usersListValidators,
     userToggleStatusValidators,
     userViewValidators,
 } from './users.validators';
+import { validateOnlyAdmin } from '../../middleware/isOnlyAdmin';
 
 const router = express.Router();
 
@@ -62,6 +66,16 @@ router.delete(
     userDeleteController,
 );
 
-router.get('/admin/users/permissions', isAdmin(), userPermissionsController );
+router.get('/admin/users/permissions', isAdmin(), userPermissionsController);
+
+// Profile Routes
+router.get('/admin/profile', validateOnlyAdmin(), userProfileController);
+
+router.patch(
+    '/admin/profile/edit',
+    userProfileEditValidators,
+    validateOnlyAdmin(),
+    userProfileUpdateController,
+);
 
 export default router;
