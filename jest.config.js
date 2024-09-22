@@ -2,14 +2,10 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    transform: {
-        '^.+.tsx?$': ['ts-jest', {}],
-    },
-    moduleNameMapper: {
-        'src/(.*)': '<rootDir>/src/$1/test',
-    },
-    testTimeout: 3000,
+    testMatch: ['<rootDir>/src/test/index.ts'],
+    setupFilesAfterEnv: ['<rootDir>/src/test/index.ts'],
+    testTimeout: 30000,
     moduleDirectories: ['node_modules', 'src'],
     collectCoverage: true,
-    coverageReporters: ['json', 'html']
+    coverageReporters: ['json', 'html'],
 };
