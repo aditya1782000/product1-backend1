@@ -106,7 +106,7 @@ export const addUsersValidators = [
             }
 
             if (!body.addressLineTwo) {
-                throw new Error('Address 1 is required');
+                throw new Error('Address 2 is required');
             }
 
             if (typeof body.addressLineTwo !== 'string') {

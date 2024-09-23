@@ -43,7 +43,7 @@ export const isAdmin = (
             }
 
             const oUser = await User.findById(decoded.id).select(
-                'organization',
+                'organization isActive',
             );
 
             if (!oUser) {
@@ -53,15 +53,10 @@ export const isAdmin = (
                 });
             }
 
-            const org =
-                req.body.organization ||
-                req.query.organization ||
-                req.params.organization;
-
-            if (decoded.organization !== org) {
+            if (!oUser.isActive) {
                 return res.status(403).json({
                     success: false,
-                    message: 'Unauthorized access',
+                    message: 'User is inactive',
                 });
             }
 

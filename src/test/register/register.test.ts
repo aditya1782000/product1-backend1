@@ -11,6 +11,10 @@ jest.mock('../../models/user');
 jest.mock('../../models/organisation');
 jest.mock('bcrypt');
 jest.mock('generate-password');
+jest.mock('../../utils/nodemailer', () => ({
+    send: jest.fn(),
+    sendMail: jest.fn(),
+}));
 
 describe('REGISTER USER', () => {
     beforeEach(() => jest.clearAllMocks());

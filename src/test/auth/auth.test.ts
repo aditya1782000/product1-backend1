@@ -7,11 +7,14 @@ import crypto from 'crypto';
 
 jest.mock('../../models/user');
 jest.mock('bcrypt');
-jest.mock('jsonwebtoken');
 jest.mock('crypto');
+jest.mock('jsonwebtoken', () => ({
+    verify: jest.fn(),
+    sign: jest.fn(),
+}));
 
 const userToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTZhYjBhMGVhMWZiNThmNmUzMmI5NCIsImlhdCI6MTcyNjkyNjgxMywiZXhwIjoxNzI3MDEzMjEzfQ.egyeDBnQOoN5heR_FmwFBMfk3s2dnLjrH_GWwvhP-Qo';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTZhYjBhMGVhMWZiNThmNmUzMmI5NCIsImlhdCI6MTcyNzEwMzMyMSwiZXhwIjoxNzI3MTg5NzIxfQ.7GkTT7NQxUChJyRcYT8O5BWdw9Iqv9Rt8eeMR6oeBVI';
 
 describe('USER LOGIN', () => {
     beforeEach(() => jest.clearAllMocks());

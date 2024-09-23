@@ -346,6 +346,7 @@ export const usersList = async (
             role,
         })
             .select(selectedFields)
+            .collation({ locale: 'en', strength: 1 })
             .sort(oData.oSortingOrder)
             .skip(start)
             .limit(limit)
