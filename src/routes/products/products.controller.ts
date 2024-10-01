@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { addProduct, listProducts, productView } from './products.services';
+import {
+    addProduct,
+    listProducts,
+    productToggleStatus,
+    productView,
+} from './products.services';
 
 export const addProductsController = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,6 +65,20 @@ export const viewProductsController = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await productView(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const toggleProductStatus = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await productToggleStatus(id, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

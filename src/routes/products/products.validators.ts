@@ -127,3 +127,12 @@ export const viewProductValidators = [
         .isMongoId()
         .withMessage('Invalid Id'),
 ];
+
+export const toggleProductStatusValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];

@@ -4,11 +4,13 @@ import { isAdmin } from '../../middleware/isAdmin';
 import {
     addProductsController,
     listProdutsController,
+    toggleProductStatus,
     viewProductsController,
 } from './products.controller';
 import {
     addProductValidators,
     listProductsValidators,
+    toggleProductStatusValidators,
     viewProductValidators,
 } from './products.validators';
 const router = express.Router();
@@ -34,6 +36,13 @@ router.get(
     viewProductValidators,
     isAdmin('products', 'V'),
     viewProductsController,
+);
+
+router.patch(
+    '/admin/product/:id/toggle',
+    toggleProductStatusValidators,
+    isAdmin('products', 'AD'),
+    toggleProductStatus,
 );
 
 export default router;

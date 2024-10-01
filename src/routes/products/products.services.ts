@@ -203,3 +203,70 @@ export const productView = async (
         };
     }
 };
+
+export const productToggleStatus = async (
+    productId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oProduct = await Product.findById({ _id: productId }).populate(
+            'organization',
+            '_id',
+        );
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Product not found',
+            };
+        }
+
+        if (
+            oProduct.organization &&
+            oProduct.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        const updateProduct = await Product.findByIdAndUpdate(
+            productId,
+            {
+                isActive: !oProduct.isActive,
+            },
+            { new: true },
+        );
+
+        if (!updateProduct) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: 'Failed to update product status',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Product status updated successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
