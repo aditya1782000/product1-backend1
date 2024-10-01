@@ -19,6 +19,7 @@ export interface IProduct extends Document {
     unitType: string;
     price: IAreaPrice[];
     organization: mongoose.Types.ObjectId;
+    isActive?: boolean;
 }
 
 export const quantityPriceSchema: Schema<IQuantityPrice> =
@@ -63,6 +64,10 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>({
     organization: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'organisation',
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
     },
 });
 

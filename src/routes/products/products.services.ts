@@ -4,6 +4,7 @@ import Product from '../../models/product';
 import { Request } from 'express';
 import uploadFileToS3 from '../../utils/aws';
 import fs from 'fs';
+import dataTable from '../../utils/dataTable';
 
 interface QuantityPrice {
     quantityType: string;
@@ -93,5 +94,57 @@ export const addProduct = async (
         if (tempFilePath) {
             deleteTempFile(tempFilePath);
         }
+    }
+};
+
+export const listProducts = async (
+    req: Request,
+    start: number,
+    limit: number,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['productName'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const nRecordsTotal = await Product.countDocuments({
+            organization: { $in: organisation },
+        });
+
+        const productList = await Product.find({
+            $and: [oData.oSearchData],
+            organization: { $in: organisation },
+        })
+            .select('productName description isActive')
+            .collation({ locale: 'en', strength: 1 })
+            .sort(oData.oSortingOrder)
+            .skip(start)
+            .limit(limit)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Products fetched successfully',
+            data: productList,
+            draw: req.body.draw,
+            recordsTotal: nRecordsTotal,
+            recordsFiltered: nRecordsTotal,
+        }
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
     }
 };
