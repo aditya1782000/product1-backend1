@@ -126,7 +126,7 @@ export const listProducts = async (
         return {
             statusCode: 200,
             success: true,
-            message: 'Products fetched successfully',
+            message: 'Products list fetched successfully',
             data: productList,
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
