@@ -4,10 +4,12 @@ import { isAdmin } from '../../middleware/isAdmin';
 import {
     addProductsController,
     listProdutsController,
+    viewProductsController,
 } from './products.controller';
 import {
     addProductValidators,
     listProductsValidators,
+    viewProductValidators,
 } from './products.validators';
 const router = express.Router();
 
@@ -25,6 +27,13 @@ router.get(
     listProductsValidators,
     isAdmin('products', 'V'),
     listProdutsController,
+);
+
+router.get(
+    '/admin/product/:id/view',
+    viewProductValidators,
+    isAdmin('products', 'V'),
+    viewProductsController,
 );
 
 export default router;

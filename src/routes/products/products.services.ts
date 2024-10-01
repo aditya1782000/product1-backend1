@@ -131,7 +131,59 @@ export const listProducts = async (
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
             recordsFiltered: nRecordsTotal,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
         }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const productView = async (
+    productId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const selectedFields =
+            'productName, description howToUse productImageUrl unitType price isActive';
+
+        const oProduct = await Product.findById({ _id: productId })
+            .populate('organization', '_id')
+            .select(selectedFields)
+            .lean();
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Product not found',
+            };
+        }
+
+        if (oProduct.organization._id.toString() !== organisation.toString()) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Product fetched successfully',
+            data: oProduct,
+        };
     } catch (error: unknown) {
         if (error instanceof Error) {
             return {

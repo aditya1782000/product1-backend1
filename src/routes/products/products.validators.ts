@@ -1,4 +1,4 @@
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import enums from '../../../enum';
 
 export const addProductValidators = [
@@ -117,4 +117,13 @@ export const listProductsValidators = [
             );
         })
         .withMessage('Order arrat must contain object with column and dir key'),
+];
+
+export const viewProductValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
 ];
