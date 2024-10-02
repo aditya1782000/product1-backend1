@@ -155,10 +155,9 @@ export const productView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'productName, description howToUse productImageUrl unitType price isActive';
+            'productName, description howToUse productImageUrl unitType price isActive organization';
 
         const oProduct = await Product.findById({ _id: productId })
-            .populate('organization', '_id')
             .select(selectedFields)
             .lean();
 
@@ -209,9 +208,8 @@ export const productToggleStatus = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const oProduct = await Product.findById({ _id: productId }).populate(
+        const oProduct = await Product.findById({ _id: productId }).select(
             'organization',
-            '_id',
         );
 
         if (!oProduct) {
@@ -283,9 +281,8 @@ export const productEdit = async (
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
-        const oProduct = await Product.findById({ _id: productId }).populate(
+        const oProduct = await Product.findById({ _id: productId }).select(
             'organization',
-            '_id',
         );
 
         if (!oProduct) {
@@ -367,7 +364,9 @@ export const productDelete = async (
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     try {
-        const oProduct = await Product.findById(productId);
+        const oProduct = await Product.findById({ _id: productId }).select(
+            'organization',
+        );
 
         if (!oProduct) {
             return {
