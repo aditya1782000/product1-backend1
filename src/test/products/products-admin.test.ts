@@ -30,9 +30,9 @@ jest.mock('mongoose', () => {
 });
 
 const userToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTZhYjBhMGVhMWZiNThmNmUzMmI5NCIsImlhdCI6MTcyNzU5MjQ0OCwiZXhwIjoxNzI4ODg4NDQ4fQ.z5RgxpCCaFI4dYW2mPB5izEBDH-Wq60OUlDR1OOF8A8';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTZhYjBhMGVhMWZiNThmNmUzMmI5NCIsImlhdCI6MTcyNzg5MzY4NSwiZXhwIjoxNzI5MTg5Njg1fQ.FLU4kMxZI-2SLu1g5vC1UDd4ekJwe8yBWCNhy97dTvE';
 
-const productId: string = '66f91b83c5903f9829222130';
+const productId: string = '66fc17a9194980fe90d9772a';
 
 describe('ADD PRODUCTS', () => {
     beforeAll(() => {
@@ -747,15 +747,13 @@ describe('VIEW PRODUCT', () => {
     afterEach(() => jest.clearAllMocks());
 
     it('should retrun 200 if user is fetched', async () => {
-        const organizationId = new mongoose.Types.ObjectId();
-
         const mockAdmin = {
             _id: '1234',
             role: 'superAdmin',
             email: 'admin@example.com',
             permissions: [],
             isActive: true,
-            organization: organizationId,
+            organization: '66e6ab0a0ea1fb58f6e32b90',
         };
 
         (jwt.verify as jest.Mock).mockResolvedValue(mockAdmin);
@@ -784,7 +782,7 @@ describe('VIEW PRODUCT', () => {
                 },
             ],
             organization: {
-                _id: organizationId,
+                _id: '66e6ab0a0ea1fb58f6e32b90',
             },
         };
 
@@ -792,7 +790,7 @@ describe('VIEW PRODUCT', () => {
             select: jest.fn().mockReturnValue(mockAdmin),
         });
         (Product.findById as jest.Mock).mockReturnValue({
-            populate: jest.fn().mockReturnThis(),
+            // populate: jest.fn().mockReturnThis(),
             select: jest.fn().mockReturnThis(),
             lean: jest.fn().mockReturnValue(mockProduct),
         });
@@ -1006,15 +1004,13 @@ describe('TOGGLE PRODUCT', () => {
     afterEach(() => jest.clearAllMocks());
 
     it('should return 200 if product is toggled successfull', async () => {
-        const organizationId = new mongoose.Types.ObjectId();
-
         const mockAdmin = {
             _id: '1234',
             role: 'admin',
             email: 'admin@example.com',
             permissions: [],
             isActive: true,
-            organization: organizationId,
+            organization: '66e6ab0a0ea1fb58f6e32b90',
         };
 
         (jwt.verify as jest.Mock).mockResolvedValue(mockAdmin);
@@ -1043,7 +1039,7 @@ describe('TOGGLE PRODUCT', () => {
                 },
             ],
             organization: {
-                _id: organizationId,
+                _id: '66e6ab0a0ea1fb58f6e32b90',
             },
         };
 
@@ -1051,7 +1047,7 @@ describe('TOGGLE PRODUCT', () => {
             select: jest.fn().mockReturnValue(mockAdmin),
         });
         (Product.findById as jest.Mock).mockResolvedValue({
-            populate: jest.fn().mockReturnValue(mockProduct),
+            select: jest.fn().mockReturnValue(mockProduct),
         });
         (Product.findByIdAndUpdate as jest.Mock).mockResolvedValue(mockProduct);
 
@@ -1286,7 +1282,7 @@ describe('PRODUCT EDIT', () => {
             email: 'admin@example.com',
             permissions: [],
             isActive: true,
-            organization: organizationId,
+            organization: '66e6ab0a0ea1fb58f6e32b90',
         };
 
         (jwt.verify as jest.Mock).mockResolvedValue(mockAdmin);
@@ -1315,7 +1311,7 @@ describe('PRODUCT EDIT', () => {
                 },
             ],
             organization: {
-                _id: organizationId,
+                _id: '66e6ab0a0ea1fb58f6e32b90',
             },
         };
 
@@ -1323,7 +1319,7 @@ describe('PRODUCT EDIT', () => {
             select: jest.fn().mockReturnValue(mockAdmin),
         });
         (Product.findById as jest.Mock).mockResolvedValue({
-            populate: jest.fn().mockReturnValue(mockProduct),
+            select: jest.fn().mockReturnValue(mockProduct),
         });
         (Product.findByIdAndUpdate as jest.Mock).mockResolvedValue(mockProduct);
 
@@ -1678,5 +1674,124 @@ describe('PRODUCT EDIT', () => {
 
         expect(response.status).toBe(403);
         expect(response.body.message).toBe('User is inactive');
+    });
+});
+
+describe('DELETE PRODUCT', () => {
+    beforeEach(() => jest.clearAllMocks());
+
+    afterEach(() => jest.clearAllMocks());
+
+    it('should return 200 if product is deleted successfully', async () => {
+        const mockAdmin = {
+            _id: '1234',
+            role: 'admin',
+            email: 'admin@example.com',
+            permissions: [],
+            isActive: true,
+            organization: '66e6ab0a0ea1fb58f6e32b90',
+        };
+
+        (jwt.verify as jest.Mock).mockResolvedValue(mockAdmin);
+
+        const mockProduct = {
+            _id: productId,
+            productName: 'Test Product',
+            description: 'Test Product Description',
+            howToUse: 'Test Product How To Use',
+            productImageUrl: 'test-product-image.jpg',
+            unitType: 'KG',
+            price: [
+                {
+                    area: 'Local',
+                    prices: [
+                        { quantityType: '1-2 kg', price: 5 },
+                        { quantityType: '2-5 kg', price: 7 },
+                    ],
+                },
+                {
+                    area: 'International',
+                    prices: [
+                        { quantityType: '1-2 kg', price: 7 },
+                        { quantityType: '2-5 kg', price: 9 },
+                    ],
+                },
+            ],
+            organization: {
+                _id: '66e6ab0a0ea1fb58f6e32b90',
+            },
+        };
+        (User.findById as jest.Mock).mockReturnValueOnce({
+            select: jest.fn().mockReturnValue(mockAdmin),
+        });
+        (Product.findById as jest.Mock).mockResolvedValue({
+            select: jest.fn().mockReturnValueOnce(mockProduct),
+        });
+        (Product.findByIdAndDelete as jest.Mock).mockResolvedValue(mockProduct);
+
+        const response = await request(app)
+            .delete(`/api/v1/admin/product/${productId}/delete`)
+            .set('authorization', `Bearer ${userToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('Product deleted successfully');
+    });
+
+    it('should return 404 if prodcut does not exist', async () => {
+        const organizationId = new mongoose.Types.ObjectId();
+
+        const mockAdmin = {
+            _id: '1234',
+            role: 'admin',
+            email: 'admin@example.com',
+            permissions: [],
+            isActive: true,
+            organization: organizationId,
+        };
+
+        (jwt.verify as jest.Mock).mockResolvedValue(mockAdmin);
+
+        const productId = new mongoose.Types.ObjectId();
+
+        (User.findById as jest.Mock).mockReturnValueOnce({
+            select: jest.fn().mockReturnValue(mockAdmin),
+        });
+        (Product.findById as jest.Mock).mockResolvedValue(null);
+        (Product.findByIdAndDelete as jest.Mock).mockResolvedValue(productId);
+
+        const response = await request(app)
+            .delete(`/api/v1/admin/product/${productId}/delete`)
+            .set('authorization', `Bearer ${userToken}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body.message).toBe('Product not found');
+    });
+
+    it('should return 403 if token is not given', async () => {
+        const organizationId = new mongoose.Types.ObjectId();
+
+        const mockAdmin = {
+            _id: '1234',
+            role: 'admin',
+            email: 'admin@example.com',
+            permissions: [],
+            isActive: true,
+            organization: organizationId,
+        };
+
+        const productId = new mongoose.Types.ObjectId();
+
+        (User.findById as jest.Mock).mockReturnValueOnce({
+            select: jest.fn().mockReturnValue(mockAdmin),
+        });
+        (Product.findById as jest.Mock).mockResolvedValue(productId);
+        (Product.findByIdAndDelete as jest.Mock).mockResolvedValue(productId);
+
+        const response = await request(app).delete(
+            `/api/v1/admin/product/${productId}/delete`,
+        );
+
+        expect(response.status).toBe(403);
+        expect(response.body.message).toBe('Token is required');
     });
 });
