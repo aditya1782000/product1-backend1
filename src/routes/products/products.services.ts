@@ -280,7 +280,7 @@ export const productEdit = async (
     howToUse?: string,
     unitType?: string,
     price?: AreaPrice[],
-) => {
+): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
         const oProduct = await Product.findById({ _id: productId }).populate(
@@ -359,5 +359,63 @@ export const productEdit = async (
         if (tempFilePath) {
             deleteTempFile(tempFilePath);
         }
+    }
+};
+
+export const productDelete = async (
+    productId: string,
+    organisation: mongoose.Types.ObjectId[],
+): Promise<AsyncResponseType> => {
+    try {
+        const oProduct = await Product.findById(productId);
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Product not found',
+            };
+        }
+
+        if (
+            oProduct.organization &&
+            oProduct.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        const deleteProduct = await Product.findByIdAndDelete(productId);
+
+        if (!deleteProduct) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: 'Failed to delete product',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Product deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
     }
 };

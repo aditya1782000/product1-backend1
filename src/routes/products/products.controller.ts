@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
     addProduct,
     listProducts,
+    productDelete,
     productEdit,
     productToggleStatus,
     productView,
@@ -118,6 +119,20 @@ export const editProductController = async (req: Request, res: Response) => {
         unitType,
         price,
     );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const deleteProductController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await productDelete(id, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

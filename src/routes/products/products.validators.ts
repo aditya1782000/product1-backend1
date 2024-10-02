@@ -201,3 +201,12 @@ export const editProductValidators = [
     //     .isFloat({ gt: 0 })
     //     .withMessage('Price must be greater than zero'),
 ];
+
+export const deleteProductValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];

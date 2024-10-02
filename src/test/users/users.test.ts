@@ -1473,6 +1473,7 @@ describe('USER DELETE', () => {
         (User.findById as jest.Mock).mockReturnValueOnce({
             select: jest.fn().mockReturnValue(mockAdmin),
         });
+        (User.findById as jest.Mock).mockResolvedValue(mockUser);
         (User.findByIdAndDelete as jest.Mock).mockResolvedValue(mockUser);
 
         const response = await request(app)

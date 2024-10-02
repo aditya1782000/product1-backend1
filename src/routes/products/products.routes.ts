@@ -3,6 +3,7 @@ import uploader from '../../utils/uploader';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     addProductsController,
+    deleteProductController,
     editProductController,
     listProdutsController,
     toggleProductStatus,
@@ -10,6 +11,7 @@ import {
 } from './products.controller';
 import {
     addProductValidators,
+    deleteProductValidators,
     editProductValidators,
     listProductsValidators,
     toggleProductStatusValidators,
@@ -53,6 +55,13 @@ router.patch(
     editProductValidators,
     isAdmin('products', 'E'),
     editProductController,
+);
+
+router.delete(
+    '/admin/product/:id/delete',
+    deleteProductValidators,
+    isAdmin('products', 'D'),
+    deleteProductController,
 );
 
 export default router;

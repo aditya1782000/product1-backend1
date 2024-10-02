@@ -641,7 +641,7 @@ export const userDelete = async (
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findByIdAndDelete(userId);
+        const oUser = await User.findById(userId);
 
         if (!oUser) {
             return {
@@ -661,6 +661,16 @@ export const userDelete = async (
                 statusCode: 403,
                 success: false,
                 message: 'Unauthorized access',
+            };
+        }
+
+        const deleteUser = await User.findByIdAndDelete(userId);
+
+        if (!deleteUser) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: 'Failed to delete user',
             };
         }
 
