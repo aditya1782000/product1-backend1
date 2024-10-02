@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
     addProduct,
     listProducts,
+    productEdit,
     productToggleStatus,
     productView,
 } from './products.services';
@@ -79,6 +80,44 @@ export const toggleProductStatus = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await productToggleStatus(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const editProductController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+    const { productName, description, howToUse, unitType } = req.body;
+
+    let price;
+    if (typeof req.body.price === 'string') {
+        try {
+            price = JSON.parse(req.body.price);
+        } catch (error: unknown) {
+            return res.status(400).send({
+                success: false,
+                message: error,
+            });
+        }
+    } else {
+        price = req.body.price;
+    }
+
+    const oResponse = await productEdit(
+        id,
+        req,
+        organization,
+        productName,
+        description,
+        howToUse,
+        unitType,
+        price,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

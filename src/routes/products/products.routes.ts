@@ -3,12 +3,14 @@ import uploader from '../../utils/uploader';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     addProductsController,
+    editProductController,
     listProdutsController,
     toggleProductStatus,
     viewProductsController,
 } from './products.controller';
 import {
     addProductValidators,
+    editProductValidators,
     listProductsValidators,
     toggleProductStatusValidators,
     viewProductValidators,
@@ -43,6 +45,14 @@ router.patch(
     toggleProductStatusValidators,
     isAdmin('products', 'AD'),
     toggleProductStatus,
+);
+
+router.patch(
+    '/admin/product/:id/edit',
+    uploader.uploadFile('image'),
+    editProductValidators,
+    isAdmin('products', 'E'),
+    editProductController,
 );
 
 export default router;

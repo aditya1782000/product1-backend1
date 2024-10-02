@@ -136,3 +136,68 @@ export const toggleProductStatusValidators = [
         .isMongoId()
         .withMessage('Invalid Id'),
 ];
+
+export const editProductValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+
+    body('productName')
+        .notEmpty()
+        .withMessage('Product name is required')
+        .bail()
+        .isString()
+        .withMessage('Product name must be string'),
+
+    body('description')
+        .notEmpty()
+        .withMessage('Description is required')
+        .bail()
+        .isString()
+        .withMessage('Description must be string'),
+
+    body('howToUse')
+        .notEmpty()
+        .withMessage('How to use is required')
+        .bail()
+        .isString()
+        .withMessage('How To Use must be string'),
+
+    body('unitType')
+        .notEmpty()
+        .withMessage('Unit Type is required')
+        .bail()
+        .isIn(enums.unitType)
+        .withMessage('Invalid Unit Type'),
+
+    //UnComment when integrate the React
+
+    // body('price')
+    //     .isArray({ min: 1 })
+    //     .withMessage('Price must be an array and cannot be empty'),
+
+    // body('price.*.area')
+    //     .notEmpty()
+    //     .withMessage('Area is required')
+    //     .bail()
+    //     .isString()
+    //     .withMessage('area must be a string'),
+
+    // body('price.*.prices')
+    //     .isArray({ min: 1 })
+    //     .withMessage('Price must be an array and cannot be empty'),
+
+    // body('price.*.prices.*.quantityType')
+    //     .notEmpty()
+    //     .withMessage('Quantity Type IS required')
+    //     .bail()
+    //     .isString()
+    //     .withMessage('Quantity Type Is required'),
+
+    // body('price.*.prices.*.price')
+    //     .isFloat({ gt: 0 })
+    //     .withMessage('Price must be greater than zero'),
+];

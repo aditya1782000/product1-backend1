@@ -270,3 +270,94 @@ export const productToggleStatus = async (
         };
     }
 };
+
+export const productEdit = async (
+    productId: string,
+    req: Request,
+    organisation: mongoose.Types.ObjectId,
+    productName?: string,
+    description?: string,
+    howToUse?: string,
+    unitType?: string,
+    price?: AreaPrice[],
+) => {
+    let tempFilePath: string | undefined;
+    try {
+        const oProduct = await Product.findById({ _id: productId }).populate(
+            'organization',
+            '_id',
+        );
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Product not found',
+            };
+        }
+
+        if (
+            oProduct.organization &&
+            oProduct.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        let productImageUrl: string | undefined;
+
+        if (req.file) {
+            tempFilePath = req.file.path;
+            const uploadData = await uploadFileToS3(
+                req.file,
+                `${Date.now().toString()}`,
+                'order',
+            );
+            productImageUrl = uploadData.Location;
+        }
+
+        const updateProduct = await Product.findByIdAndUpdate(oProduct._id, {
+            productName,
+            description,
+            howToUse,
+            productImageUrl,
+            unitType,
+            price,
+        });
+
+        if (!updateProduct) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: 'Failed to update product',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Product updated successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    } finally {
+        if (tempFilePath) {
+            deleteTempFile(tempFilePath);
+        }
+    }
+};
