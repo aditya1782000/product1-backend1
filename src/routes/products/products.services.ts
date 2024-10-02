@@ -252,7 +252,7 @@ export const productToggleStatus = async (
         return {
             statusCode: 200,
             success: true,
-            message: 'Product status updated successfully',
+            message: 'Product status toggled successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
