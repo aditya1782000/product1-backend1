@@ -420,3 +420,52 @@ export const productDelete = async (
         };
     }
 };
+
+export const customerProductList = async (
+    organisation: mongoose.Types.ObjectId,
+    pinCode: number,
+): Promise<AsyncResponseType> => {
+    try {
+        const products = await Product.find(
+            {
+                organization: { $in: organisation },
+                isActive: true,
+                'price.area': pinCode,
+            },
+            {
+                'price.$': 1,
+            },
+        )
+            .select('productName')
+            .lean();
+
+        if (!products.length) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'No products found',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Products fetched successfully',
+            data: products,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

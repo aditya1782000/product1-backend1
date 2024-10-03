@@ -3,6 +3,7 @@ import uploader from '../../utils/uploader';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     addProductsController,
+    customerProductListController,
     deleteProductController,
     editProductController,
     listProdutsController,
@@ -17,6 +18,7 @@ import {
     toggleProductStatusValidators,
     viewProductValidators,
 } from './products.validators';
+import { isCustomer } from '../../middleware/isCustomer';
 const router = express.Router();
 
 //Admin panel Apis
@@ -64,4 +66,10 @@ router.delete(
     deleteProductController,
 );
 
+// Customer APIs
+router.get(
+    '/customer/products/list',
+    isCustomer(),
+    customerProductListController,
+);
 export default router;
