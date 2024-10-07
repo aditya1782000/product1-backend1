@@ -1,5 +1,7 @@
 import http from 'http';
 import app from './app';
+import { init } from './utils/kafka';
+
 const server = http.createServer(app);
 
 const { API_PORT, DATABASE_URL } = process.env;
@@ -14,6 +16,9 @@ function connectToDbAndRunServer() {
         await mongoose.connect(DATABASE_URL);
         mongoose.connection.on('error', (error: Error) => console.log(error));
         console.log('Connect to database successfully...');
+
+        await init();
+        console.log('Kafka initialized successfully...');
     });
 }
 

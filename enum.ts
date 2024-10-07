@@ -19,6 +19,7 @@ const enums = {
         'application/csv',
         'application/msword'
     ],
+    orderStatus: ['inApproval', 'approve', 'rejected', 'delivered',],
 };
 
 export default enums;
