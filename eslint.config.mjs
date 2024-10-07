@@ -11,6 +11,7 @@ export default [
             // ignore files explicitly in config as a backup
             'src/app.ts',
             'src/index.ts',
+            'src/utils/kafka.ts',
         ],
     },
     {
