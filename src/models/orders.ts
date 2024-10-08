@@ -15,8 +15,6 @@ export interface IOrder extends Document {
     totalAmount: number;
     status: string;
     type: string;
-    createdAt: Date;
-    updatedAt: Date;
     deliveredAt: Date;
 }
 
@@ -43,33 +41,32 @@ const orderItemSchema: Schema<IOrderItem> = new Schema<IOrderItem>({
     },
 });
 
-const orderSchema: Schema<IOrder> = new Schema<IOrder>({
-    customer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'customer',
+const orderSchema: Schema<IOrder> = new Schema<IOrder>(
+    {
+        customer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'customer',
+        },
+        orderItems: [orderItemSchema],
+        totalAmount: {
+            type: Number,
+            required: true,
+        },
+        status: {
+            type: String,
+            required: true,
+            enum: data.orderStatus,
+            default: 'inApproval',
+        },
+        type: {
+            type: String,
+            required: true,
+            enum: data.orderType,
+        },
+        deliveredAt: Date,
     },
-    orderItems: [orderItemSchema],
-    totalAmount: {
-        type: Number,
-        required: true,
-    },
-    status: {
-        type: String,
-        required: true,
-        enum: data.orderStatus,
-        default: 'inApproval',
-    },
-    type: String,
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
-    deliveredAt: Date,
-});
+    { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
+);
 
 const Order: Model<IOrder> = mongoose.model<IOrder>('orders', orderSchema);
 

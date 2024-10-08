@@ -42,34 +42,37 @@ export const areaPriceSchema: Schema<IAreaPrice> = new Schema<IAreaPrice>({
     prices: [quantityPriceSchema],
 });
 
-export const productSchema: Schema<IProduct> = new Schema<IProduct>({
-    productName: {
-        type: String,
-        required: true,
+export const productSchema: Schema<IProduct> = new Schema<IProduct>(
+    {
+        productName: {
+            type: String,
+            required: true,
+        },
+        description: {
+            type: String,
+            required: true,
+        },
+        howToUse: {
+            type: String,
+        },
+        productImageUrl: String,
+        unitType: {
+            type: String,
+            required: true,
+            enum: data.unitType,
+        },
+        price: [areaPriceSchema],
+        organization: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'organisation',
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
     },
-    description: {
-        type: String,
-        required: true,
-    },
-    howToUse: {
-        type: String,
-    },
-    productImageUrl: String,
-    unitType: {
-        type: String,
-        required: true,
-        enum: data.unitType,
-    },
-    price: [areaPriceSchema],
-    organization: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'organisation',
-    },
-    isActive: {
-        type: Boolean,
-        default: true,
-    },
-});
+    { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
+);
 
 const Product: Model<IProduct> = mongoose.model<IProduct>(
     'product',

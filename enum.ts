@@ -17,9 +17,10 @@ const enums = {
         'image/png',
         'application/pdf',
         'application/csv',
-        'application/msword'
+        'application/msword',
     ],
-    orderStatus: ['inApproval', 'approve', 'rejected', 'delivered',],
+    orderStatus: ['inApproval', 'approve', 'rejected', 'delivered'],
+    orderType: ['customer', 'admin'],
 };
 
 export default enums;
