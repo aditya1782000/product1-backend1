@@ -15,6 +15,7 @@ export interface IOrder extends Document {
     totalAmount: number;
     status: string;
     type: string;
+    organization: mongoose.Types.ObjectId;
     deliveredAt: Date;
 }
 
@@ -62,6 +63,10 @@ const orderSchema: Schema<IOrder> = new Schema<IOrder>(
             type: String,
             required: true,
             enum: data.orderType,
+        },
+        organization: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'organisation',
         },
         deliveredAt: Date,
     },

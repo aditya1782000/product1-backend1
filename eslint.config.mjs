@@ -12,6 +12,7 @@ export default [
             'src/app.ts',
             'src/index.ts',
             'src/utils/kafka.ts',
+            'src/utils/socket.ts',
         ],
     },
     {

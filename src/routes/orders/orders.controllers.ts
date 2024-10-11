@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createCustomerOrder } from './orders.services';
+import { createCustomerOrder, recieveCustomerOrders } from './orders.services';
 
 export const createCustomerOrderController = async (
     req: Request,
@@ -20,6 +20,18 @@ export const createCustomerOrderController = async (
         type,
         organization,
     );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const receiveCustomerOrdersControllers = async (
+    _req: Request,
+    res: Response,
+) => {
+    const oResponse = await recieveCustomerOrders();
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
