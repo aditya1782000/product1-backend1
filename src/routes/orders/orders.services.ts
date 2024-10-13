@@ -303,6 +303,7 @@ export const listCustomerPendingOrders = async (
             organization: { $in: organisation },
         })
             .select('status totalAmount dCreatedAt dUpdatedAt deliveredAt')
+            .sort({ dCreatedAt: -1 })
             .lean();
 
         if (!orders.length) {
@@ -347,6 +348,7 @@ export const listCustomerCompletedOrders = async (
             organization: { $in: organisation },
         })
             .select('status totalAmount dCreatedAt dUpdatedAt deliveredAt')
+            .sort({ dCreatedAt: -1 })
             .lean();
 
         if (!orders.length) {
@@ -362,6 +364,107 @@ export const listCustomerCompletedOrders = async (
             success: true,
             message: 'Customer Completed orders retrieved successfully',
             data: orders,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const viewAdminOrder = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oProduct = await Order.findById({
+            _id: orderId,
+            organization: { $in: organisation },
+        })
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
+            )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt',
+            )
+            .lean();
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order retrieved successfully',
+            data: oProduct,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const viewCustomerOrder = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oProduct = await Order.findById({
+            _id: orderId,
+            organization: { $in: organisation },
+        })
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
+            )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt',
+            )
+            .sort({ dCreatedAt: -1 })
+            .lean();
+
+        if (!oProduct) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order retrieved successfully',
+            data: oProduct,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

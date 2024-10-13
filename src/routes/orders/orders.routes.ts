@@ -7,11 +7,15 @@ import {
     listCustomerPendingOrdersControllers,
     listPendingOrdersControllers,
     receiveCustomerOrdersControllers,
+    viewAdminOrderControllers,
+    viewCustomerOrderControllers,
 } from './orders.controllers';
 import {
     createCustomerOrderValidators,
     listCompletedOrdersValidators,
     listPendingOrdersValidators,
+    viewAdminOrderValidators,
+    viewCustomerOrderValidators,
 } from './orders.validators';
 import { isAdmin } from '../../middleware/isAdmin';
 
@@ -38,6 +42,13 @@ router.get(
     listCompletedOrdersControllers,
 );
 
+router.get(
+    '/admin/order/:id/view',
+    viewAdminOrderValidators,
+    isAdmin('orders', 'V'),
+    viewAdminOrderControllers,
+);
+
 // Customer APIs
 router.post(
     '/customer/order/create',
@@ -54,8 +65,11 @@ router.get(
 
 router.get(
     '/customer/orders/completed/list',
+    viewCustomerOrderValidators,
     isCustomer(),
     listCustomerCompletedOrdersControllers,
 );
+
+router.get('/customer/order/view', isCustomer(), viewCustomerOrderControllers);
 
 export default router;
