@@ -6,6 +6,8 @@ import {
     listCustomerPendingOrders,
     listPendingOrders,
     recieveCustomerOrders,
+    viewAdminOrder,
+    viewCustomerOrder,
 } from './orders.services';
 
 export const createCustomerOrderController = async (
@@ -117,6 +119,40 @@ export const listCustomerCompletedOrdersControllers = async (
     const organization = (req as any).sOrganization;
 
     const oResponse = await listCustomerCompletedOrders(customer, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const viewAdminOrderControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await viewAdminOrder(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const viewCustomerOrderControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.body;
+
+    const oResponse = await viewCustomerOrder(id, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
