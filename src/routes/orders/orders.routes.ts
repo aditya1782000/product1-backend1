@@ -3,6 +3,7 @@ import { isCustomer } from '../../middleware/isCustomer';
 import {
     acceptOrderControllers,
     changeOrderStatusControllers,
+    createAdminOrdersControllers,
     createCustomerOrderController,
     editOrderControllers,
     listCompletedOrdersControllers,
@@ -17,6 +18,7 @@ import {
 import {
     acceptOrderValidators,
     changeOrderStatusValidators,
+    createAdminOrdersValidators,
     createCustomerOrderValidators,
     editOrderValidators,
     listCompletedOrdersValidators,
@@ -83,6 +85,13 @@ router.patch(
     changeOrderStatusValidators,
     isAdmin('orders', 'E'),
     changeOrderStatusControllers,
+);
+
+router.post(
+    '/admin/orders/add',
+    createAdminOrdersValidators,
+    isAdmin('orders', 'A'),
+    createAdminOrdersControllers,
 );
 
 // Customer APIs

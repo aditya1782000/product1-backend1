@@ -831,3 +831,69 @@ export const changeOrderStatus = async (
         };
     }
 };
+
+export const createAdminOrders = async (
+    customer: mongoose.Types.ObjectId,
+    orderItems: OrderItems[],
+    totalAmount: number,
+    status: string,
+    type: string = 'admin',
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oCustomer = await User.findById({ _id: customer })
+            .populate('organization', '_id')
+            .lean();
+
+        if (!oCustomer) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Customer not found',
+            };
+        }
+
+        if (
+            oCustomer.organization.some(
+                (org) =>
+                    org._id && org._id.toString() !== organisation.toString(),
+            )
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'You do not have access to this customer',
+            };
+        }
+
+        const oOrder = await Order.create({
+            customer,
+            orderItems,
+            totalAmount,
+            status,
+            type,
+            organization: organisation,
+        });
+
+        return {
+            statusCode: 201,
+            success: true,
+            message: 'Order created successfully',
+            data: oOrder,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
