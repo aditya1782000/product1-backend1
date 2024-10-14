@@ -17,6 +17,8 @@ export interface IOrder extends Document {
     type: string;
     organization: mongoose.Types.ObjectId;
     deliveredAt: Date;
+    orderNumber: string;
+    dCreatedAt?: Date;
 }
 
 const orderItemSchema: Schema<IOrderItem> = new Schema<IOrderItem>({
@@ -69,6 +71,10 @@ const orderSchema: Schema<IOrder> = new Schema<IOrder>(
             ref: 'organisation',
         },
         deliveredAt: Date,
+        orderNumber: {
+            type: String,
+            required: true,
+        },
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );

@@ -23,6 +23,28 @@ export const createCustomerOrder = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
+        const currentDate = new Date();
+        let startYear: number;
+        let endYear: number;
+
+        if (currentDate.getMonth() >= 3) {
+            startYear = currentDate.getFullYear();
+            endYear = currentDate.getFullYear() + 1;
+        } else {
+            startYear = currentDate.getFullYear() - 1;
+            endYear = currentDate.getFullYear();
+        }
+
+        const ficalYearStart = new Date(`${startYear}-04-01`);
+        const ficalYearEnd = new Date(`${endYear}-03-31`);
+
+        const nOrderTotal = await Order.countDocuments({
+            customer,
+            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+        });
+
+        const orderNumber = `order ${nOrderTotal + 1}`;
+
         const order = {
             customer,
             orderItems,
@@ -30,6 +52,7 @@ export const createCustomerOrder = async (
             status,
             type,
             organization: organisation,
+            orderNumber,
         };
 
         const producer = myKafka.producer();
@@ -168,7 +191,7 @@ export const listPendingOrders = async (
 
         const orders = await Order.find(orderQuery)
             .populate('customer', '_id firstName lastName phoneNumber')
-            .select('totalAmount dCreatedAt status')
+            .select('totalAmount dCreatedAt status orderNumber')
             .collation({ locale: 'en', strength: 1 })
             .sort(oOrderData.oSortingOrder)
             .skip(start)
@@ -251,7 +274,7 @@ export const listCompletedOrders = async (
 
         const orders = await Order.find(orderQuery)
             .populate('customer', '_id firstName lastName phoneNumber')
-            .select('totalAmount dCreatedAt dUpdatedAt status')
+            .select('totalAmount dCreatedAt dUpdatedAt status orderNumber')
             .collation({ locale: 'en', strength: 1 })
             .sort(oOrderData.oSortingOrder)
             .skip(start)
@@ -302,7 +325,9 @@ export const listCustomerPendingOrders = async (
             status: 'inApproval',
             organization: { $in: organisation },
         })
-            .select('status totalAmount dCreatedAt dUpdatedAt deliveredAt')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            )
             .sort({ dCreatedAt: -1 })
             .lean();
 
@@ -347,7 +372,9 @@ export const listCustomerCompletedOrders = async (
             status: { $in: ['approved', 'rejected', 'delivered'] },
             organization: { $in: organisation },
         })
-            .select('status totalAmount dCreatedAt dUpdatedAt deliveredAt')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            )
             .sort({ dCreatedAt: -1 })
             .lean();
 
@@ -397,7 +424,7 @@ export const viewAdminOrder = async (
             )
             .populate('orderItems.product', 'productName productImageUrl')
             .select(
-                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt',
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt orderNumber',
             )
             .lean();
 
@@ -458,7 +485,7 @@ export const viewCustomerOrder = async (
             )
             .populate('orderItems.product', 'productName productImageUrl')
             .select(
-                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt',
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt orderNumber',
             )
             .sort({ dCreatedAt: -1 })
             .lean();
@@ -866,6 +893,28 @@ export const createAdminOrders = async (
             };
         }
 
+        const currentDate = new Date();
+        let startYear: number;
+        let endYear: number;
+
+        if (currentDate.getMonth() >= 3) {
+            startYear = currentDate.getFullYear();
+            endYear = currentDate.getFullYear() + 1;
+        } else {
+            startYear = currentDate.getFullYear() - 1;
+            endYear = currentDate.getFullYear();
+        }
+
+        const ficalYearStart = new Date(`${startYear}-04-01`);
+        const ficalYearEnd = new Date(`${endYear}-03-31`);
+
+        const nOrderTotal = await Order.countDocuments({
+            customer,
+            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+        });
+
+        const orderNumber = `order ${nOrderTotal + 1}`;
+
         const oOrder = await Order.create({
             customer,
             orderItems,
@@ -873,6 +922,7 @@ export const createAdminOrders = async (
             status,
             type,
             organization: organisation,
+            orderNumber,
         });
 
         return {
