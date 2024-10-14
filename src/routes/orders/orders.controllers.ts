@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import {
+    acceptOrder,
+    changeOrderStatus,
     createCustomerOrder,
     editOrder,
     listCompletedOrders,
@@ -7,6 +9,7 @@ import {
     listCustomerPendingOrders,
     listPendingOrders,
     recieveCustomerOrders,
+    rejectOrder,
     viewAdminOrder,
     viewCustomerOrder,
 } from './orders.services';
@@ -175,6 +178,48 @@ export const editOrderControllers = async (req: Request, res: Response) => {
         orderItems,
         totalAmount,
     );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const acceptOrderControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await acceptOrder(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const rejectedOrderControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await rejectOrder(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const changeOrderStatusControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await changeOrderStatus(id, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

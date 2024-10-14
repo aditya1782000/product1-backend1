@@ -244,3 +244,30 @@ export const editOrderValidators = [
         .isNumeric()
         .withMessage('Total amount must be a number'),
 ];
+
+export const acceptOrderValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];
+
+export const rejectOrderValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];
+
+export const changeOrderStatusValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];

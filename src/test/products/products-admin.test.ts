@@ -30,7 +30,7 @@ jest.mock('mongoose', () => {
 });
 
 const userToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTZhYjBhMGVhMWZiNThmNmUzMmI5NCIsImlhdCI6MTcyNzg5MzY4NSwiZXhwIjoxNzI5MTg5Njg1fQ.FLU4kMxZI-2SLu1g5vC1UDd4ekJwe8yBWCNhy97dTvE';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTVhMTc0MzdkNDM4NmY2NjE1YzcyOSIsImlhdCI6MTcyODgxNTY0MSwiZXhwIjoxNzMwMTExNjQxfQ.9J9We6nDLqzs7ZGyqZjE_QyiFF9Kuz58v55RVIoFdiQ';
 
 const productId: string = '66fc17a9194980fe90d9772a';
 

@@ -29,7 +29,7 @@ jest.mock('mongoose', () => {
 });
 
 const customerToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZmVlMGQ4YjA1MWNmZWFiZWE3N2FmOCIsImlhdCI6MTcyODA1NzEwMywiZXhwIjoxNzI5MzUzMTAzfQ.yrBzB4cWM_O27e1ASdyO4vUB4jtqYH7OeHcCjxItO6s';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTVhMTc0MzdkNDM4NmY2NjE1YzcyOSIsImlhdCI6MTcyODgxNTY0MSwiZXhwIjoxNzMwMTExNjQxfQ.9J9We6nDLqzs7ZGyqZjE_QyiFF9Kuz58v55RVIoFdiQ';
 
 describe('LIST CUSTOMER PRODUCTS', () => {
     beforeEach(() => jest.clearAllMocks());

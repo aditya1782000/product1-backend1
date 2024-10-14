@@ -573,3 +573,261 @@ export const editOrder = async (
         };
     }
 };
+
+export const acceptOrder = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oOrder = await Order.findById({
+            _id: orderId,
+        }).populate('organization', '_id');
+
+        if (!oOrder) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        if (
+            oOrder.organization &&
+            oOrder.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        if (oOrder.status === 'inApproval') {
+            const updateOrder = await Order.findByIdAndUpdate(
+                oOrder._id,
+                { status: 'approved' },
+                { new: true },
+            );
+
+            if (!updateOrder) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Failed to accept order',
+                };
+            }
+        } else {
+            if (oOrder.status === 'approved') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already approved',
+                };
+            } else if (oOrder.status === 'rejected') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already rejected',
+                };
+            } else if (oOrder.status === 'delivered') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already delivered',
+                };
+            }
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order accepted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const rejectOrder = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oOrder = await Order.findById({
+            _id: orderId,
+        }).populate('organization', '_id');
+
+        if (!oOrder) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        if (
+            oOrder.organization &&
+            oOrder.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        if (oOrder.status === 'inApproval') {
+            const updateOrder = await Order.findByIdAndUpdate(
+                oOrder._id,
+                { status: 'rejected' },
+                { new: true },
+            );
+
+            if (!updateOrder) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Failed to reject order',
+                };
+            }
+        } else {
+            if (oOrder.status === 'approved') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already approved',
+                };
+            } else if (oOrder.status === 'rejected') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already rejected',
+                };
+            } else if (oOrder.status === 'delivered') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already delivered',
+                };
+            }
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order rejected successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const changeOrderStatus = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oOrder = await Order.findById({
+            _id: orderId,
+        }).populate('organization', '_id');
+
+        if (!oOrder) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        if (
+            oOrder.organization &&
+            oOrder.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        if (oOrder.status === 'approved') {
+            const updateOrder = await Order.findByIdAndUpdate(
+                oOrder._id,
+                { status: 'delivered' },
+                { new: true },
+            );
+
+            if (!updateOrder) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Failed to change the status',
+                };
+            }
+        } else {
+            if (oOrder.status === 'rejected') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already rejected',
+                };
+            } else if (oOrder.status === 'inApproval') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is in approval',
+                };
+            } else if (oOrder.status === 'delivered') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already delivered',
+                };
+            }
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order delivered successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

@@ -1,6 +1,8 @@
 import express from 'express';
 import { isCustomer } from '../../middleware/isCustomer';
 import {
+    acceptOrderControllers,
+    changeOrderStatusControllers,
     createCustomerOrderController,
     editOrderControllers,
     listCompletedOrdersControllers,
@@ -8,14 +10,18 @@ import {
     listCustomerPendingOrdersControllers,
     listPendingOrdersControllers,
     receiveCustomerOrdersControllers,
+    rejectedOrderControllers,
     viewAdminOrderControllers,
     viewCustomerOrderControllers,
 } from './orders.controllers';
 import {
+    acceptOrderValidators,
+    changeOrderStatusValidators,
     createCustomerOrderValidators,
     editOrderValidators,
     listCompletedOrdersValidators,
     listPendingOrdersValidators,
+    rejectOrderValidators,
     viewAdminOrderValidators,
     viewCustomerOrderValidators,
 } from './orders.validators';
@@ -56,6 +62,27 @@ router.patch(
     editOrderValidators,
     isAdmin('orders', 'E'),
     editOrderControllers,
+);
+
+router.patch(
+    '/admin/order/:id/approve',
+    acceptOrderValidators,
+    isAdmin('orders', 'E'),
+    acceptOrderControllers,
+);
+
+router.patch(
+    '/admin/order/:id/reject',
+    rejectOrderValidators,
+    isAdmin('orders', 'E'),
+    rejectedOrderControllers,
+);
+
+router.patch(
+    '/admin/order/:id/deliever',
+    changeOrderStatusValidators,
+    isAdmin('orders', 'E'),
+    changeOrderStatusControllers,
 );
 
 // Customer APIs
