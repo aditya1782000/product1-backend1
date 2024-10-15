@@ -41,6 +41,7 @@ export const createCustomerOrder = async (
         const nOrderTotal = await Order.countDocuments({
             customer,
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+            status: { $ne: 'rejected' },
         });
 
         const orderNumber = `order ${nOrderTotal + 1}`;
@@ -718,7 +719,7 @@ export const rejectOrder = async (
         if (oOrder.status === 'inApproval') {
             const updateOrder = await Order.findByIdAndUpdate(
                 oOrder._id,
-                { status: 'rejected' },
+                { status: 'rejected', orderNumber: null },
                 { new: true },
             );
 
@@ -863,7 +864,6 @@ export const createAdminOrders = async (
     customer: mongoose.Types.ObjectId,
     orderItems: OrderItems[],
     totalAmount: number,
-    status: string,
     type: string = 'admin',
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
@@ -911,6 +911,7 @@ export const createAdminOrders = async (
         const nOrderTotal = await Order.countDocuments({
             customer,
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+            status: { $ne: 'rejected' },
         });
 
         const orderNumber = `order ${nOrderTotal + 1}`;
@@ -919,7 +920,7 @@ export const createAdminOrders = async (
             customer,
             orderItems,
             totalAmount,
-            status,
+            status: 'approved',
             type,
             organization: organisation,
             orderNumber,
@@ -930,6 +931,82 @@ export const createAdminOrders = async (
             success: true,
             message: 'Order created successfully',
             data: oOrder,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const deleteOrder = async (
+    orderId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oOrder = await Order.findById({
+            _id: orderId,
+        }).populate('organization', '_id');
+
+        if (!oOrder) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Order not found',
+            };
+        }
+
+        if (
+            oOrder.organization &&
+            oOrder.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        if (oOrder.status === 'inApproval' || oOrder.status === 'rejected') {
+            const deletedOrder = await Order.findByIdAndDelete(oOrder._id);
+
+            if (!deletedOrder) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Failed to delete order',
+                };
+            }
+        } else {
+            if (oOrder.status === 'approved') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already approved',
+                };
+            } else if (oOrder.status === 'delivered') {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'Order is already delivered',
+                };
+            }
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order deleted successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

@@ -333,3 +333,12 @@ export const createAdminOrdersValidators = [
         .isIn(enums.orderType)
         .withMessage('Invalid order type'),
 ];
+
+export const deleteOrderValidators = [
+    param('id')
+        .notEmpty()
+        .withMessage('Id is required')
+        .bail()
+        .isMongoId()
+        .withMessage('Invalid Id'),
+];
