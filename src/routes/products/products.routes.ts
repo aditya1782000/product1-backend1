@@ -32,7 +32,7 @@ router.post(
     addProductsController,
 );
 
-router.get(
+router.post(
     '/admin/products/list',
     listProductsValidators,
     isAdmin('products', 'V'),
