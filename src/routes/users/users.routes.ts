@@ -31,7 +31,7 @@ router.post(
     addUsersControlller,
 );
 
-router.get(
+router.post(
     '/admin/users/list',
     usersListValidators,
     isAdmin('', 'V'),

@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 import { AsyncResponseType } from '../../types/async';
 import Product from '../../models/product';
 import { Request } from 'express';
-import uploadFileToS3 from '../../utils/aws';
+import {
+    deleteFileFromS3,
+    extractS3Key,
+    uploadFileToS3,
+} from '../../utils/aws';
 import fs from 'fs';
 import dataTable from '../../utils/dataTable';
 
@@ -308,7 +312,11 @@ export const productEdit = async (
 
         let productImageUrl: string | undefined;
 
-        if (req.file) {
+        if (req.file !== undefined) {
+            if (oProduct.productImageUrl) {
+                const key = extractS3Key(oProduct.productImageUrl);
+                deleteFileFromS3(key);
+            }
             tempFilePath = req.file.path;
             const uploadData = await uploadFileToS3(
                 req.file,
@@ -367,9 +375,9 @@ export const productDelete = async (
 ): Promise<AsyncResponseType> => {
     try {
         const oProduct = await Product.findById({ _id: productId }).select(
-            'organization',
+            'organization productImageUrl',
         );
-
+        
         if (!oProduct) {
             return {
                 statusCode: 404,
@@ -387,6 +395,11 @@ export const productDelete = async (
                 success: false,
                 message: 'Unauthorized access',
             };
+        }
+
+        if (oProduct.productImageUrl) {
+            const key = extractS3Key(oProduct.productImageUrl);
+            deleteFileFromS3(key);
         }
 
         const deleteProduct = await Product.findByIdAndDelete(productId);

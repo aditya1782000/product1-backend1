@@ -663,7 +663,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody)
             .set('authorization', `Bearer ${userToken}`);
 
@@ -735,7 +735,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody)
             .set('authorization', `Bearer ${userToken}`);
 
@@ -801,7 +801,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody)
             .set('authorization', `Bearer ${userToken}`);
 
@@ -832,7 +832,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody);
 
         expect(response.status).toBe(403);
@@ -897,7 +897,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody)
             .set('authorization', `Bearer ${userToken}`);
 
@@ -963,7 +963,7 @@ describe('USERS LIST', () => {
         };
 
         const response = await request(app)
-            .get('/api/v1/admin/users/list')
+            .post('/api/v1/admin/users/list')
             .send(requestBody)
             .set('authorization', `Bearer ${userToken}`);
 

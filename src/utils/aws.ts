@@ -52,4 +52,35 @@ const uploadFileToS3 = async (
     }).done();
 };
 
-export default uploadFileToS3;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const deleteFileFromS3 = (key: any): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        const params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+        s3.deleteObject(params, function (err: unknown, _data: any) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+const extractS3Key = (url: string) => {
+    const regex = new RegExp(
+        `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/(.*)`,
+    );
+
+    const match = url.match(regex);
+
+    if (match && match[1]) {
+        return match[1];
+    }
+    return null;
+};
+
+export { uploadFileToS3, deleteFileFromS3, extractS3Key };
