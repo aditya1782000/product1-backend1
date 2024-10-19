@@ -54,13 +54,6 @@ export const createCustomerOrderValidators = [
         .bail()
         .isIn(enums.orderStatus)
         .withMessage('Invalid status'),
-
-    body('type')
-        .notEmpty()
-        .withMessage('Order type is required')
-        .bail()
-        .isIn(enums.orderType)
-        .withMessage('Invalid order type'),
 ];
 
 export const listPendingOrdersValidators = [

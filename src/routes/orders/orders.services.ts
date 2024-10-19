@@ -19,7 +19,6 @@ export const createCustomerOrder = async (
     orderItems: OrderItems[],
     totalAmount: number,
     status: string,
-    type: string = 'customer',
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
@@ -51,7 +50,7 @@ export const createCustomerOrder = async (
             orderItems,
             totalAmount,
             status,
-            type,
+            type: 'customer',
             organization: organisation,
             orderNumber,
         };
@@ -121,6 +120,13 @@ export const recieveCustomerOrders = async (
                     ) {
                         const newOrder = new Order(orderData);
                         await newOrder.save();
+
+                        global.io
+                            .to(organisation.toString())
+                            .emit('Order-recieved', {
+                                message: 'A new order has been received.',
+                                orderDetails: newOrder,
+                            });
                     }
                 } catch (error) {
                     console.error(error);
@@ -666,6 +672,10 @@ export const acceptOrder = async (
             }
         }
 
+        global.io.to(oOrder.customer.toString()).emit('Order-accepted', {
+            message: `Your ${oOrder.orderNumber} has been accepted`,
+        });
+
         return {
             statusCode: 200,
             success: true,
@@ -751,6 +761,10 @@ export const rejectOrder = async (
                 };
             }
         }
+
+        global.io.to(oOrder.customer.toString()).emit('Order-rejected', {
+            message: `Your ${oOrder.orderNumber} has been rejected`,
+        });
 
         return {
             statusCode: 200,
@@ -838,6 +852,10 @@ export const changeOrderStatus = async (
             }
         }
 
+        global.io.to(oOrder.customer.toString()).emit('Order-delivered', {
+            message: `Your ${oOrder.orderNumber} has been delivered`,
+        });
+
         return {
             statusCode: 200,
             success: true,
@@ -864,7 +882,6 @@ export const createAdminOrders = async (
     customer: mongoose.Types.ObjectId,
     orderItems: OrderItems[],
     totalAmount: number,
-    type: string = 'admin',
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
@@ -921,7 +938,7 @@ export const createAdminOrders = async (
             orderItems,
             totalAmount,
             status: 'approved',
-            type,
+            type: 'admin',
             organization: organisation,
             orderNumber,
         });

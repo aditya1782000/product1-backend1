@@ -40,14 +40,14 @@ router.get(
     receiveCustomerOrdersControllers,
 );
 
-router.get(
+router.post(
     '/admin/orders/pending/list',
     listPendingOrdersValidators,
     isAdmin('orders', 'V'),
     listPendingOrdersControllers,
 );
 
-router.get(
+router.post(
     '/admin/orders/completed/list',
     listCompletedOrdersValidators,
     isAdmin('orders', 'V'),

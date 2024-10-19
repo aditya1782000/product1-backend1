@@ -25,14 +25,13 @@ export const createCustomerOrderController = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { orderItems, totalAmount, status, type } = req.body;
+    const { orderItems, totalAmount, status } = req.body;
 
     const oResponse = await createCustomerOrder(
         customer,
         orderItems,
         totalAmount,
         status,
-        type,
         organization,
     );
 
@@ -239,13 +238,12 @@ export const createAdminOrdersControllers = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { orderItems, totalAmount, customer, type } = req.body;
+    const { orderItems, totalAmount, customer } = req.body;
 
     const oResponse = await createAdminOrders(
         customer,
         orderItems,
         totalAmount,
-        type,
         organization,
     );
 
