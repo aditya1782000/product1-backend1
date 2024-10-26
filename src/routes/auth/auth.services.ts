@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from '../../utils/nodemailer';
+import otpGenerator from 'otp-generator';
 
 const { JWT_SECRET } = process.env;
 const jwtSecret = process.env.JWT_SECRET || JWT_SECRET;
@@ -13,8 +14,6 @@ export const userLogin = async (
     password: string,
 ): Promise<AsyncResponseType> => {
     try {
-        let token: string = '';
-
         const oUser = await User.findOne({ email });
 
         if (!oUser) {
@@ -46,14 +45,114 @@ export const userLogin = async (
             };
         }
 
-        token = jwt.sign({ id: oUser._id }, jwtSecret as string, {
-            expiresIn: process.env.JWT_EXPIRES_IN as string,
-        });
+        const otpGenerate: number = parseInt(
+            otpGenerator
+                .generate(4, {
+                    upperCaseAlphabets: false,
+                    specialChars: false,
+                    digits: true,
+                    lowerCaseAlphabets: false,
+                })
+                .padStart(4, '0'),
+            10,
+        );
+
+        const otpExpires = Date.now() + 5 * 60 * 1000;
+
+        oUser.otp = otpGenerate;
+        oUser.otpExpires = otpExpires;
+
+        await oUser.save();
+
+        await nodemailer.send(
+            'send_otp.html',
+            {
+                SITENAME: process.env.SITE_NAME,
+                OTP: otpGenerate,
+            },
+            {
+                from: process.env.SMTP_USERNAME,
+                to: oUser.email,
+                subject: '`OTP Verification',
+            },
+        );
 
         return {
             statusCode: 200,
             success: true,
-            message: 'User logged in successfully',
+            message: 'Otp send successfully to your email',
+            data: { otpGenerate },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const verifyOtp = async (
+    email: string,
+    otp: number,
+): Promise<AsyncResponseType> => {
+    try {
+        let token: string = '';
+
+        const oUser = await User.findOne({ email });
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        if (!oUser.otp || !oUser.otpExpires) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'OTP not found',
+            };
+        }
+
+        if (Date.now() > oUser.otpExpires) {
+            return {
+                statusCode: 406,
+                success: false,
+                message: 'OTP expired',
+            };
+        }
+
+        if (otp !== oUser.otp) {
+            return {
+                statusCode: 406,
+                success: false,
+                message: 'Invalid OTP',
+            };
+        }
+
+        token = jwt.sign({ id: oUser._id }, jwtSecret as string, {
+            expiresIn: process.env.JWT_EXPIRES_IN as string,
+        });
+
+        oUser.otp = undefined;
+        oUser.otpExpires = undefined;
+        await oUser.save();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Otp verified successfully',
             data: {
                 token,
                 email: oUser.email || '',
@@ -64,6 +163,71 @@ export const userLogin = async (
                 organization: oUser.organization || '',
                 _id: oUser._id || '',
             },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const resendOtp = async (email: string): Promise<AsyncResponseType> => {
+    try {
+        const oUser = await User.findOne({ email });
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        const otpGenerate: number = parseInt(
+            otpGenerator
+                .generate(4, {
+                    upperCaseAlphabets: false,
+                    specialChars: false,
+                    digits: true,
+                    lowerCaseAlphabets: false,
+                })
+                .padStart(4, '0'),
+            10,
+        );
+
+        const otpExpires = Date.now() + 5 * 60 * 1000;
+
+        oUser.otp = otpGenerate;
+        oUser.otpExpires = otpExpires;
+        await oUser.save();
+
+        await nodemailer.send(
+            'send_otp.html',
+            {
+                SITENAME: process.env.SITE_NAME,
+                OTP: otpGenerate,
+            },
+            {
+                from: process.env.SMTP_USERNAME,
+                to: oUser.email,
+                subject: '`OTP Verification',
+            },
+        );
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Otp resend successfully to your email',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

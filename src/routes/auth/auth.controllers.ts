@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import {
+    resendOtp,
     userChangePassword,
     userLogin,
     userLogout,
     userPasswordReset,
     userReserPasswordPost,
     userResetPasswordGet,
+    verifyOtp,
 } from './auth.services';
 import { validationResult } from 'express-validator';
 
@@ -18,6 +20,36 @@ export const userLoginController = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const oResponse = await userLogin(email, password);
+
+    return res
+        .status(oResponse.statusCode)
+        .send({ ...oResponse, statusCode: undefined });
+};
+
+export const verifyOtpControllers = async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, otp } = req.body;
+
+    const oResponse = await verifyOtp(email, otp);
+
+    return res
+        .status(oResponse.statusCode)
+        .send({ ...oResponse, statusCode: undefined });
+};
+
+export const resendOtpControllers = async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email } = req.body;
+
+    const oResponse = await resendOtp(email);
 
     return res
         .status(oResponse.statusCode)
