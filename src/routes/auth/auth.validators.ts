@@ -11,6 +11,32 @@ export const userLoginValidator = [
     body('password').notEmpty().withMessage('Please enter your password'),
 ];
 
+export const verifyOtpValidators = [
+    body('email')
+        .notEmpty()
+        .withMessage('Please enter your email')
+        .bail()
+        .isEmail()
+        .withMessage('Please enter valid email'),
+
+    body('otp')
+        .notEmpty()
+        .withMessage('Please enter Otp')
+        .bail()
+        .isNumeric()
+        .isLength({ min: 4, max: 4 })
+        .withMessage('Invalid otp'),
+];
+
+export const resendOtpValidators = [
+    body('email')
+        .notEmpty()
+        .withMessage('Please enter your email')
+        .bail()
+        .isEmail()
+        .withMessage('Please enter valid email'),
+];
+
 export const userPasswordResetValidator = [
     body('email')
         .notEmpty()

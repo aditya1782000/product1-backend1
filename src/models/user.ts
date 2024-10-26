@@ -20,6 +20,8 @@ export interface IUser extends Document {
     city?: string;
     state?: string;
     pinCode?: number;
+    otp?: number;
+    otpExpires?: number;
 }
 
 export interface IPermission extends Document {
@@ -82,6 +84,8 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         city: String,
         state: String,
         pinCode: Number,
+        otp: Number,
+        otpExpires: Number,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );
