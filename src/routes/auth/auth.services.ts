@@ -250,7 +250,7 @@ export const userPasswordReset = async (
     email: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOneAndUpdate({ email });
+        const oUser = await User.findOne({ email });
 
         if (!oUser) {
             return {
