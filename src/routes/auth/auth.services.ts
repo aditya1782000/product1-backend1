@@ -81,7 +81,7 @@ export const userLogin = async (
             statusCode: 200,
             success: true,
             message: 'Otp send successfully to your email',
-            data: { otpGenerate },
+            data: { email },
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -107,7 +107,10 @@ export const verifyOtp = async (
     try {
         let token: string = '';
 
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email }).populate(
+            'organization',
+            'organisationName',
+        );
 
         if (!oUser) {
             return {
@@ -156,7 +159,7 @@ export const verifyOtp = async (
             data: {
                 token,
                 email: oUser.email || '',
-                firtName: oUser.firstName || '',
+                firstName: oUser.firstName || '',
                 lastName: oUser.lastName || '',
                 role: oUser.role || '',
                 permissions: oUser.permissions || '',
