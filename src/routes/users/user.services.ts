@@ -32,8 +32,14 @@ const handleSubAdminCreation = async (
     firstName: string,
     lastName: string,
     email: string,
+    phoneNumber: number,
     role: string,
     permissions: Permission[],
+    addressLineOne: string,
+    addressLineTwo: string,
+    city: string,
+    state: string,
+    pinCode: number,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     const exisitngUser = await User.findOne({ email });
@@ -60,9 +66,15 @@ const handleSubAdminCreation = async (
         firstName,
         lastName,
         email,
+        phoneNumber,
         hash,
         role,
         permissions,
+        addressLineOne,
+        addressLineTwo,
+        city,
+        state,
+        pinCode,
         organization: [organisation],
     });
 
@@ -283,8 +295,14 @@ export const addUsers = async (
                 firstName,
                 lastName,
                 email,
+                phoneNumber,
                 role,
                 permissions,
+                addressLineOne,
+                addressLineTwo,
+                city,
+                state,
+                pinCode,
                 organisation,
             );
         }
@@ -326,7 +344,7 @@ export const usersList = async (
         let selectedFields = '';
         if (role === 'subAdmin') {
             selectedFields =
-                'firstName lastName email permissions organization isActive';
+                'firstName lastName email phoneNumber permissions organization isActive';
         } else if (role == 'customer') {
             selectedFields =
                 'firstName lastName email phoneNumber organization type addressLineOne addressLineTwo city state pinCode isActive';
