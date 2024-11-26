@@ -191,7 +191,7 @@ export const userProfileController = async (req: Request, res: Response) => {
 export const userProfileUpdateController = async (
     req: Request,
     res: Response,
-) => {    
+) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (req as any).userId;
 
