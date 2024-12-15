@@ -10,7 +10,7 @@ interface Filter {
     status?: string;
     from?: string;
     to?: string;
-    firstName?: string;
+    firstName?: string[];
 }
 
 const createFilterQuery = (filter: Filter) => {
@@ -201,9 +201,17 @@ export const listPendingOrders = async (
         const filterQuery = createFilterQuery(filter);
 
         if (filter.firstName) {
+            const firstNames = Array.isArray(filter.firstName)
+                ? filter.firstName
+                : [filter.firstName];
+
+            const namePatterns = firstNames.map(
+                (name) => new RegExp(name, 'i'),
+            );
+
             const matchingCustomers = await User.find(
                 {
-                    firstName: new RegExp(filter.firstName, 'i'),
+                    firstName: { $in: namePatterns },
                     role: 'customer',
                     organization: { $in: [organisation] },
                 },
@@ -286,9 +294,17 @@ export const listCompletedOrders = async (
         const filterQuery = createFilterQuery(filter);
 
         if (filter.firstName) {
+            const firstNames = Array.isArray(filter.firstName)
+                ? filter.firstName
+                : [filter.firstName];
+
+            const namePatterns = firstNames.map(
+                (name) => new RegExp(name, 'i'),
+            );
+
             const matchingCustomers = await User.find(
                 {
-                    firstName: new RegExp(filter.firstName, 'i'),
+                    firstName: { $in: namePatterns },
                     role: 'customer',
                     organization: { $in: [organisation] },
                 },
