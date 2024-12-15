@@ -4,6 +4,7 @@ import {
     changeOrderStatus,
     createAdminOrders,
     createCustomerOrder,
+    customerList,
     deleteOrder,
     editOrder,
     listCompletedOrders,
@@ -269,6 +270,18 @@ export const deleteOrderControllers = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await deleteOrder(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const customerListControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const oResponse = await customerList(req, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

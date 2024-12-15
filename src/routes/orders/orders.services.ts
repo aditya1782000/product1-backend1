@@ -4,11 +4,13 @@ import { myKafka } from '../../utils/kafka';
 import Order from '../../models/orders';
 import { Request } from 'express';
 import User from '../../models/user';
+import dataTable from '../../utils/dataTable';
 
 interface Filter {
     status?: string;
     from?: string;
     to?: string;
+    firstName?: string;
 }
 
 const createFilterQuery = (filter: Filter) => {
@@ -29,6 +31,10 @@ const createFilterQuery = (filter: Filter) => {
         if (filter.to) {
             query.dCreatedAt.$lte = new Date(filter.to);
         }
+    }
+
+    if (filter.firstName) {
+        query.customer = filter.firstName;
     }
 
     return query;
@@ -194,6 +200,30 @@ export const listPendingOrders = async (
     try {
         const filterQuery = createFilterQuery(filter);
 
+        if (filter.firstName) {
+            const matchingCustomers = await User.find(
+                {
+                    firstName: new RegExp(filter.firstName, 'i'),
+                    role: 'customer',
+                    organization: { $in: [organisation] },
+                },
+                '_id',
+            ).lean();
+
+            if (matchingCustomers.length) {
+                const customerIds = matchingCustomers.map(
+                    (customer) => customer._id,
+                );
+                filterQuery.customer = { $in: customerIds };
+            } else {
+                return {
+                    statusCode: 404,
+                    success: false,
+                    message: 'No customers found with the given name',
+                };
+            }
+        }
+
         const orderQuery = {
             $and: [filterQuery],
             status: 'inApproval',
@@ -254,6 +284,30 @@ export const listCompletedOrders = async (
 ): Promise<AsyncResponseType> => {
     try {
         const filterQuery = createFilterQuery(filter);
+
+        if (filter.firstName) {
+            const matchingCustomers = await User.find(
+                {
+                    firstName: new RegExp(filter.firstName, 'i'),
+                    role: 'customer',
+                    organization: { $in: [organisation] },
+                },
+                '_id',
+            ).lean();
+
+            if (matchingCustomers.length) {
+                const customerIds = matchingCustomers.map(
+                    (customer) => customer._id,
+                );
+                filterQuery.customer = { $in: customerIds };
+            } else {
+                return {
+                    statusCode: 404,
+                    success: false,
+                    message: 'No customers found with the given name',
+                };
+            }
+        }
 
         const orderQuery = {
             $and: [filterQuery],
@@ -1008,6 +1062,46 @@ export const deleteOrder = async (
             statusCode: 200,
             success: true,
             message: 'Order deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const customerList = async (
+    req: Request,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['firstName', 'lastName'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const customers = await User.find({
+            $and: [oData.oSearchData],
+            role: 'customer',
+            organization: { $in: organisation },
+        })
+            .select('_id firstName lastName')
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Customers fetched successfully',
+            data: customers,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
