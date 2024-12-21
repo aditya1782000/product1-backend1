@@ -5,6 +5,7 @@ import Order from '../../models/orders';
 import { Request } from 'express';
 import User from '../../models/user';
 import dataTable from '../../utils/dataTable';
+import Product from '../../models/product';
 
 interface Filter {
     status?: string;
@@ -873,7 +874,7 @@ export const changeOrderStatus = async (
         if (oOrder.status === 'approved') {
             const updateOrder = await Order.findByIdAndUpdate(
                 oOrder._id,
-                { status: 'delivered' },
+                { status: 'delivered', deliveredAt: Date.now() },
                 { new: true },
             );
 
@@ -1118,6 +1119,49 @@ export const customerList = async (
             success: true,
             message: 'Customers fetched successfully',
             data: customers,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const productsList = async (
+    req: Request,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['productName'];
+
+        const oData = dataTable.initDataTable(
+            req.body,
+            searchFields,
+            'srNo',
+        );
+
+        const products = await Product.find({
+            $and: [oData.oSearchData],
+            organization: { $in: organisation },
+        })
+            .select('_id productName productImageUrl')
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Products fetched successfully',
+            data: products,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

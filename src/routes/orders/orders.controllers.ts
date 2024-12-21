@@ -11,6 +11,7 @@ import {
     listCustomerCompletedOrders,
     listCustomerPendingOrders,
     listPendingOrders,
+    productsList,
     recieveCustomerOrders,
     rejectOrder,
     viewAdminOrder,
@@ -282,6 +283,18 @@ export const customerListControllers = async (req: Request, res: Response) => {
     const organization = (req as any).sOrganization;
 
     const oResponse = await customerList(req, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const productsListControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const oResponse = await productsList(req, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

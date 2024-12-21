@@ -12,6 +12,7 @@ import {
     listCustomerCompletedOrdersControllers,
     listCustomerPendingOrdersControllers,
     listPendingOrdersControllers,
+    productsListControllers,
     receiveCustomerOrdersControllers,
     rejectedOrderControllers,
     viewAdminOrderControllers,
@@ -108,6 +109,12 @@ router.post(
     '/admin/order/customers/list',
     isAdmin('orders', 'V'),
     customerListControllers,
+);
+
+router.post(
+    '/admin/order/products/list',
+    isAdmin('orders', 'V'),
+    productsListControllers,
 );
 
 // Customer APIs
