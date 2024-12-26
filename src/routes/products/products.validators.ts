@@ -30,33 +30,31 @@ export const addProductValidators = [
         .isIn(enums.unitType)
         .withMessage('Invalid enum type'),
 
-    //UnComment when integrate the React
+    body('price')
+        .isArray({ min: 1 })
+        .withMessage('Price must be an array and cannot be empty'),
 
-    // body('price')
-    //     .isArray({ min: 1 })
-    //     .withMessage('Price must be an array and cannot be empty'),
+    body('price.*.area')
+        .notEmpty()
+        .withMessage('Area is required')
+        .bail()
+        .isString()
+        .withMessage('area must be a string'),
 
-    // body('price.*.area')
-    //     .notEmpty()
-    //     .withMessage('Area is required')
-    //     .bail()
-    //     .isString()
-    //     .withMessage('area must be a string'),
+    body('price.*.prices')
+        .isArray({ min: 1 })
+        .withMessage('Price must be an array and cannot be empty'),
 
-    // body('price.*.prices')
-    //     .isArray({ min: 1 })
-    //     .withMessage('Price must be an array and cannot be empty'),
+    body('price.*.prices.*.quantityType')
+        .notEmpty()
+        .withMessage('Quantity Type IS required')
+        .bail()
+        .isString()
+        .withMessage('Quantity Type Is required'),
 
-    // body('price.*.prices.*.quantityType')
-    //     .notEmpty()
-    //     .withMessage('Quantity Type IS required')
-    //     .bail()
-    //     .isString()
-    //     .withMessage('Quantity Type Is required'),
-
-    // body('price.*.prices.*.price')
-    //     .isFloat({ gt: 0 })
-    //     .withMessage('Price must be greater than zero'),
+    body('price.*.prices.*.price')
+        .isFloat({ gt: 0 })
+        .withMessage('Price must be greater than zero'),
 ];
 
 export const listProductsValidators = [

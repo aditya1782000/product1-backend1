@@ -3,8 +3,43 @@ import { AsyncResponseType } from '../../types/async';
 import { myKafka } from '../../utils/kafka';
 import Order from '../../models/orders';
 import { Request } from 'express';
-import dataTable from '../../utils/dataTable';
 import User from '../../models/user';
+import dataTable from '../../utils/dataTable';
+import Product from '../../models/product';
+
+interface Filter {
+    status?: string;
+    from?: string;
+    to?: string;
+    firstName?: string[];
+}
+
+const createFilterQuery = (filter: Filter) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: any = {};
+
+    if (filter.status) {
+        query.status = filter.status;
+    }
+
+    if (filter.from || filter.to) {
+        query.dCreatedAt = {};
+
+        if (filter.from) {
+            query.dCreatedAt.$gte = new Date(filter.from);
+        }
+
+        if (filter.to) {
+            query.dCreatedAt.$lte = new Date(filter.to);
+        }
+    }
+
+    if (filter.firstName) {
+        query.customer = filter.firstName;
+    }
+
+    return query;
+};
 
 interface OrderItems {
     product: mongoose.Types.ObjectId;
@@ -160,38 +195,48 @@ export const listPendingOrders = async (
     req: Request,
     start: number,
     limit: number,
+    filter: Filter,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const customerSearchFields = ['firstName', 'lastName'];
+        const filterQuery = createFilterQuery(filter);
 
-        const customerNumberFields = ['phoneNumber'];
+        if (filter.firstName) {
+            const firstNames = Array.isArray(filter.firstName)
+                ? filter.firstName
+                : [filter.firstName];
 
-        const orderSearchFields = ['status'];
+            const namePatterns = firstNames.map(
+                (name) => new RegExp(name, 'i'),
+            );
 
-        const orderNumberFields = ['totalAmount'];
+            const matchingCustomers = await User.find(
+                {
+                    firstName: { $in: namePatterns },
+                    role: 'customer',
+                    organization: { $in: [organisation] },
+                },
+                '_id',
+            ).lean();
 
-        const oCustomerData = dataTable.initDataTable(
-            req.body,
-            customerSearchFields,
-            'srNo',
-            customerNumberFields,
-        );
-
-        const oOrderData = dataTable.initDataTable(
-            req.body,
-            orderSearchFields,
-            'srNo',
-            orderNumberFields,
-        );
+            if (matchingCustomers.length) {
+                const customerIds = matchingCustomers.map(
+                    (customer) => customer._id,
+                );
+                filterQuery.customer = { $in: customerIds };
+            } else {
+                return {
+                    statusCode: 404,
+                    success: false,
+                    message: 'No customers found with the given name',
+                };
+            }
+        }
 
         const orderQuery = {
-            ...oOrderData.oSearchData,
+            $and: [filterQuery],
             status: 'inApproval',
             organization: { $in: [organisation] },
-            customer: {
-                $in: await User.find(oCustomerData.oSearchData).select('_id'),
-            },
         };
 
         const nRecordsTotal = await Order.countDocuments(orderQuery);
@@ -200,7 +245,7 @@ export const listPendingOrders = async (
             .populate('customer', '_id firstName lastName phoneNumber')
             .select('totalAmount dCreatedAt status orderNumber')
             .collation({ locale: 'en', strength: 1 })
-            .sort(oOrderData.oSortingOrder)
+            .sort({ dCreatedAt: -1 })
             .skip(start)
             .limit(limit)
             .lean();
@@ -243,38 +288,48 @@ export const listCompletedOrders = async (
     req: Request,
     start: number,
     limit: number,
+    filter: Filter,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const customerSearchFields = ['firstName', 'lastName'];
+        const filterQuery = createFilterQuery(filter);
 
-        const customerNumberFields = ['phoneNumber'];
+        if (filter.firstName) {
+            const firstNames = Array.isArray(filter.firstName)
+                ? filter.firstName
+                : [filter.firstName];
 
-        const orderSearchFields = ['status'];
+            const namePatterns = firstNames.map(
+                (name) => new RegExp(name, 'i'),
+            );
 
-        const orderNumberFields = ['totalAmount'];
+            const matchingCustomers = await User.find(
+                {
+                    firstName: { $in: namePatterns },
+                    role: 'customer',
+                    organization: { $in: [organisation] },
+                },
+                '_id',
+            ).lean();
 
-        const oCustomerData = dataTable.initDataTable(
-            req.body,
-            customerSearchFields,
-            'srNo',
-            customerNumberFields,
-        );
-
-        const oOrderData = dataTable.initDataTable(
-            req.body,
-            orderSearchFields,
-            'srNo',
-            orderNumberFields,
-        );
+            if (matchingCustomers.length) {
+                const customerIds = matchingCustomers.map(
+                    (customer) => customer._id,
+                );
+                filterQuery.customer = { $in: customerIds };
+            } else {
+                return {
+                    statusCode: 404,
+                    success: false,
+                    message: 'No customers found with the given name',
+                };
+            }
+        }
 
         const orderQuery = {
-            ...oOrderData.oSearchData,
+            $and: [filterQuery],
             status: { $in: ['approved', 'rejected', 'delivered'] },
             organization: { $in: [organisation] },
-            customer: {
-                $in: await User.find(oCustomerData.oSearchData).select('_id'),
-            },
         };
 
         const nRecordsTotal = await Order.countDocuments(orderQuery);
@@ -283,7 +338,7 @@ export const listCompletedOrders = async (
             .populate('customer', '_id firstName lastName phoneNumber')
             .select('totalAmount dCreatedAt dUpdatedAt status orderNumber')
             .collation({ locale: 'en', strength: 1 })
-            .sort(oOrderData.oSortingOrder)
+            .sort({ dCreatedAt: -1 })
             .skip(start)
             .limit(limit)
             .lean();
@@ -819,7 +874,7 @@ export const changeOrderStatus = async (
         if (oOrder.status === 'approved') {
             const updateOrder = await Order.findByIdAndUpdate(
                 oOrder._id,
-                { status: 'delivered' },
+                { status: 'delivered', deliveredAt: Date.now() },
                 { new: true },
             );
 
@@ -1024,6 +1079,87 @@ export const deleteOrder = async (
             statusCode: 200,
             success: true,
             message: 'Order deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const customerList = async (
+    req: Request,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['firstName', 'lastName'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const customers = await User.find({
+            $and: [oData.oSearchData],
+            role: 'customer',
+            organization: { $in: organisation },
+        })
+            .select(
+                '_id firstName lastName phoneNumber type addressLineOne addressLineTwo city state pinCode',
+            )
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Customers fetched successfully',
+            data: customers,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const productsList = async (
+    req: Request,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['productName'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const products = await Product.find({
+            $and: [oData.oSearchData],
+            organization: { $in: organisation },
+        })
+            .select('_id productName productImageUrl price')
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Products fetched successfully',
+            data: products,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

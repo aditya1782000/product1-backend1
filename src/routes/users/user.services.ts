@@ -32,8 +32,14 @@ const handleSubAdminCreation = async (
     firstName: string,
     lastName: string,
     email: string,
+    phoneNumber: number,
     role: string,
     permissions: Permission[],
+    addressLineOne: string,
+    addressLineTwo: string,
+    city: string,
+    state: string,
+    pinCode: number,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     const exisitngUser = await User.findOne({ email });
@@ -60,9 +66,15 @@ const handleSubAdminCreation = async (
         firstName,
         lastName,
         email,
+        phoneNumber,
         hash,
         role,
         permissions,
+        addressLineOne,
+        addressLineTwo,
+        city,
+        state,
+        pinCode,
         organization: [organisation],
     });
 
@@ -283,8 +295,14 @@ export const addUsers = async (
                 firstName,
                 lastName,
                 email,
+                phoneNumber,
                 role,
                 permissions,
+                addressLineOne,
+                addressLineTwo,
+                city,
+                state,
+                pinCode,
                 organisation,
             );
         }
@@ -326,7 +344,7 @@ export const usersList = async (
         let selectedFields = '';
         if (role === 'subAdmin') {
             selectedFields =
-                'firstName lastName email permissions organization isActive';
+                'firstName lastName email phoneNumber permissions organization isActive';
         } else if (role == 'customer') {
             selectedFields =
                 'firstName lastName email phoneNumber organization type addressLineOne addressLineTwo city state pinCode isActive';
@@ -384,7 +402,7 @@ export const userView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'firstName lastName email phoneNumber role permisssions isActive addressLineOne addressLineTwo city state pinCode';
+            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode';
 
         const oUser = await User.findById({
             _id: userId,
@@ -510,9 +528,11 @@ const updateUser = async (
     updateUser: UpdateUserOption,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
-    if (updateUser.email) {
-        const existingUser = await User.findOne({ email: updateUser.email });
-        if (existingUser && existingUser._id !== userId) {
+    const oUser = await User.findById(userId).lean();
+
+    if (updateUser.email && updateUser.email !== oUser?.email) {
+        const emailInUse = await User.findOne({ email: updateUser.email });
+        if (emailInUse) {
             return {
                 statusCode: 409,
                 success: false,
@@ -520,8 +540,6 @@ const updateUser = async (
             };
         }
     }
-
-    const oUser = await User.findById(userId).lean();
 
     if (!oUser) {
         return {
@@ -615,6 +633,11 @@ export const userEdit = async (
                     email,
                     phoneNumber,
                     permissions,
+                    addressLineOne,
+                    addressLineTwo,
+                    city,
+                    state,
+                    pinCode,
                 },
                 organisation,
             );

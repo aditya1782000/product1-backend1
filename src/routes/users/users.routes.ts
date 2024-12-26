@@ -21,6 +21,7 @@ import {
     userViewValidators,
 } from './users.validators';
 import { validateOnlyAdmin } from '../../middleware/isOnlyAdmin';
+import uploader from '../../utils/uploader';
 
 const router = express.Router();
 
@@ -73,6 +74,7 @@ router.get('/admin/profile', validateOnlyAdmin(), userProfileController);
 
 router.patch(
     '/admin/profile/edit',
+    uploader.uploadFile('image'),
     userProfileEditValidators,
     validateOnlyAdmin(),
     userProfileUpdateController,

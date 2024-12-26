@@ -4,12 +4,14 @@ import {
     changeOrderStatus,
     createAdminOrders,
     createCustomerOrder,
+    customerList,
     deleteOrder,
     editOrder,
     listCompletedOrders,
     listCustomerCompletedOrders,
     listCustomerPendingOrders,
     listPendingOrders,
+    productsList,
     recieveCustomerOrders,
     rejectOrder,
     viewAdminOrder,
@@ -65,8 +67,15 @@ export const listPendingOrdersControllers = async (
 
     const offSet = Number(req.body.start);
     const limit = Number(req.body.length);
+    const { filter } = req.body;
 
-    const oResponse = await listPendingOrders(req, offSet, limit, organization);
+    const oResponse = await listPendingOrders(
+        req,
+        offSet,
+        limit,
+        filter,
+        organization,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
@@ -83,11 +92,13 @@ export const listCompletedOrdersControllers = async (
 
     const offSet = Number(req.body.start);
     const limit = Number(req.body.length);
+    const { filter } = req.body;
 
     const oResponse = await listCompletedOrders(
         req,
         offSet,
         limit,
+        filter,
         organization,
     );
 
@@ -260,6 +271,30 @@ export const deleteOrderControllers = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const oResponse = await deleteOrder(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const customerListControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const oResponse = await customerList(req, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const productsListControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const oResponse = await productsList(req, organization);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

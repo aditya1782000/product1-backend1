@@ -78,17 +78,6 @@ export const listPendingOrdersValidators = [
         .isNumeric()
         .withMessage('Invalid draw value'),
 
-    body('search')
-        .notEmpty()
-        .notEmpty()
-        .withMessage('Search is required')
-        .bail()
-        .isObject()
-        .withMessage('Search must be an object')
-        .bail()
-        .custom((value) => value.hasOwnProperty('value'))
-        .withMessage('Search object must contain a value key'),
-
     body('columns')
         .notEmpty()
         .withMessage('Columns is required')
@@ -137,17 +126,6 @@ export const listCompletedOrdersValidators = [
         .bail()
         .isNumeric()
         .withMessage('Invalid draw value'),
-
-    body('search')
-        .notEmpty()
-        .notEmpty()
-        .withMessage('Search is required')
-        .bail()
-        .isObject()
-        .withMessage('Search must be an object')
-        .bail()
-        .custom((value) => value.hasOwnProperty('value'))
-        .withMessage('Search object must contain a value key'),
 
     body('columns')
         .notEmpty()
@@ -313,15 +291,13 @@ export const createAdminOrdersValidators = [
         .withMessage('Total amount must be a number'),
 
     body('status')
-        .notEmpty()
-        .withMessage('status is required')
+        .optional()
         .bail()
         .isIn(enums.orderStatus)
         .withMessage('Invalid status'),
 
     body('type')
-        .notEmpty()
-        .withMessage('Order type is required')
+        .optional()
         .bail()
         .isIn(enums.orderType)
         .withMessage('Invalid order type'),
