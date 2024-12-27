@@ -35,7 +35,7 @@ const uploadFileToS3 = async (
     let filePath = `${folderName}/${id}`;
 
     if (process.env.S3_BUCKET_SUB_NAME != '') {
-        filePath = `${process.env.S3_BUCKET_SUB_NAME}/${process.env.NODE_ENV}${filePath}`;
+        filePath = `${process.env.S3_BUCKET_SUB_NAME}/${process.env.NODE_ENV}/${filePath}`;
     }
 
     const params = {

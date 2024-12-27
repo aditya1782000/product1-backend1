@@ -4,9 +4,10 @@ import auth from './auth/auth.routes';
 import users from './users/users.routes';
 import products from './products/products.routes';
 import orders from './orders/orders.routes';
+import invoices from './invocies/invoices.routes';
 
 const router = express.Router();
 
-router.use('/', [registration, auth, users, products, orders]);
+router.use('/', [registration, auth, users, products, orders, invoices]);
 
 export default router;
