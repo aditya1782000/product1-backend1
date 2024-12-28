@@ -7,6 +7,7 @@ import {
     customerList,
     deleteOrder,
     editOrder,
+    getCustomerOrderList,
     listCompletedOrders,
     listCustomerCompletedOrders,
     listCustomerPendingOrders,
@@ -295,6 +296,32 @@ export const productsListControllers = async (req: Request, res: Response) => {
     const organization = (req as any).sOrganization;
 
     const oResponse = await productsList(req, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const getCustomerOrderListControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const offSet = Number(req.body.start);
+    const limit = Number(req.body.length);
+
+    const oResponse = await getCustomerOrderList(
+        req,
+        offSet,
+        limit,
+        id,
+        organization,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
