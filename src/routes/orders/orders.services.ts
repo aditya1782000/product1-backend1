@@ -1177,3 +1177,54 @@ export const productsList = async (
         };
     }
 };
+
+export const getCustomerOrderList = async (
+    req: Request,
+    start: number,
+    limit: number,
+    customerId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const orderQuery = {
+            customer: customerId,
+            status: { $in: ['approved', 'rejected', 'delivered'] },
+            organization: { $in: organisation },
+        };
+
+        const nRecordsTotal = await Order.countDocuments(orderQuery);
+
+        const orders = await Order.find(orderQuery)
+            .populate('customer', '_id firstName lastName phoneNumber')
+            .select('totalAmount dCreatedAt status orderNumber')
+            .collation({ locale: 'en', strength: 1 })
+            .sort({ dCreatedAt: -1 })
+            .skip(start)
+            .limit(limit)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Orders fetched successfully',
+            data: orders,
+            draw: req.body.draw,
+            recordsTotal: nRecordsTotal,
+            recordsFiltered: nRecordsTotal,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

@@ -8,6 +8,7 @@ import {
     customerListControllers,
     deleteOrderControllers,
     editOrderControllers,
+    getCustomerOrderListControllers,
     listCompletedOrdersControllers,
     listCustomerCompletedOrdersControllers,
     listCustomerPendingOrdersControllers,
@@ -23,6 +24,7 @@ import {
     changeOrderStatusValidators,
     createAdminOrdersValidators,
     createCustomerOrderValidators,
+    cusotmerOrderValidators,
     deleteOrderValidators,
     editOrderValidators,
     listCompletedOrdersValidators,
@@ -115,6 +117,13 @@ router.post(
     '/admin/order/products/list',
     isAdmin('orders', 'V'),
     productsListControllers,
+);
+
+router.post(
+    '/admin/orders/:id/customer/list',
+    cusotmerOrderValidators,
+    isAdmin('', 'V'),
+    getCustomerOrderListControllers,
 );
 
 // Customer APIs
