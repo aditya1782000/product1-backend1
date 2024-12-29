@@ -100,3 +100,124 @@ export const getRecentOrders = async (
         };
     }
 };
+
+export const orderCountsMonthYear = async (
+    year: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const start = new Date(`${year}-01-01`);
+        const end = new Date(`${parseInt(year) + 1}-01-01`);
+
+        const orders = await Order.aggregate([
+            {
+                $match: {
+                    dCreatedAt: {
+                        $gte: start,
+                        $lt: end,
+                    },
+                    organization: { $in: organisation },
+                },
+            },
+            {
+                $group: {
+                    _id: { $month: '$dCreatedAt' },
+                    count: { $sum: 1 },
+                },
+            },
+            {
+                $sort: {
+                    _id: 1,
+                },
+            },
+        ]);
+
+        const result = Array.from({ length: 12 }, (_, index) => {
+            const monthData = orders.find((order) => order._id === index + 1);
+
+            return {
+                month: index + 1,
+                orders: monthData?.count || 0,
+            };
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order counts by month and year retrieved successfully',
+            data: result,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const orderDeliveryStatusCount = async (
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const curretDate = new Date();
+
+        const [deliveredOrders, approvedOrders, pendingOrders] =
+            await Promise.all([
+                Order.countDocuments({
+                    status: 'delivered',
+                    organization: { $in: [organisation] },
+                    dCreatedAt: {
+                        $gte: new Date(curretDate.getFullYear(), 0, 1),
+                    },
+                }),
+                Order.countDocuments({
+                    status: 'approved',
+                    organization: { $in: [organisation] },
+                    dCreatedAt: {
+                        $gte: new Date(curretDate.getFullYear(), 0, 1),
+                    },
+                }),
+                Order.countDocuments({
+                    status: 'pending',
+                    organization: { $in: [organisation] },
+                    dCreatedAt: {
+                        $gte: new Date(curretDate.getFullYear(), 0, 1),
+                    },
+                }),
+            ]);
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Order delivery status count retrieved successfully',
+            data: {
+                deliveredOrders,
+                approvedOrders,
+                pendingOrders,
+            },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

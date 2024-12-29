@@ -48,3 +48,12 @@ export const recentOrdersValidators = [
         })
         .withMessage('Order array must contain object with column and dir key'),
 ];
+
+export const orderCountsMonthYearValidators = [
+    body('year')
+        .notEmpty()
+        .withMessage('Year is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid year value'),
+];

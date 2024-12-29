@@ -3,8 +3,13 @@ import { isAdmin } from '../../middleware/isAdmin';
 import {
     getCountDataControllers,
     getRecentOrdersControllers,
+    orderCountsMonthYearControllers,
+    orderStatusCountControllers,
 } from './dashboard.controllers';
-import { recentOrdersValidators } from './dashboard.validators';
+import {
+    orderCountsMonthYearValidators,
+    recentOrdersValidators,
+} from './dashboard.validators';
 
 const router = express.Router();
 
@@ -15,6 +20,19 @@ router.post(
     recentOrdersValidators,
     isAdmin(),
     getRecentOrdersControllers,
+);
+
+router.post(
+    '/admin/dashboard/orders/count/month',
+    orderCountsMonthYearValidators,
+    isAdmin(),
+    orderCountsMonthYearControllers,
+);
+
+router.get(
+    '/admin/dashboard/orders/status/count',
+    isAdmin(),
+    orderStatusCountControllers,
 );
 
 export default router;
