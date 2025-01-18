@@ -402,6 +402,9 @@ export const userReserPasswordPost = async (
             statusCode: 200,
             success: true,
             message: 'Password has been reset successfully',
+            data: {
+                role: oUser.role,
+            },
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
