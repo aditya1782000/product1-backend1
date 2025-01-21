@@ -624,7 +624,7 @@ export const verifyCustomerOtp = async (
 
         const oUser = await User.findOne({ email }).populate(
             'organization',
-            'organisationName',
+            'organisationName gstNumber addressLineone addressLineTwo city state pinCode',
         );
 
         if (!oUser) {
