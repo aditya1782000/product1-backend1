@@ -6,6 +6,7 @@ import users from './users/users.routes';
 import products from './products/products.routes';
 import orders from './orders/orders.routes';
 import invoices from './invocies/invoices.routes';
+import contactus from './contactus/contactus.routes';
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.use('/', [
     products,
     orders,
     invoices,
+    contactus,
 ]);
 
 export default router;
