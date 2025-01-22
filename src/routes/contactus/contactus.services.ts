@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import ContactUs from '../../models/contactus';
 import { AsyncResponseType } from '../../types/async';
 
@@ -6,6 +7,7 @@ export const addContactUs = async (
     phoneNumber: number,
     email: string,
     message: string,
+    organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
         const oContactUS = await ContactUs.create({
@@ -13,6 +15,7 @@ export const addContactUs = async (
             phoneNumber,
             email,
             message,
+            organization: organisation,
         });
 
         return {

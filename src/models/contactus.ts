@@ -6,6 +6,7 @@ export interface IContactUS extends Document {
     email: string;
     message: string;
     isReolved: boolean;
+    organization: mongoose.Types.ObjectId;
 }
 
 export const contactUsSchema: Schema<IContactUS> = new Schema<IContactUS>(
@@ -29,6 +30,10 @@ export const contactUsSchema: Schema<IContactUS> = new Schema<IContactUS>(
         isReolved: {
             type: Boolean,
             default: false,
+        },
+        organization: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'organisation',
         },
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
