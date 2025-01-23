@@ -56,11 +56,13 @@ export const listContactUs = async (
 
         const nRecordsTotal = await ContactUs.countDocuments({
             organization: { $in: organisation },
+            isReolved: false,
         });
 
         const contactUsList = await ContactUs.find({
             $and: [oData.oSearchData],
             organization: { $in: organisation },
+            isReolved: false,
         })
             .select('name email phoneNumber message isReolved')
             .collation({ locale: 'en', strength: 1 })
