@@ -118,7 +118,15 @@ export const listCustomerPendingOrdersControllers = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const oResponse = await listCustomerPendingOrders(customer, organization);
+    const offSet = Number(req.query.start);
+    const limit = Number(req.query.length);
+
+    const oResponse = await listCustomerPendingOrders(
+        customer,
+        organization,
+        offSet,
+        limit,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,
@@ -135,7 +143,15 @@ export const listCustomerCompletedOrdersControllers = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const oResponse = await listCustomerCompletedOrders(customer, organization);
+    const offSet = Number(req.query.start);
+    const limit = Number(req.query.length);
+
+    const oResponse = await listCustomerCompletedOrders(
+        customer,
+        organization,
+        offSet,
+        limit,
+    );
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

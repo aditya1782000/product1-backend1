@@ -380,6 +380,8 @@ export const listCompletedOrders = async (
 export const listCustomerPendingOrders = async (
     customer: mongoose.Types.ObjectId,
     organisation: mongoose.Types.ObjectId,
+    start: number,
+    limit: number,
 ): Promise<AsyncResponseType> => {
     try {
         const orders = await Order.find({
@@ -387,9 +389,16 @@ export const listCustomerPendingOrders = async (
             status: 'inApproval',
             organization: { $in: organisation },
         })
-            .select(
-                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
             )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber orderItems',
+            )
+            .skip(start)
+            .limit(limit)
             .sort({ dCreatedAt: -1 })
             .lean();
 
@@ -427,6 +436,8 @@ export const listCustomerPendingOrders = async (
 export const listCustomerCompletedOrders = async (
     customer: mongoose.Types.ObjectId,
     organisation: mongoose.Types.ObjectId,
+    start: number,
+    limit: number,
 ): Promise<AsyncResponseType> => {
     try {
         const orders = await Order.find({
@@ -434,9 +445,16 @@ export const listCustomerCompletedOrders = async (
             status: { $in: ['approved', 'rejected', 'delivered'] },
             organization: { $in: organisation },
         })
-            .select(
-                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
             )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber orderItems',
+            )
+            .skip(start)
+            .limit(limit)
             .sort({ dCreatedAt: -1 })
             .lean();
 
