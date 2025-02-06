@@ -402,19 +402,12 @@ export const listCustomerPendingOrders = async (
             .sort({ dCreatedAt: -1 })
             .lean();
 
-        if (!orders.length) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'No pending orders found for this customer',
-            };
-        }
-
         return {
             statusCode: 200,
             success: true,
             message: 'Customer pending orders retrieved successfully',
             data: orders,
+            recordsTotal: orders.length,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -458,19 +451,12 @@ export const listCustomerCompletedOrders = async (
             .sort({ dCreatedAt: -1 })
             .lean();
 
-        if (!orders.length) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'No Completed orders found for this customer',
-            };
-        }
-
         return {
             statusCode: 200,
             success: true,
             message: 'Customer Completed orders retrieved successfully',
             data: orders,
+            recordsTotal: orders.length,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
