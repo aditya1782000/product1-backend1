@@ -293,3 +293,50 @@ export const customerOrderConuts = async (
         };
     }
 };
+
+export const customerRecentDeilveredOrder = async (
+    customerId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const order = await Order.find({
+            status: 'delivered',
+            customer: customerId,
+            organization: { $in: [organisation] },
+        })
+            .populate('organization', ' _id')
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
+            )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt orderNumber invoiceUrl',
+            )
+            .sort({ dCreatedAt: -1 })
+            .skip(0)
+            .limit(3)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Recent delivered order retrieved successfully',
+            data: order,
+        };
+    } catch (error) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};

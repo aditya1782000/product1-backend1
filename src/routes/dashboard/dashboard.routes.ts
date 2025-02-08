@@ -2,6 +2,7 @@ import express from 'express';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     customerOrdercountsControllers,
+    customerRecentDeliveredOrdersController,
     getCountDataControllers,
     getRecentOrdersControllers,
     orderCountsMonthYearControllers,
@@ -45,6 +46,12 @@ router.post(
     customerOrderCountsValidators,
     isCustomer(),
     customerOrdercountsControllers,
+);
+
+router.get(
+    '/customer/home/recent/delivered/orders',
+    isCustomer(),
+    customerRecentDeliveredOrdersController,
 );
 
 export default router;
