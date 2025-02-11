@@ -57,3 +57,12 @@ export const orderCountsMonthYearValidators = [
         .isNumeric()
         .withMessage('Invalid year value'),
 ];
+
+export const customerOrderCountsValidators = [
+    body('year')
+        .notEmpty()
+        .withMessage('Year is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid year value'),
+];

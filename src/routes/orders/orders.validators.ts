@@ -1,4 +1,4 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import enums from '../../../enum';
 
 export const createCustomerOrderValidators = [
@@ -359,4 +359,36 @@ export const cusotmerOrderValidators = [
             );
         })
         .withMessage('Order array must contain object with column and dir key'),
+];
+
+export const customerPendingOrderListValidators = [
+    query('start')
+        .notEmpty()
+        .withMessage('Offset is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid offset value'),
+
+    query('length')
+        .notEmpty()
+        .withMessage('Limit is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid limit value'),
+];
+
+export const customerCompletedOrderListValidators = [
+    query('start')
+        .notEmpty()
+        .withMessage('Offset is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid offset value'),
+
+    query('length')
+        .notEmpty()
+        .withMessage('Limit is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Invalid limit value'),
 ];

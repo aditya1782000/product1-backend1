@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
-import { validationResult } from 'express-validator';
+import { ValidationError, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 
 interface RequestWithUser extends Request {
@@ -67,9 +67,15 @@ export const isAdmin = (
             if (oUser.role === 'superAdmin') {
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) {
-                    return res.status(400).json({ errors: errors.array() });
+                    const errorMessages = errors
+                        .array()
+                        .map((error: ValidationError) => error.msg)
+                        .join(', ');
+                    return res.status(422).json({
+                        success: false,
+                        message: errorMessages,
+                    });
                 }
-
                 return next();
             }
 
@@ -94,7 +100,14 @@ export const isAdmin = (
 
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) {
-                    return res.status(400).json({ errors: errors.array() });
+                    const errorMessages = errors
+                        .array()
+                        .map((error: ValidationError) => error.msg)
+                        .join(', ');
+                    return res.status(422).json({
+                        success: false,
+                        message: errorMessages,
+                    });
                 }
 
                 return next();
@@ -105,9 +118,14 @@ export const isAdmin = (
                     if (req.body.userId === decoded.id) {
                         const errors = validationResult(req);
                         if (!errors.isEmpty()) {
-                            return res
-                                .status(400)
-                                .json({ errors: errors.array() });
+                            const errorMessages = errors
+                                .array()
+                                .map((error: ValidationError) => error.msg)
+                                .join(', ');
+                            return res.status(422).json({
+                                success: false,
+                                message: errorMessages,
+                            });
                         }
                         return next();
                     } else {
@@ -121,7 +139,14 @@ export const isAdmin = (
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
+                const errorMessages = errors
+                    .array()
+                    .map((error: ValidationError) => error.msg)
+                    .join(', ');
+                return res.status(422).json({
+                    success: false,
+                    message: errorMessages,
+                });
             }
 
             return next();

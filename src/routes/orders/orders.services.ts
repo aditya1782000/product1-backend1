@@ -380,6 +380,8 @@ export const listCompletedOrders = async (
 export const listCustomerPendingOrders = async (
     customer: mongoose.Types.ObjectId,
     organisation: mongoose.Types.ObjectId,
+    start: number,
+    limit: number,
 ): Promise<AsyncResponseType> => {
     try {
         const orders = await Order.find({
@@ -387,25 +389,25 @@ export const listCustomerPendingOrders = async (
             status: 'inApproval',
             organization: { $in: organisation },
         })
-            .select(
-                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
             )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber orderItems invoiceUrl',
+            )
+            .skip(start)
+            .limit(limit)
             .sort({ dCreatedAt: -1 })
             .lean();
-
-        if (!orders.length) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'No pending orders found for this customer',
-            };
-        }
 
         return {
             statusCode: 200,
             success: true,
             message: 'Customer pending orders retrieved successfully',
             data: orders,
+            recordsTotal: orders.length,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -427,6 +429,8 @@ export const listCustomerPendingOrders = async (
 export const listCustomerCompletedOrders = async (
     customer: mongoose.Types.ObjectId,
     organisation: mongoose.Types.ObjectId,
+    start: number,
+    limit: number,
 ): Promise<AsyncResponseType> => {
     try {
         const orders = await Order.find({
@@ -434,25 +438,25 @@ export const listCustomerCompletedOrders = async (
             status: { $in: ['approved', 'rejected', 'delivered'] },
             organization: { $in: organisation },
         })
-            .select(
-                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber',
+            .populate(
+                'customer',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
             )
+            .populate('orderItems.product', 'productName productImageUrl')
+            .select(
+                'status totalAmount dCreatedAt dUpdatedAt deliveredAt orderNumber orderItems invoiceUrl',
+            )
+            .skip(start)
+            .limit(limit)
             .sort({ dCreatedAt: -1 })
             .lean();
-
-        if (!orders.length) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'No Completed orders found for this customer',
-            };
-        }
 
         return {
             statusCode: 200,
             success: true,
             message: 'Customer Completed orders retrieved successfully',
             data: orders,
+            recordsTotal: orders.length,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

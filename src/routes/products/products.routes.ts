@@ -10,9 +10,10 @@ import {
     listProdutsController,
     toggleProductStatus,
     viewProductsController,
-} from './products.controller';
+} from './products.controllers';
 import {
     addProductValidators,
+    customerProductsListValidators,
     customerProductViewValidators,
     deleteProductValidators,
     editProductValidators,
@@ -71,12 +72,13 @@ router.delete(
 // Customer APIs
 router.get(
     '/customer/products/list',
+    customerProductsListValidators,
     isCustomer(),
     customerProductListController,
 );
 
 router.get(
-    '/customer/product/view',
+    '/customer/product/:id/view',
     customerProductViewValidators,
     isCustomer(),
     customerProductViewController,

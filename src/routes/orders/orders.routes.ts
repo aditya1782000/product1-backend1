@@ -25,13 +25,14 @@ import {
     createAdminOrdersValidators,
     createCustomerOrderValidators,
     cusotmerOrderValidators,
+    customerCompletedOrderListValidators,
+    customerPendingOrderListValidators,
     deleteOrderValidators,
     editOrderValidators,
     listCompletedOrdersValidators,
     listPendingOrdersValidators,
     rejectOrderValidators,
     viewAdminOrderValidators,
-    viewCustomerOrderValidators,
 } from './orders.validators';
 import { isAdmin } from '../../middleware/isAdmin';
 
@@ -136,13 +137,14 @@ router.post(
 
 router.get(
     '/customer/orders/pending/list',
+    customerPendingOrderListValidators,
     isCustomer(),
     listCustomerPendingOrdersControllers,
 );
 
 router.get(
     '/customer/orders/completed/list',
-    viewCustomerOrderValidators,
+    customerCompletedOrderListValidators,
     isCustomer(),
     listCustomerCompletedOrdersControllers,
 );

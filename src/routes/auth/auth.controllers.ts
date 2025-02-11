@@ -12,12 +12,19 @@ import {
     verifyCustomerOtp,
     verifyOtp,
 } from './auth.services';
-import { validationResult } from 'express-validator';
+import { ValidationError, validationResult } from 'express-validator';
 
 export const userLoginController = async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email, password } = req.body;
@@ -32,7 +39,14 @@ export const userLoginController = async (req: Request, res: Response) => {
 export const verifyOtpControllers = async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email, otp } = req.body;
@@ -47,7 +61,14 @@ export const verifyOtpControllers = async (req: Request, res: Response) => {
 export const resendOtpControllers = async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email } = req.body;
@@ -65,7 +86,14 @@ export const userPasswordResetController = async (
 ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email } = req.body;
@@ -83,9 +111,15 @@ export const userPasswordResetGetController = async (
 ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
-
     const { token } = req.params;
 
     const oResponse = await userResetPasswordGet(token);
@@ -101,7 +135,14 @@ export const userPasswordReserPostController = async (
 ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { password, confirmPassword } = req.body;
@@ -154,7 +195,14 @@ export const userChangePasswordController = async (
 export const customerLoginController = async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email, password } = req.body;
@@ -172,7 +220,14 @@ export const customerOptVerifyController = async (
 ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
 
     const { email, otp } = req.body;
@@ -190,9 +245,16 @@ export const resentVerifyCustomerOtpController = async (
 ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        const errorMessages = errors
+            .array()
+            .map((error: ValidationError) => error.msg)
+            .join(', ');
+        return res.status(422).json({
+            success: false,
+            message: errorMessages,
+        });
     }
-
+    
     const { email } = req.body;
 
     const oResponse = await resendCustomerOtp(email);
