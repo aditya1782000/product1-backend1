@@ -618,6 +618,7 @@ export const customerLogin = async (
 export const verifyCustomerOtp = async (
     email: string,
     otp: number,
+    fcmToken: string,
 ): Promise<AsyncResponseType> => {
     try {
         let token: string = '';
@@ -665,6 +666,7 @@ export const verifyCustomerOtp = async (
 
         oUser.otp = undefined;
         oUser.otpExpires = undefined;
+        oUser.fcmToken = fcmToken;
         await oUser.save();
 
         return {

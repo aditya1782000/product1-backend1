@@ -230,9 +230,9 @@ export const customerOptVerifyController = async (
         });
     }
 
-    const { email, otp } = req.body;
+    const { email, otp, fcmToken } = req.body;
 
-    const oResponse = await verifyCustomerOtp(email, otp);
+    const oResponse = await verifyCustomerOtp(email, otp, fcmToken);
 
     return res
         .status(oResponse.statusCode)
@@ -254,7 +254,7 @@ export const resentVerifyCustomerOtpController = async (
             message: errorMessages,
         });
     }
-    
+
     const { email } = req.body;
 
     const oResponse = await resendCustomerOtp(email);
