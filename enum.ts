@@ -23,6 +23,7 @@ const enums = {
     ],
     orderStatus: ['inApproval', 'approved', 'rejected', 'delivered'],
     orderType: ['customer', 'admin'],
+    notificationType: ['offer', 'payment', 'delivery', 'reject', 'approved'],
 };
 
 export default enums;

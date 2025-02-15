@@ -7,6 +7,7 @@ import products from './products/products.routes';
 import orders from './orders/orders.routes';
 import invoices from './invocies/invoices.routes';
 import contactus from './contactus/contactus.routes';
+import notifications from './notifications/notifications.routes';
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.use('/', [
     orders,
     invoices,
     contactus,
+    notifications,
 ]);
 
 export default router;
