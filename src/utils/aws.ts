@@ -83,4 +83,29 @@ const extractS3Key = (url: string) => {
     return null;
 };
 
-export { uploadFileToS3, deleteFileFromS3, extractS3Key };
+const uploadFileBufferToS3 = async (
+    fileBuffer: Buffer | string,
+    id: string,
+    folderName: string,
+    mimetype: string,
+) => {
+    let filePath = `${folderName}/${id}`;
+
+    if (process.env.S3_BUCKET_NAME != '') {
+        filePath = `${process.env.S3_BUCKET_SUB_NAME}/${process.env.NODE_ENV}/${filePath}`;
+    }
+
+    const params = {
+        Body: fileBuffer,
+        Bucket: process.env.S3_BUCKET_NAME,
+        ContentType: mimetype,
+        Key: filePath,
+    };
+
+    return new Upload({
+        client: s3,
+        params,
+    }).done();
+};
+
+export { uploadFileToS3, deleteFileFromS3, extractS3Key, uploadFileBufferToS3 };

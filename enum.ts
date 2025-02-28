@@ -8,7 +8,7 @@ const enums = {
         'Invoices',
         'Contact Forms',
         'Notification',
-        'e-Challan',
+        'Challan',
         'Attendance',
     ],
     permissionType: ['ALL', 'A', 'E', 'D', 'V', 'AD'],

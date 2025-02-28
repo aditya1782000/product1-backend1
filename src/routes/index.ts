@@ -9,6 +9,7 @@ import invoices from './invocies/invoices.routes';
 import contactus from './contactus/contactus.routes';
 import notifications from './notifications/notifications.routes';
 import search from './search/search.routes';
+import challan from './challan/challan.routes';
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use('/', [
     contactus,
     notifications,
     search,
+    challan,
 ]);
 
 export default router;

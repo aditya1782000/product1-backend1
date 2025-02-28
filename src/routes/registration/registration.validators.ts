@@ -42,7 +42,9 @@ export const registerUserValidators = [
         .withMessage('Organisation name is required')
         .bail()
         .isString()
-        .withMessage('Organisation name must be a string'),
+        .withMessage('Organisation name must be a string')
+        .isLength({ min: 3, max: 100 })
+        .withMessage('Organisation name must between 3 to 100'),
 
     body('gstNumber')
         .notEmpty()
@@ -59,14 +61,18 @@ export const registerUserValidators = [
         .withMessage('Address 1 is required')
         .bail()
         .isString()
-        .withMessage('Address 1 must be a string'),
+        .withMessage('Address 1 must be a string')
+        .isLength({ min: 3, max: 100 })
+        .withMessage('Address 1 must between 3 to 100'),
 
     body('addressLineTwo')
         .notEmpty()
         .withMessage('Address 2 is required')
         .bail()
         .isString()
-        .withMessage('Address 2 must be a string'),
+        .withMessage('Address 2 must be a string')
+        .isLength({ min: 3, max: 100 })
+        .withMessage('Address 2 must between 3 to 100'),
 
     body('city')
         .notEmpty()
