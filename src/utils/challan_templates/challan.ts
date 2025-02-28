@@ -24,10 +24,11 @@ interface DeliverySlip {
 
 class PDFHelper {
     private doc: PDFKit.PDFDocument;
+    private totalQty: number = 0;
     private readonly margin = 20;
     private readonly pageHeight = 595;
     private readonly slipWidth = (842 - 60) / 2;
-
+    private readonly maxItemsPerPage = 8;
     private items?: DeliverySlip['items'];
     private total?: number;
 
@@ -36,12 +37,55 @@ class PDFHelper {
     }
 
     generateDualSlips(data: DeliverySlip) {
-        this.generateSingleSlip(data, 0);
-        this.generateSingleSlip(data, this.slipWidth + 20);
+        const totalItems = data.items.length;
+        const totalPages = Math.ceil(totalItems / this.maxItemsPerPage);
+        this.totalQty = data.items.reduce(
+            (sum, item) => sum + Number(item.qty),
+            0,
+        );
+        for (let page = 0; page < totalPages; page++) {
+            if (page > 0) {
+                this.doc.addPage();
+            }
+
+            const startIdx = page * this.maxItemsPerPage;
+            const endIdx = Math.min(
+                startIdx + this.maxItemsPerPage,
+                totalItems,
+            );
+            const pageItems = data.items.slice(startIdx, endIdx);
+
+            const pageSubtotal = pageItems.reduce(
+                (sum, item) => sum + item.qty * item.rate,
+                0,
+            );
+
+            const pageData = {
+                ...data,
+                items: pageItems,
+                total: page === totalPages - 1 ? data.total : pageSubtotal,
+                slipNo:
+                    totalPages > 1
+                        ? `${data.slipNo} (Page ${page + 1}/${totalPages})`
+                        : data.slipNo,
+            };
+
+            this.generateSingleSlip(pageData, 0, page === totalPages - 1);
+            this.generateSingleSlip(
+                pageData,
+                this.slipWidth + 20,
+                page === totalPages - 1,
+            );
+        }
+
         return this;
     }
 
-    private generateSingleSlip(data: DeliverySlip, xOffset: number) {
+    private generateSingleSlip(
+        data: DeliverySlip,
+        xOffset: number,
+        isLastPage: boolean,
+    ) {
         this.drawOuterBox(xOffset)
             .drawHeader(
                 data.gstNo || '',
@@ -57,8 +101,8 @@ class PDFHelper {
             .drawCustomerInfo(data.name, data.address, xOffset)
             .setItems(data.items)
             .setTotal(data.total)
-            .drawTable(xOffset)
-            .drawFooter(xOffset, data.footer || '', data.note || '')
+            .drawTable(xOffset, isLastPage)
+            .drawFooter(xOffset, data.footer || '', data.note || '', isLastPage)
             .drawWatermark(xOffset, data.logoPath);
     }
 
@@ -214,14 +258,15 @@ class PDFHelper {
         return this;
     }
 
-    private drawTable(xOffset: number) {
+    private drawTable(xOffset: number, isLastPage: boolean) {
         const tableTop = this.margin + 190;
         const tableBottom = this.pageHeight - this.margin - 90;
 
         const columns = {
             start: this.margin + xOffset,
-            beforeQty: this.margin + xOffset + this.slipWidth - 140,
-            beforeRate: this.margin + xOffset + this.slipWidth - 70,
+            beforeQty: this.margin + xOffset + this.slipWidth - 210,
+            beforeRate: this.margin + xOffset + this.slipWidth - 140,
+            beforeTotal: this.margin + xOffset + this.slipWidth - 70,
             end: this.margin + xOffset + this.slipWidth,
         };
 
@@ -233,6 +278,10 @@ class PDFHelper {
                 align: 'right',
             })
             .text('Rate', columns.beforeRate + 10, tableTop + 10, {
+                width: 40,
+                align: 'right',
+            })
+            .text('Total', columns.beforeTotal + 10, tableTop + 10, {
                 width: 40,
                 align: 'right',
             });
@@ -248,6 +297,8 @@ class PDFHelper {
             const rowHeight = 25;
 
             this.items.forEach((item) => {
+                const itemTotal = item.qty * item.rate;
+
                 this.doc
                     .fontSize(10)
                     .text(item.particulars, columns.start + 10, currentY)
@@ -268,6 +319,15 @@ class PDFHelper {
                             width: 40,
                             align: 'right',
                         },
+                    )
+                    .text(
+                        itemTotal.toFixed(2),
+                        columns.beforeTotal + 10,
+                        currentY,
+                        {
+                            width: 40,
+                            align: 'right',
+                        },
                     );
 
                 currentY += rowHeight;
@@ -277,18 +337,33 @@ class PDFHelper {
         const totalY = tableBottom - 30;
         this.drawHorizontalLine(totalY, xOffset);
 
-        this.doc
-            .fontSize(10)
-            .text('Total:', columns.beforeQty + 10, totalY + 10)
-            .text(
-                `₹ ${this.total?.toFixed(2)}`,
-                columns.beforeRate + 10,
-                totalY + 10,
-                {
-                    width: 40,
-                    align: 'right',
-                },
-            );
+        if (!isLastPage) {
+            this.doc
+                .fontSize(10)
+                .text(
+                    'Continued on next page...',
+                    columns.start + 10,
+                    totalY + 10,
+                );
+        } else {
+            this.doc
+                .fontSize(10)
+                .text(
+                    this.totalQty.toString(),
+                    columns.beforeQty + 10,
+                    totalY + 10,
+                    { width: 40, align: 'right' },
+                )
+                .text(
+                    `₹ ${this.total?.toFixed(2)}`,
+                    columns.beforeTotal + 10,
+                    totalY + 10,
+                    {
+                        width: 40,
+                        align: 'right',
+                    },
+                );
+        }
 
         this.drawHorizontalLine(tableBottom, xOffset);
 
@@ -305,30 +380,42 @@ class PDFHelper {
         return this;
     }
 
-    private drawFooter(xOffset: number, footer: string, note: string) {
+    private drawFooter(
+        xOffset: number,
+        footer: string,
+        note: string,
+        isLastPage: boolean,
+    ) {
         const footerY = this.pageHeight - this.margin - 80;
 
-        this.doc
-            .fontSize(10)
-            .text(`${footer}`, this.margin + 10 + xOffset, footerY - 25);
+        if (isLastPage) {
+            this.doc
+                .fontSize(10)
+                .text(`${footer}`, this.margin + 10 + xOffset, footerY - 25);
+        }
 
-        const signatureY = footerY + 20;
-        this.doc.text(
-            'Auth. Sign. .............................',
-            this.margin + xOffset + this.slipWidth * 0.6,
-            signatureY,
-            {
-                width: this.slipWidth * 0.4 - 10,
-                align: 'right',
-            },
-        );
+        if (isLastPage) {
+            const signatureY = footerY + 20;
+            this.doc.text(
+                'Auth. Sign. .............................',
+                this.margin + xOffset + this.slipWidth * 0.6,
+                signatureY,
+                {
+                    width: this.slipWidth * 0.4 - 10,
+                    align: 'right',
+                },
+            );
+        }
 
-        const noteY = signatureY + 25;
-        this.doc
-            .fontSize(9)
-            .text(`Note: ${note}`, this.margin + 10 + xOffset, noteY, {
-                width: this.slipWidth - 20,
-            });
+        if (isLastPage) {
+            const signatureY = footerY + 20;
+            const noteY = signatureY + 25;
+            this.doc
+                .fontSize(9)
+                .text(`Note: ${note}`, this.margin + 10 + xOffset, noteY, {
+                    width: this.slipWidth - 20,
+                });
+        }
 
         return this;
     }
