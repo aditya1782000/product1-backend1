@@ -10,6 +10,7 @@ import contactus from './contactus/contactus.routes';
 import notifications from './notifications/notifications.routes';
 import search from './search/search.routes';
 import challan from './challan/challan.routes';
+import attendance from './attendance/attendance.routes';
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.use('/', [
     notifications,
     search,
     challan,
+    attendance,
 ]);
 
 export default router;

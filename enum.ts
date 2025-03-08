@@ -24,6 +24,10 @@ const enums = {
     orderStatus: ['inApproval', 'approved', 'rejected', 'delivered'],
     orderType: ['customer', 'admin'],
     notificationType: ['offer', 'payment', 'delivery', 'reject', 'approved'],
+    attendanceStatus: ['present', 'absent', 'half-day', 'leave'],
+    leaveType: ['fullDay', 'firstHalf', 'secondHalf'],
+    leaveStatus: ['pending', 'approved', 'rejected'],
+    leaveActions: ['approved', 'rejected'],
 };
 
 export default enums;
