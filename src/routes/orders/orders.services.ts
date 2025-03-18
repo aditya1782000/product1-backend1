@@ -486,7 +486,7 @@ export const viewAdminOrder = async (
             .populate('organization', ' _id')
             .populate(
                 'customer',
-                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode',
+                '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber',
             )
             .populate('orderItems.product', 'productName productImageUrl')
             .select(

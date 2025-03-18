@@ -68,6 +68,88 @@ export const addUsersValidators = [
                 if (!isValidType) {
                     throw new Error('Invalid permission type');
                 }
+
+                if (!body.phoneNumber) {
+                    throw new Error('Phone number is required');
+                }
+
+                if (typeof body.phoneNumber !== 'string') {
+                    throw new Error('Phone number must be a string');
+                }
+
+                if (!/^\+91\d{10}$/.test(body.phoneNumber)) {
+                    throw new Error('Invalid phone number');
+                }
+
+                if (!body.addressLineOne) {
+                    throw new Error('Address 1 is required');
+                }
+
+                if (typeof body.addressLineOne !== 'string') {
+                    throw new Error('Address 1 must be a string');
+                }
+
+                if (
+                    body.addressLineOne.length < 3 ||
+                    body.addressLineOne.length > 100
+                ) {
+                    throw new Error(
+                        'Address 1 must between 3 to 100 characters',
+                    );
+                }
+
+                if (!body.addressLineTwo) {
+                    throw new Error('Address 2 is required');
+                }
+
+                if (typeof body.addressLineTwo !== 'string') {
+                    throw new Error('Address 2 must be a string');
+                }
+
+                if (
+                    body.addressLineTwo.length < 3 ||
+                    body.addressLineTwo.length > 100
+                ) {
+                    throw new Error(
+                        'Address 1 must between 3 to 100 characters',
+                    );
+                }
+
+                if (!body.city) {
+                    throw new Error('City is required');
+                }
+
+                if (typeof body.city !== 'string') {
+                    throw new Error('City must be a string');
+                }
+
+                if (body.city.length < 3 || body.city.length > 25) {
+                    throw new Error('State must be between 3 to 25 characters');
+                }
+
+                if (!body.state) {
+                    throw new Error('State is required');
+                }
+
+                if (typeof body.state !== 'string') {
+                    throw new Error('State must be a string');
+                }
+
+                if (body.state.length < 3 || body.state.length > 25) {
+                    throw new Error('State must be between 3 to 25 characters');
+                }
+
+                if (!body.pinCode) {
+                    throw new Error('Pin code is required');
+                }
+
+                if (typeof body.pinCode !== 'string') {
+                    throw new Error('Pin code must be a number');
+                }
+
+                if (body.pinCode.length !== 6) {
+                    throw new Error('Pin code must be a 6-digit number');
+                }
             });
 
             return permissions;
@@ -355,6 +437,88 @@ export const userEditValidators = [
 
                 if (!isValidType) {
                     throw new Error('Invalid permission type');
+                }
+
+                if (!body.phoneNumber) {
+                    throw new Error('Phone number is required');
+                }
+
+                if (typeof body.phoneNumber !== 'string') {
+                    throw new Error('Phone number must be a string');
+                }
+
+                if (!/^\+91\d{10}$/.test(body.phoneNumber)) {
+                    throw new Error('Invalid phone number');
+                }
+
+                if (!body.addressLineOne) {
+                    throw new Error('Address 1 is required');
+                }
+
+                if (typeof body.addressLineOne !== 'string') {
+                    throw new Error('Address 1 must be a string');
+                }
+
+                if (
+                    body.addressLineOne.length < 3 ||
+                    body.addressLineOne.length > 100
+                ) {
+                    throw new Error(
+                        'Address 1 must between 3 to 100 characters',
+                    );
+                }
+
+                if (!body.addressLineTwo) {
+                    throw new Error('Address 2 is required');
+                }
+
+                if (typeof body.addressLineTwo !== 'string') {
+                    throw new Error('Address 2 must be a string');
+                }
+
+                if (
+                    body.addressLineTwo.length < 3 ||
+                    body.addressLineTwo.length > 100
+                ) {
+                    throw new Error(
+                        'Address 1 must between 3 to 100 characters',
+                    );
+                }
+
+                if (!body.city) {
+                    throw new Error('City is required');
+                }
+
+                if (typeof body.city !== 'string') {
+                    throw new Error('City must be a string');
+                }
+
+                if (body.city.length < 3 || body.city.length > 25) {
+                    throw new Error('State must be between 3 to 25 characters');
+                }
+
+                if (!body.state) {
+                    throw new Error('State is required');
+                }
+
+                if (typeof body.state !== 'string') {
+                    throw new Error('State must be a string');
+                }
+
+                if (body.state.length < 3 || body.state.length > 25) {
+                    throw new Error('State must be between 3 to 25 characters');
+                }
+
+                if (!body.pinCode) {
+                    throw new Error('Pin code is required');
+                }
+
+                if (typeof body.pinCode !== 'string') {
+                    throw new Error('Pin code must be a number');
+                }
+
+                if (body.pinCode.length !== 6) {
+                    throw new Error('Pin code must be a 6-digit number');
                 }
             });
 
