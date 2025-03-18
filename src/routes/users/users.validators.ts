@@ -376,17 +376,17 @@ export const userEditValidators = [
                 throw new Error('Type is required');
             }
 
-            // if (!body.phoneNumber) {
-            //     throw new Error('Phone number is required');
-            // }
+            if (!body.phoneNumber) {
+                throw new Error('Phone number is required');
+            }
 
-            // if (typeof body.phoneNumber !== 'string') {
-            //     throw new Error('Phone number must be a string');
-            // }
+            if (typeof body.phoneNumber !== 'string') {
+                throw new Error('Phone number must be a string');
+            }
 
-            // if (!/^\+91\d{10}$/.test(body.phoneNumber)) {
-            //     throw new Error('Invalid phone number');
-            // }
+            if (!/^\+91\d{10}$/.test(body.phoneNumber)) {
+                throw new Error('Invalid phone number');
+            }
 
             if (!body.addressLineOne) {
                 throw new Error('Address 1 is required');
@@ -434,13 +434,17 @@ export const userEditValidators = [
                 throw new Error('State must be a string');
             }
 
-            // if (!body.pinCode) {
-            //     throw new Error('Pin code is required');
-            // }
+            if (!body.pinCode) {
+                throw new Error('Pin code is required');
+            }
 
-            // if (typeof body.pinCode !== 'string') {
-            //     throw new Error('Pin code must be a number');
-            // }
+            if (typeof body.pinCode !== 'string') {
+                throw new Error('Pin code must be a number');
+            }
+
+            if (body.pinCode.length !== 6) {
+                throw new Error('Pin code must be a 6-digit number');
+            }
 
             if (!body.orgnaizationName) {
                 throw new Error('Organisation name is required');

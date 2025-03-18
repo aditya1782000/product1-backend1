@@ -605,7 +605,7 @@ export const userEdit = async (
     state: string,
     pinCode: number,
     orgnaizationName: string,
-    gstNumber: string
+    gstNumber: string,
 ): Promise<AsyncResponseType> => {
     try {
         if (role === 'customer') {
