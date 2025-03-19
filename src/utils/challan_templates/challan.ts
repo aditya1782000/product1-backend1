@@ -13,6 +13,7 @@ interface DeliverySlip {
     address: string;
     items: {
         particulars: string;
+        description?: string; 
         qty: number;
         rate: number;
     }[];
@@ -299,9 +300,13 @@ class PDFHelper {
             this.items.forEach((item) => {
                 const itemTotal = item.qty * item.rate;
 
+                const particularsText = item.description
+                    ? `${item.particulars} (${item.description})`
+                    : item.particulars;
+
                 this.doc
                     .fontSize(10)
-                    .text(item.particulars, columns.start + 10, currentY)
+                    .text(particularsText, columns.start + 10, currentY)
                     .text(
                         item.qty.toString(),
                         columns.beforeQty + 10,

@@ -20,6 +20,7 @@ interface Item {
     particulars: string;
     qty: number;
     rate: number;
+    description?: string; 
 }
 
 const deleteTempFile = (filePath: string) => {

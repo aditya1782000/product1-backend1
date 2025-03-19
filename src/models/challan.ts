@@ -4,6 +4,7 @@ export interface IChallanItem extends Document {
     particulars: string;
     qty: number;
     rate: number;
+    description?: string;
 }
 
 export interface IChallan extends Document {
@@ -31,6 +32,7 @@ const challanItemSchema: Schema<IChallanItem> = new Schema<IChallanItem>({
         type: Number,
         required: true,
     },
+    description: String,
 });
 
 export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
