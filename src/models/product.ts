@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
-import data from '../../enum';
+// import data from '../../enum';
 
 export interface IQuantityPrice extends Document {
     quantityType: string;
@@ -59,7 +59,7 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>(
         unitType: {
             type: String,
             required: true,
-            enum: data.unitType,
+            // enum: data.unitType,
         },
         price: [areaPriceSchema],
         organization: {

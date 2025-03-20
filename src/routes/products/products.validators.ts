@@ -7,28 +7,32 @@ export const addProductValidators = [
         .withMessage('Product name is required')
         .bail()
         .isString()
-        .withMessage('Product name must be string'),
+        .withMessage('Product name must be string')
+        .bail()
+        .isLength({ min: 1, max: 100 })
+        .withMessage('Product name must be between 1 to 100 characters'),
 
     body('description')
         .notEmpty()
         .withMessage('Description is required')
         .bail()
         .isString()
-        .withMessage('Description must be string'),
+        .withMessage('Description must be string')
+        .bail()
+        .isLength({ min: 1, max: 300 })
+        .withMessage('Description must be between 1 to 100 characters'),
 
     body('howToUse')
         .notEmpty()
         .withMessage('How to use is required')
         .bail()
         .isString()
-        .withMessage('How To Use must be string'),
-
-    body('unitType')
-        .notEmpty()
-        .withMessage('Unit Type is required')
+        .withMessage('How To Use must be string')
         .bail()
-        .isIn(enums.unitType)
-        .withMessage('Invalid enum type'),
+        .isLength({ min: 1, max: 300 })
+        .withMessage('How to use name must be between 1 to 100 characters'),
+
+    body('unitType').notEmpty().withMessage('Unit Type is required'),
 
     body('price')
         .isArray({ min: 1 })
