@@ -109,7 +109,7 @@ export const verifyOtp = async (
 
         const oUser = await User.findOne({ email }).populate(
             'organization',
-            'organisationName',
+            'organisationName addressLineone addressLineTwo city state pinCode',
         );
 
         if (!oUser) {
@@ -165,6 +165,8 @@ export const verifyOtp = async (
                 role: oUser.role || '',
                 permissions: oUser.permissions || '',
                 organization: oUser.organization || '',
+                addressLineOne: oUser.addressLineOne || '',
+                addressLineTwo: oUser.addressLineTwo || '',
                 _id: oUser._id || '',
             },
         };
