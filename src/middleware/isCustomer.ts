@@ -72,6 +72,7 @@ export const isCustomer = () => {
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
+                const errorMessages = errors
                     .array()
                     .map((error: ValidationError) => error.msg)
                     .join(', ');
