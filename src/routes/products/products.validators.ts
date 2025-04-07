@@ -19,7 +19,7 @@ export const addProductValidators = [
         .isString()
         .withMessage('Description must be string')
         .bail()
-        .isLength({ min: 1, max: 300 })
+        .isLength({ min: 1, max: 2000 })
         .withMessage('Description must be between 1 to 100 characters'),
 
     body('howToUse')
@@ -29,7 +29,7 @@ export const addProductValidators = [
         .isString()
         .withMessage('How To Use must be string')
         .bail()
-        .isLength({ min: 1, max: 300 })
+        .isLength({ min: 1, max: 2000 })
         .withMessage('How to use name must be between 1 to 100 characters'),
 
     body('unitType').notEmpty().withMessage('Unit Type is required'),

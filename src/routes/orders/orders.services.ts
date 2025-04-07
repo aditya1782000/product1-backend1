@@ -82,7 +82,7 @@ export const createCustomerOrder = async (
 
         const orderNumber = `order ${nOrderTotal + 1}`;
 
-        const order = {
+        const orderData = {
             customer,
             orderItems,
             totalAmount,
@@ -100,19 +100,22 @@ export const createCustomerOrder = async (
             topic: process.env.TOPIC_ONE || '',
             messages: [
                 {
-                    value: JSON.stringify(order),
-                    key: order.organization.toString(),
+                    value: JSON.stringify(orderData),
+                    key: orderData.organization.toString(),
                 },
             ],
         });
 
         await producer.disconnect();
 
+        const newOrder = new Order(orderData);
+        await newOrder.save();
+
         return {
             statusCode: 200,
             success: true,
             message: 'Order created successfully',
-            data: order,
+            data: newOrder,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -156,15 +159,19 @@ export const recieveCustomerOrders = async (
                         orderData.organization.toString() ===
                         organisation.toString()
                     ) {
-                        const newOrder = new Order(orderData);
-                        await newOrder.save();
+                        const order = await Order.findOne({
+                            orderNumber: orderData.orderNumber,
+                            organization: orderData.organization,
+                        });
 
-                        global.io
-                            .to(organisation.toString())
-                            .emit('Order-recieved', {
-                                message: 'A new order has been received.',
-                                orderDetails: newOrder,
-                            });
+                        if (order) {
+                            global.io
+                                .to(organisation.toString())
+                                .emit('Order-recieved', {
+                                    message: 'A new order has been received.',
+                                    orderDetails: order,
+                                });
+                        }
                     }
                 } catch (error) {
                     console.error(error);
@@ -175,7 +182,7 @@ export const recieveCustomerOrders = async (
         return {
             statusCode: 200,
             success: true,
-            message: 'Orders received successfully',
+            message: 'Order notification service started successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
