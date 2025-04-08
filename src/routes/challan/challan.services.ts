@@ -20,7 +20,7 @@ interface Item {
     particulars: string;
     qty: number;
     rate: number;
-    description?: string; 
+    description?: string;
 }
 
 const deleteTempFile = (filePath: string) => {
@@ -115,11 +115,13 @@ export const createChallanOrganization = async (
 
 export const createChallan = async (
     customerName: string,
+    customerMobileNo: string,
     date: Date,
     address: string,
     items: Item[],
     total: number,
     organisation: mongoose.Types.ObjectId,
+    vehicleNo?: string,
 ): Promise<AsyncResponseType> => {
     try {
         const existingChallanOrganisation = await ChallanOrganization.findOne({
@@ -190,6 +192,8 @@ export const createChallan = async (
             name: customerName,
             address,
             items,
+            customerMobileNo: Number(customerMobileNo),
+            vehicleNo: vehicleNo,
         });
 
         const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
@@ -218,6 +222,8 @@ export const createChallan = async (
             items,
             total,
             challanUrl: uploadData.Location,
+            vehicleNo: vehicleNo,
+            customerMobileNo: customerMobileNo,
         });
 
         return {
@@ -486,10 +492,12 @@ export const editChallan = async (
     challanId: string,
     organisation: mongoose.Types.ObjectId,
     customerName?: string,
+    customerMobileNo?: string,
     date?: Date,
     address?: string,
     items?: Item[],
     total?: number,
+    vehicleNo?: string,
 ): Promise<AsyncResponseType> => {
     try {
         const oChallan = await Challan.findById(challanId);
@@ -557,8 +565,11 @@ export const editChallan = async (
             slipNo: oChallan.challanNo,
             date: formatDate(formattedDate),
             name: customerName || oChallan.customerName || '',
+            customerMobileNo:
+                Number(customerMobileNo) || oChallan.customerMobileNo,
             address: address || oChallan.address || '',
             items: items || oChallan.items || [],
+            vehicleNo: vehicleNo || oChallan.vehicleNo || '',
         });
 
         const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {

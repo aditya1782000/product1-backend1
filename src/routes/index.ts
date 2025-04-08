@@ -15,6 +15,7 @@ import unitType from './unitType/unitType.routes';
 import customerType from './customerType/customerType.routes';
 import statement from './statement/statement.routes';
 import deilveryAddress from './deliveryAddress/deliveryAddress.routes';
+import vehicleNo from './vehicleNo/vehicleNo.routes';
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.use('/', [
     customerType,
     statement,
     deilveryAddress,
+    vehicleNo,
 ]);
 
 export default router;

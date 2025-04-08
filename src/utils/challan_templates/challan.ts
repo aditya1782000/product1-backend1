@@ -11,9 +11,11 @@ interface DeliverySlip {
     date: string;
     name: string;
     address: string;
+    customerMobileNo?: number;
+    vehicleNo?: string;
     items: {
         particulars: string;
-        description?: string; 
+        description?: string;
         qty: number;
         rate: number;
     }[];
@@ -99,11 +101,22 @@ class PDFHelper {
                 xOffset,
             )
             .drawSlipDetails(data.slipNo, data.date, xOffset)
-            .drawCustomerInfo(data.name, data.address, xOffset)
+            .drawCustomerInfo(
+                data.name,
+                data.address,
+                xOffset,
+                data.customerMobileNo || 0,
+            )
             .setItems(data.items)
             .setTotal(data.total)
             .drawTable(xOffset, isLastPage)
-            .drawFooter(xOffset, data.footer || '', data.note || '', isLastPage)
+            .drawFooter(
+                xOffset,
+                data.footer || '',
+                data.note || '',
+                isLastPage,
+                data.vehicleNo || '',
+            )
             .drawWatermark(xOffset, data.logoPath);
     }
 
@@ -134,9 +147,18 @@ class PDFHelper {
         const boxWidth = this.slipWidth;
 
         this.doc
+            .fontSize(12)
+            .fillColor('black')
+            .text('ESTIMATE', boxStart + boxWidth - 80, this.margin - 15, {
+                align: 'right',
+                width: 70,
+            })
+            .fillColor('black');
+
+        this.doc
             .fontSize(10)
             .text(`GSTN. : ${gstNo}`, boxStart + 10, headerTop)
-            .text(`Mobile No.: ${mobileNo}`, boxStart + 10, headerTop + 15);
+            .text(`Mobile No.: +${mobileNo}`, boxStart + 10, headerTop + 15);
 
         const rightSectionStart = boxStart + boxWidth - 235;
 
@@ -201,6 +223,7 @@ class PDFHelper {
                     align: 'left',
                 });
         }
+
         this.drawHorizontalLine(headerTop + 90, xOffset);
 
         return this;
@@ -234,7 +257,12 @@ class PDFHelper {
         return this;
     }
 
-    private drawCustomerInfo(name: string, address: string, xOffset: number) {
+    private drawCustomerInfo(
+        name: string,
+        address: string,
+        xOffset: number,
+        customerMobileNo: number,
+    ) {
         const infoTop = this.margin + 140;
 
         this.doc
@@ -242,8 +270,26 @@ class PDFHelper {
                 width: 80,
             })
             .text(name, this.margin + 60 + xOffset, infoTop, {
-                width: this.slipWidth - 100,
+                width: this.slipWidth / 2 - 80,
             });
+
+        this.doc
+            .text(
+                `Mobile :`,
+                this.margin + xOffset + this.slipWidth - 140,
+                infoTop,
+                {
+                    width: 50,
+                },
+            )
+            .text(
+                `+${customerMobileNo}`,
+                this.margin + xOffset + this.slipWidth - 90,
+                infoTop,
+                {
+                    width: 80,
+                },
+            );
 
         this.drawHorizontalLine(infoTop + 20, xOffset);
 
@@ -390,6 +436,7 @@ class PDFHelper {
         footer: string,
         note: string,
         isLastPage: boolean,
+        vehicleNo: string,
     ) {
         const footerY = this.pageHeight - this.margin - 80;
 
@@ -399,8 +446,29 @@ class PDFHelper {
                 .text(`${footer}`, this.margin + 10 + xOffset, footerY - 25);
         }
 
+        if (vehicleNo) {
+            this.doc
+                .fontSize(10)
+                .text(
+                    `Vehicle No: ${vehicleNo}`,
+                    this.margin + 10 + xOffset,
+                    footerY + 5,
+                );
+        }
+
         if (isLastPage) {
             const signatureY = footerY + 20;
+
+            this.doc.text(
+                'Receiver Sign. .............................',
+                this.margin + 10 + xOffset,
+                signatureY,
+                {
+                    width: this.slipWidth * 0.4,
+                    align: 'left',
+                },
+            );
+
             this.doc.text(
                 'Auth. Sign. .............................',
                 this.margin + xOffset + this.slipWidth * 0.6,

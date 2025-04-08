@@ -62,6 +62,22 @@ export const createChallanValidators = [
         .bail()
         .isNumeric()
         .withMessage('Total must be a number'),
+
+    body('customerMobileNo')
+        .notEmpty()
+        .withMessage('Phone number is required')
+        .bail()
+        .isNumeric()
+        .matches(/^\+91\d{10}$/)
+        .withMessage('Phone number must be 10 digit'),
+
+    body('vehicleNo')
+        .optional()
+        .bail()
+        .matches(/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/)
+        .withMessage(
+            'Please enter a valid Indian vehicle registration number (e.g., MH12AB1234)',
+        ),
 ];
 
 export const editChallanOrganizationValidators = [
@@ -137,6 +153,21 @@ export const editChallanValidators = [
         .bail()
         .isNumeric()
         .withMessage('Total must be a number'),
+
+    body('customerMobileNo')
+        .optional()
+        .bail()
+        .isNumeric()
+        .matches(/^\+91\d{10}$/)
+        .withMessage('Phone number must be 10 digit'),
+
+    body('vehicleNo')
+        .optional()
+        .bail()
+        .matches(/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}$/)
+        .withMessage(
+            'Please enter a valid Indian vehicle registration number (e.g., MH12AB1234)',
+        ),
 ];
 
 export const deleteChallanValidators = [
