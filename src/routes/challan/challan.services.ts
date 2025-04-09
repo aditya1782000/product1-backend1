@@ -699,9 +699,9 @@ export const listChallans = async (
             $and: [oData.oSearchData],
             challanOrg: { $in: organisation },
         })
-            .select('challanNo customerName total challanUrl')
+            .select('challanNo customerName total challanUrl date')
             .collation({ locale: 'en', strength: 1 })
-            .sort(oData.oSortingOrder)
+            .sort({ dCreatedAt: -1 })
             .skip(start)
             .limit(limit)
             .lean();
