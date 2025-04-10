@@ -39,15 +39,25 @@ export const createChallanControllers = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { customerName, date, address, items, total } = req.body;
-
-    const oResponse = await createChallan(
+    const {
         customerName,
         date,
         address,
         items,
         total,
+        vehicleNo,
+        customerMobileNo,
+    } = req.body;
+
+    const oResponse = await createChallan(
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        items,
+        total,
         organization,
+        vehicleNo,
     );
 
     return res.status(oResponse.statusCode).send({
@@ -133,16 +143,26 @@ export const editChallanControllers = async (req: Request, res: Response) => {
 
     const { id } = req.params;
 
-    const { customerName, date, address, items, total } = req.body;
-
-    const oResponse = await editChallan(
-        id,
-        organization,
+    const {
         customerName,
         date,
         address,
         items,
         total,
+        customerMobileNo,
+        vehicleNo,
+    } = req.body;
+
+    const oResponse = await editChallan(
+        id,
+        organization,
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        items,
+        total,
+        vehicleNo,
     );
 
     return res.status(oResponse.statusCode).send({

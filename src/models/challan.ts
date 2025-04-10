@@ -13,10 +13,12 @@ export interface IChallan extends Document {
     customerName: string;
     address: string;
     date: Date;
+    vehicleNo: string;
     items: IChallanItem[];
     total: number;
     challanUrl: string;
     dCreatedAt?: Date;
+    customerMobileNo: number;
 }
 
 const challanItemSchema: Schema<IChallanItem> = new Schema<IChallanItem>({
@@ -49,6 +51,10 @@ export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
             type: String,
             required: true,
         },
+        customerMobileNo: {
+            type: Number,
+            required: true,
+        },
         date: {
             type: Date,
             required: true,
@@ -58,6 +64,7 @@ export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
             required: true,
         },
         items: [challanItemSchema],
+        vehicleNo: String,
         total: {
             type: Number,
             required: true,
