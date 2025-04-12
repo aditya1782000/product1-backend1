@@ -64,8 +64,7 @@ export const createChallanValidators = [
         .withMessage('Total must be a number'),
 
     body('customerMobileNo')
-        .notEmpty()
-        .withMessage('Phone number is required')
+        .optional()
         .bail()
         .isNumeric()
         .matches(/^\+91\d{10}$/)

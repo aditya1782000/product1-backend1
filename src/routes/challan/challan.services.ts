@@ -601,6 +601,8 @@ export const editChallan = async (
             items: items || oChallan.items,
             total: total || oChallan.total,
             challanUrl: uploadData.Location,
+            customerMobileNo: customerMobileNo || oChallan.customerMobileNo,
+            vehicleNo: vehicleNo || oChallan.vehicleNo,
         });
 
         return {

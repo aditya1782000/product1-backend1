@@ -273,23 +273,25 @@ class PDFHelper {
                 width: this.slipWidth / 2 - 80,
             });
 
-        this.doc
-            .text(
-                `Mobile :`,
-                this.margin + xOffset + this.slipWidth - 140,
-                infoTop,
-                {
-                    width: 50,
-                },
-            )
-            .text(
-                `+${customerMobileNo}`,
-                this.margin + xOffset + this.slipWidth - 90,
-                infoTop,
-                {
-                    width: 80,
-                },
-            );
+        if (customerMobileNo) {
+            this.doc
+                .text(
+                    `Mobile :`,
+                    this.margin + xOffset + this.slipWidth - 140,
+                    infoTop,
+                    {
+                        width: 50,
+                    },
+                )
+                .text(
+                    `+${customerMobileNo}`,
+                    this.margin + xOffset + this.slipWidth - 90,
+                    infoTop,
+                    {
+                        width: 80,
+                    },
+                );
+        }
 
         this.drawHorizontalLine(infoTop + 20, xOffset);
 

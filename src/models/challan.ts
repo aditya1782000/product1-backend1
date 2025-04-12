@@ -53,7 +53,6 @@ export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
         },
         customerMobileNo: {
             type: Number,
-            required: true,
         },
         date: {
             type: Date,
