@@ -319,20 +319,29 @@ class PDFHelper {
             end: this.margin + xOffset + this.slipWidth,
         };
 
+        const particularsWidth = columns.beforeQty - columns.start - 20;
+        const qtyWidth = columns.beforeRate - columns.beforeQty;
+        const rateWidth = columns.beforeTotal - columns.beforeRate;
+        const totalWidth = columns.end - columns.beforeTotal;
+
+        const qtyCenter = columns.beforeQty + qtyWidth / 2;
+        const rateCenter = columns.beforeRate + rateWidth / 2;
+        const totalCenter = columns.beforeTotal + totalWidth / 2;
+
         this.doc
             .fontSize(12)
             .text('Particulars', columns.start + 10, tableTop + 10)
-            .text('Qty.', columns.beforeQty + 10, tableTop + 10, {
-                width: 40,
-                align: 'right',
+            .text('Qty.', qtyCenter - 15, tableTop + 10, {
+                width: 30,
+                align: 'center',
             })
-            .text('Rate', columns.beforeRate + 10, tableTop + 10, {
-                width: 40,
-                align: 'right',
+            .text('Rate', rateCenter - 15, tableTop + 10, {
+                width: 30,
+                align: 'center',
             })
-            .text('Total', columns.beforeTotal + 10, tableTop + 10, {
+            .text('Total', totalCenter - 20, tableTop + 10, {
                 width: 40,
-                align: 'right',
+                align: 'center',
             });
 
         this.drawHorizontalLine(tableTop + 30, xOffset);
@@ -343,7 +352,7 @@ class PDFHelper {
 
         if (this.items && this.items.length > 0) {
             let currentY = tableTop + 40;
-            const rowHeight = 25;
+            const baseRowHeight = 25;
 
             this.items.forEach((item) => {
                 const itemTotal = item.qty * item.rate;
@@ -352,36 +361,49 @@ class PDFHelper {
                     ? `${item.particulars} (${item.description})`
                     : item.particulars;
 
+                const textOptions = {
+                    width: particularsWidth,
+                    align: 'left' as const,
+                };
+
+                const textHeight = this.doc.heightOfString(
+                    particularsText,
+                    textOptions,
+                );
+                const rowHeight = Math.max(baseRowHeight, textHeight + 10);
+
                 this.doc
                     .fontSize(10)
-                    .text(particularsText, columns.start + 10, currentY)
                     .text(
-                        item.qty.toString(),
-                        columns.beforeQty + 10,
+                        particularsText,
+                        columns.start + 10,
                         currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
-                    )
-                    .text(
-                        item.rate.toString(),
-                        columns.beforeRate + 10,
-                        currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
-                    )
-                    .text(
-                        itemTotal.toFixed(2),
-                        columns.beforeTotal + 10,
-                        currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
+                        textOptions,
                     );
+
+                this.doc
+                    .text(
+                        `${item.qty.toString()}.000`,
+                        qtyCenter - 15,
+                        currentY,
+                        {
+                            width: 40,
+                            align: 'center',
+                        },
+                    )
+                    .text(
+                        `${item.rate.toString()}.00`,
+                        rateCenter - 15,
+                        currentY,
+                        {
+                            width: 40,
+                            align: 'center',
+                        },
+                    )
+                    .text(itemTotal.toFixed(2), totalCenter - 20, currentY, {
+                        width: 40,
+                        align: 'center',
+                    });
 
                 currentY += rowHeight;
             });
@@ -401,19 +423,17 @@ class PDFHelper {
         } else {
             this.doc
                 .fontSize(10)
-                .text(
-                    this.totalQty.toString(),
-                    columns.beforeQty + 10,
-                    totalY + 10,
-                    { width: 40, align: 'right' },
-                )
+                .text(this.totalQty.toString(), qtyCenter - 15, totalY + 10, {
+                    width: 30,
+                    align: 'center',
+                })
                 .text(
                     `₹ ${this.total?.toFixed(2)}`,
-                    columns.beforeTotal + 10,
+                    totalCenter - 20,
                     totalY + 10,
                     {
                         width: 40,
-                        align: 'right',
+                        align: 'center',
                     },
                 );
         }

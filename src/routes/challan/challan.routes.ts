@@ -2,26 +2,44 @@ import express from 'express';
 import {
     createChallanOrganizationValidators,
     createChallanValidators,
+    createCustomChallanOrganizationValidators,
+    createCustomChallanValidators,
     deleteChallanOrganizationValidators,
     deleteChallanValidators,
+    deleteCustomChallanOrganizationValidators,
     editChallanOrganizationValidators,
     editChallanValidators,
+    editCustomChallanOrganizationValidators,
+    editCustomChallanValidators,
     listChallansOrganizationValidaors,
     listChallansValidaors,
+    listCustomChallanOrgValidators,
+    listCustomChallanValidators,
     viewChallanValidators,
+    viewCustomChallanValidators,
 } from './challan.validators';
 import { isAdmin } from '../../middleware/isAdmin';
 import {
     createChallanControllers,
     createChallanOrganizationControllers,
+    createCustomChallanControllers,
+    createCustomChallanOrganizationControllers,
     deleteChallanControllers,
     deleteChallanOrganizationControllers,
+    deleteCustomChallanOrganizationControllers,
+    deleteCutomChallanControllers,
     editChallanControllers,
     editChallanOrganizationControllers,
+    editCustomChallanControllers,
+    editCustomChallOrganizationControllers,
     listChallanOrgnaizationControllers,
     listChallansControllers,
+    listCustomChallanControllers,
+    listCustomChallanOrgControllers,
     viewChallanControllers,
     viewChallanOrganizationControlllers,
+    viewCustomChallanControllers,
+    viewCustomChallanOrganizationControllers,
 } from './challan.controllers';
 import uploader from '../../utils/uploader';
 
@@ -96,6 +114,75 @@ router.post(
     listChallansOrganizationValidaors,
     isAdmin('Challan', 'V'),
     listChallanOrgnaizationControllers,
+);
+
+router.post(
+    '/admin/create/custom/challan/organization',
+    createCustomChallanOrganizationValidators,
+    isAdmin('Challan', 'A'),
+    createCustomChallanOrganizationControllers,
+);
+
+router.post(
+    '/admin/create/custom/challan',
+    isAdmin('Challan', 'A'),
+    createCustomChallanControllers,
+);
+
+router.get(
+    '/admin/custom/challan/org/view',
+    createCustomChallanValidators,
+    isAdmin('Challan', 'V'),
+    viewCustomChallanOrganizationControllers,
+);
+
+router.patch(
+    '/admin/custom/challan/org/:id/edit',
+    editCustomChallanOrganizationValidators,
+    isAdmin('Challan', 'E'),
+    editCustomChallOrganizationControllers,
+);
+
+router.delete(
+    '/admin/custom/challan/org/:id/delete',
+    deleteCustomChallanOrganizationValidators,
+    isAdmin('Challan', 'D'),
+    deleteCustomChallanOrganizationControllers,
+);
+
+router.get(
+    '/admin/custom/challan/:id/view',
+    viewCustomChallanValidators,
+    isAdmin('Challan', 'V'),
+    viewCustomChallanControllers,
+);
+
+router.patch(
+    '/admin/custom/challan/:id/edit',
+    editCustomChallanValidators,
+    isAdmin('Challan', 'E'),
+    editCustomChallanControllers,
+);
+
+router.delete(
+    '/admin/custom/challan/:id/delete',
+    deleteChallanValidators,
+    isAdmin('Challan', 'D'),
+    deleteCutomChallanControllers,
+);
+
+router.post(
+    '/admin/custom/challa/org/list',
+    listCustomChallanOrgValidators,
+    isAdmin('Challan', 'V'),
+    listCustomChallanOrgControllers,
+);
+
+router.post(
+    '/admin/custom/challa/list',
+    listCustomChallanValidators,
+    isAdmin('Challan', 'V'),
+    listCustomChallanControllers,
 );
 
 export default router;

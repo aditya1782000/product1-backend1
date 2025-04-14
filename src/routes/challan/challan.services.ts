@@ -15,12 +15,23 @@ import { convertImageUrlToBase64 } from '../../utils/imageConverter';
 import formatDate from '../../utils/date';
 import dataTable from '../../utils/dataTable';
 import fs from 'fs';
+import CustomChallanOrg from '../../models/customChallanOrg';
+import { generateDeliveryChallan } from '../../utils/challan_templates/challan2';
+import CustomChallan from '../../models/customChallan';
 
 interface Item {
     particulars: string;
     qty: number;
     rate: number;
     description?: string;
+}
+
+interface CustomItem {
+    productName: string;
+    typeOfPacking?: string;
+    bagBoxes?: number;
+    qty: number;
+    rate: number;
 }
 
 const deleteTempFile = (filePath: string) => {
@@ -767,6 +778,787 @@ export const listChallanOrgnaization = async (
             success: true,
             message: 'Challan organization list fetched successfully',
             data: challanOrgList,
+            draw: req.body.draw,
+            recordsTotal: nRecordsTotal,
+            recordsFiltered: nRecordsTotal,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const createCustomChallanOrganization = async (
+    challanOrg: string,
+    title: string,
+    address: string,
+    gstNo: string,
+    panNo: string,
+    headerContent: string,
+    organisation: mongoose.Types.ObjectId,
+    footerOne?: string,
+    footerTwo?: string,
+    footerThree?: string,
+    footerFour?: string,
+    footerFive?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findOne({
+                organization: organisation,
+            });
+
+        if (existingCustomChallanOrganisation) {
+            return {
+                statusCode: 409,
+                success: false,
+                message: 'Custom Challan for this organization aleady exists',
+            };
+        }
+
+        const oCustomChallanOrg = await CustomChallanOrg.create({
+            challanOrg,
+            title,
+            address,
+            gstNo,
+            panNo,
+            headerContent,
+            footerOne,
+            footerTwo,
+            footerThree,
+            footerFour,
+            footerFive,
+            organization: organisation,
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Custom Challan has been added fro this organization',
+            data: oCustomChallanOrg,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const createCustomChallan = async (
+    customerName: string,
+    customerMobileNo: number,
+    date: Date,
+    address: string,
+    dated: Date,
+    items: CustomItem[],
+    total: number,
+    organisation: mongoose.Types.ObjectId,
+    partyCode?: string,
+    nameOfTransport?: string,
+    lrNo?: string,
+    orderNo?: string,
+    vehicleNo?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findOne({
+                organization: organisation,
+            });
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message:
+                    'Custom Challan does not exist for this organization please create one.',
+            };
+        }
+
+        const currentDate = new Date();
+        let startYear: number;
+        let endYear: number;
+
+        if (currentDate.getMonth() >= 3) {
+            startYear = currentDate.getFullYear();
+            endYear = currentDate.getFullYear() + 1;
+        } else {
+            startYear = currentDate.getFullYear() - 1;
+            endYear = currentDate.getFullYear();
+        }
+
+        const ficalYearStart = new Date(`${startYear}-04-01`);
+        const ficalYearEnd = new Date(`${endYear}-03-31`);
+
+        const nChallanTotal = await CustomChallan.countDocuments({
+            customChallanOrg: organisation,
+            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+        });
+
+        const ChallanNo = `${nChallanTotal + 1}`;
+
+        let formattedDate: string;
+        if (typeof date === 'string') {
+            formattedDate = date;
+        } else {
+            formattedDate = date.toISOString().split('T')[0];
+        }
+
+        let formattedDated: string;
+        if (typeof dated === 'string') {
+            formattedDated = dated;
+        } else {
+            formattedDated = dated.toISOString().split('T')[0];
+        }
+
+        const formattedItems = items.map((item, index) => ({
+            srNo: index + 1,
+            productName: item.productName,
+            packingType: item.typeOfPacking || '',
+            bagsBoxes: item.bagBoxes || 0,
+            totalQty: item.qty,
+            rate: item.rate,
+            amount: item.qty * item.rate,
+        }));
+
+        const customChallanFile = generateDeliveryChallan({
+            companyName: existingCustomChallanOrganisation.challanOrg,
+            title: existingCustomChallanOrganisation.title,
+            companyAddress: existingCustomChallanOrganisation.address,
+            contactNumber: customerMobileNo,
+            gstNo: existingCustomChallanOrganisation.gstNo,
+            panNo: existingCustomChallanOrganisation.panNo,
+            partyCode: partyCode,
+            challanNo: ChallanNo,
+            dateNo: formatDate(formattedDate),
+            consigneeName: customerName,
+            address: address,
+            transportName: nameOfTransport,
+            lrNo: lrNo,
+            truckNo: vehicleNo,
+            orderNo: orderNo,
+            dated: formatDate(formattedDated),
+            items: formattedItems,
+            footerOne: existingCustomChallanOrganisation.footerOne,
+            footerTwo: existingCustomChallanOrganisation.footerTwo,
+            footerThree: existingCustomChallanOrganisation.footerThree,
+            footerFour: existingCustomChallanOrganisation.footerFour,
+            footerFive: existingCustomChallanOrganisation.footerFive,
+            total: String(total),
+        });
+
+        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Uint8Array[] = [];
+
+            customChallanFile.on('data', (chunk) => chunks.push(chunk));
+            customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
+            customChallanFile.on('error', reject);
+
+            customChallanFile.end();
+        });
+
+        const uploadData = await uploadFileBufferToS3(
+            pdfBuffer,
+            `${Date.now().toString()}`,
+            'customChallans',
+            'application/pdf',
+        );
+
+        const oCustomChallan = await CustomChallan.create({
+            customChallanOrg: existingCustomChallanOrganisation.organization,
+            challanNo: ChallanNo,
+            customerName,
+            customerMobileNo,
+            date: formattedDate,
+            dated: formattedDated,
+            address,
+            partyCode,
+            nameOfTransport,
+            orderNo,
+            lrNo,
+            items,
+            vehicleNo,
+            total,
+            challanUrl: uploadData.Location,
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan has been created',
+            data: oCustomChallan,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const viewCustomChallanOrganization = async (
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findOne({
+                organization: organisation,
+            });
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message:
+                    'Custom Challan does not exist for this organization please create one.',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Custom Challan details',
+            data: existingCustomChallanOrganisation,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const editCustomChallanOrganization = async (
+    challanOrgId: string,
+    organisation: mongoose.Types.ObjectId,
+    challanOrg: string,
+    title: string,
+    address: string,
+    gstNo: string,
+    panNo: string,
+    headerContent: string,
+    footerOne?: string,
+    footerTwo?: string,
+    footerThree?: string,
+    footerFour?: string,
+    footerFive?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findById(challanOrgId);
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message:
+                    'Custom Challan does not exist for this organization please create one.',
+            };
+        }
+
+        if (
+            existingCustomChallanOrganisation.organization &&
+            existingCustomChallanOrganisation.organization._id.toString() !==
+                organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        const oCustomChallan = await CustomChallanOrg.findByIdAndUpdate(
+            existingCustomChallanOrganisation._id,
+            {
+                challanOrg:
+                    challanOrg || existingCustomChallanOrganisation.challanOrg,
+                title: title || existingCustomChallanOrganisation.title,
+                address: address || existingCustomChallanOrganisation.address,
+                gstNo: gstNo || existingCustomChallanOrganisation.gstNo,
+                panNo: panNo || existingCustomChallanOrganisation.panNo,
+                headerContent:
+                    headerContent || existingCustomChallanOrganisation,
+                footerOne:
+                    footerOne || existingCustomChallanOrganisation.footerOne,
+                footerTwo:
+                    footerTwo || existingCustomChallanOrganisation.footerTwo,
+                footerThree:
+                    footerThree ||
+                    existingCustomChallanOrganisation.footerThree,
+                footerFour:
+                    footerFour || existingCustomChallanOrganisation.footerFour,
+                footerFive:
+                    footerFive || existingCustomChallanOrganisation.footerFive,
+            },
+        );
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Custom Challan organization updated successfully',
+            data: oCustomChallan,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const deleteCustomChallanOrgnization = async (
+    challanOrgId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findById(challanOrgId);
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message:
+                    'Custom Challan does not exist for this organization please create one.',
+            };
+        }
+
+        if (
+            existingCustomChallanOrganisation.organization &&
+            existingCustomChallanOrganisation.organization._id.toString() !==
+                organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        await CustomChallanOrg.findByIdAndDelete(challanOrgId);
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Custom challan Organziation deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const viewCustomChallan = async (
+    challanId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await CustomChallan.findById(challanId);
+
+        if (!oChallan) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Challan not found',
+            };
+        }
+
+        if (
+            oChallan.customChallanOrg &&
+            oChallan.customChallanOrg._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan details',
+            data: oChallan,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const editCustomChallan = async (
+    challanId: string,
+    customerName: string,
+    customerMobileNo: number,
+    date: Date,
+    address: string,
+    dated: Date,
+    items: CustomItem[],
+    total: number,
+    organisation: mongoose.Types.ObjectId,
+    partyCode?: string,
+    nameOfTransport?: string,
+    lrNo?: string,
+    orderNo?: string,
+    vehicleNo?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await CustomChallan.findById(challanId);
+
+        if (!oChallan) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Challan not found',
+            };
+        }
+
+        if (
+            oChallan.customChallanOrg &&
+            oChallan.customChallanOrg._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        const existingCustomChallanOrganisation =
+            await CustomChallanOrg.findOne({
+                organization: organisation,
+            });
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message:
+                    'Custom Challan does not exist for this organization please create one.',
+            };
+        }
+
+        let formattedDate: string;
+        if (typeof date === 'string') {
+            formattedDate = date;
+        } else {
+            formattedDate = date.toISOString().split('T')[0];
+        }
+
+        let formattedDated: string;
+        if (typeof dated === 'string') {
+            formattedDated = dated;
+        } else {
+            formattedDated = dated.toISOString().split('T')[0];
+        }
+
+        const formattedItems = items.map((item, index) => ({
+            srNo: index + 1,
+            productName: item.productName,
+            packingType: item.typeOfPacking || '',
+            bagsBoxes: item.bagBoxes || 0,
+            totalQty: item.qty,
+            rate: item.rate,
+            amount: item.qty * item.rate,
+        }));
+
+        const customChallanFile = generateDeliveryChallan({
+            companyName: existingCustomChallanOrganisation.challanOrg,
+            title: existingCustomChallanOrganisation.title,
+            companyAddress: existingCustomChallanOrganisation.address,
+            contactNumber: customerMobileNo || oChallan.customerMobileNo,
+            gstNo: existingCustomChallanOrganisation.gstNo,
+            panNo: existingCustomChallanOrganisation.panNo,
+            partyCode: partyCode || oChallan.partyCode,
+            challanNo: oChallan.challanNo,
+            dateNo: formatDate(formattedDate),
+            consigneeName: customerName || oChallan.customerName,
+            address: address || oChallan.address,
+            transportName: nameOfTransport || oChallan.nameOfTransport,
+            lrNo: lrNo || oChallan.lrNo,
+            truckNo: vehicleNo || oChallan.vehicleNo,
+            orderNo: orderNo || oChallan.orderNo,
+            dated: formatDate(formattedDated),
+            items: formattedItems || oChallan.items,
+            footerOne: existingCustomChallanOrganisation.footerOne,
+            footerTwo: existingCustomChallanOrganisation.footerTwo,
+            footerThree: existingCustomChallanOrganisation.footerThree,
+            footerFour: existingCustomChallanOrganisation.footerFour,
+            footerFive: existingCustomChallanOrganisation.footerFive,
+            total: String(total) || String(oChallan.total),
+        });
+
+        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Uint8Array[] = [];
+
+            customChallanFile.on('data', (chunk) => chunks.push(chunk));
+            customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
+            customChallanFile.on('error', reject);
+
+            customChallanFile.end();
+        });
+
+        if (oChallan.challanUrl) {
+            const key = extractS3Key(oChallan.challanUrl);
+            deleteFileFromS3(key);
+        }
+
+        const uploadData = await uploadFileBufferToS3(
+            pdfBuffer,
+            `${Date.now().toString()}`,
+            'customChallans',
+            'application/pdf',
+        );
+
+        const oCusomChallan = await CustomChallan.findByIdAndUpdate(challanId, {
+            customChallanOrg: existingCustomChallanOrganisation.organization,
+            challanNo: oChallan.challanNo,
+            customerName: customerName || oChallan.customerName,
+            customerMobileNo: customerMobileNo || oChallan.customerMobileNo,
+            date: formattedDate,
+            dated: formattedDated,
+            address: address || oChallan.address,
+            partyCode: partyCode || oChallan.partyCode,
+            nameOfTransport: nameOfTransport || oChallan.nameOfTransport,
+            orderNo: orderNo || oChallan.orderNo,
+            lrNo: lrNo || oChallan.lrNo,
+            items: items || oChallan.items,
+            vehicleNo: vehicleNo || oChallan.vehicleNo,
+            total: total || oChallan.total,
+            challanUrl: uploadData.Location,
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan updated successfully',
+            data: oCusomChallan,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const deleteCustomChallan = async (
+    challanId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await CustomChallan.findById(challanId);
+
+        if (!oChallan) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Challan not found',
+            };
+        }
+
+        if (
+            oChallan.customChallanOrg &&
+            oChallan.customChallanOrg._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        await CustomChallan.findByIdAndDelete(challanId);
+
+        if (oChallan.challanUrl) {
+            const key = extractS3Key(oChallan.challanUrl);
+            deleteFileFromS3(key);
+        }
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan deleted successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const listCustomChallanOrg = async (
+    req: Request,
+    start: number,
+    limit: number,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['challanOrg'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'id');
+
+        const nRecordsTotal = await CustomChallanOrg.countDocuments({
+            organization: organisation,
+        });
+
+        const customChallanOrgList = await CustomChallanOrg.find({
+            $and: [oData.oSearchData],
+            organization: organisation,
+        })
+            .select('_id challanOrg title')
+            .collation({ locale: 'en', strength: 1 })
+            .sort(oData.oSortingOrder)
+            .skip(start)
+            .limit(limit)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan organization list fetched successfully',
+            data: customChallanOrgList,
+            draw: req.body.draw,
+            recordsTotal: nRecordsTotal,
+            recordsFiltered: nRecordsTotal,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    }
+};
+
+export const listCustomChallan = async (
+    req: Request,
+    start: number,
+    limit: number,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['customerName'];
+
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const nRecordsTotal = await CustomChallan.countDocuments({
+            customChallanOrg: { $in: organisation },
+        });
+
+        const challanList = await CustomChallan.find({
+            $and: [oData.oSearchData],
+            customChallanOrg: { $in: organisation },
+        })
+            .select('challanNo customerName total challanUrl date')
+            .collation({ locale: 'en', strength: 1 })
+            .sort({ dCreatedAt: -1 })
+            .skip(start)
+            .limit(limit)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan list fetched successfully',
+            data: challanList,
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
             recordsFiltered: nRecordsTotal,

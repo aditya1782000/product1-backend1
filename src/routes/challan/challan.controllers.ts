@@ -2,14 +2,24 @@ import { Request, Response } from 'express';
 import {
     createChallan,
     createChallanOrganization,
+    createCustomChallan,
+    createCustomChallanOrganization,
     deleteChallan,
     deleteChallanOrganization,
+    deleteCustomChallan,
+    deleteCustomChallanOrgnization,
     editChallan,
     editChallanOrganization,
+    editCustomChallan,
+    editCustomChallanOrganization,
     listChallanOrgnaization,
     listChallans,
+    listCustomChallan,
+    listCustomChallanOrg,
     viewChallan,
     viewChallanOrganization,
+    viewCustomChallan,
+    viewCustomChallanOrganization,
 } from './challan.services';
 
 export const createChallanOrganizationControllers = async (
@@ -219,6 +229,291 @@ export const listChallanOrgnaizationControllers = async (
 
     return res.status(oResponse.statusCode).send({
         data: oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const createCustomChallanOrganizationControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const {
+        challanOrg,
+        title,
+        address,
+        gstNo,
+        panNo,
+        headerContent,
+        footerOne,
+        footerTwo,
+        footerThree,
+        footerFour,
+        footerFive,
+    } = req.body;
+
+    const oResponse = await createCustomChallanOrganization(
+        challanOrg,
+        title,
+        address,
+        gstNo,
+        panNo,
+        headerContent,
+        organization,
+        footerOne,
+        footerTwo,
+        footerThree,
+        footerFour,
+        footerFive,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        data: oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const createCustomChallanControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const {
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        dated,
+        items,
+        total,
+        partyCode,
+        nameOfTransport,
+        lrNo,
+        orderNo,
+        vehicleNo,
+    } = req.body;
+
+    const oResponse = await createCustomChallan(
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        dated,
+        items,
+        total,
+        organization,
+        partyCode,
+        nameOfTransport,
+        lrNo,
+        orderNo,
+        vehicleNo,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        data: oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const viewCustomChallanOrganizationControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const oResponse = await viewCustomChallanOrganization(organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const editCustomChallOrganizationControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const {
+        challanOrg,
+        title,
+        address,
+        gstNo,
+        panNo,
+        headerContent,
+        footerOne,
+        footerTwo,
+        footerThree,
+        footerFour,
+        footerFive,
+    } = req.body;
+
+    const oResponse = await editCustomChallanOrganization(
+        id,
+        organization,
+        challanOrg,
+        title,
+        address,
+        gstNo,
+        panNo,
+        headerContent,
+        footerOne,
+        footerTwo,
+        footerThree,
+        footerFour,
+        footerFive,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const deleteCustomChallanOrganizationControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await deleteCustomChallanOrgnization(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const viewCustomChallanControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await viewCustomChallan(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const editCustomChallanControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const {
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        dated,
+        items,
+        total,
+        partyCode,
+        nameOfTransport,
+        lrNo,
+        orderNo,
+        vehicleNo,
+    } = req.body;
+
+    const oResponse = await editCustomChallan(
+        id,
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        dated,
+        items,
+        total,
+        organization,
+        partyCode,
+        nameOfTransport,
+        lrNo,
+        orderNo,
+        vehicleNo,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const deleteCutomChallanControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const oResponse = await deleteCustomChallan(id, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const listCustomChallanOrgControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const offSet = Number(req.body.start);
+    const limit = Number(req.body.length);
+
+    const oResponse = await listCustomChallanOrg(
+        req,
+        offSet,
+        limit,
+        organization,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const listCustomChallanControllers = async (
+    req: Request,
+    res: Response,
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const offSet = Number(req.body.start);
+    const limit = Number(req.body.length);
+
+    const oResponse = await listCustomChallan(req, offSet, limit, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
         statusCode: undefined,
     });
 };
