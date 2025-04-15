@@ -729,17 +729,16 @@ export const createCustomChallanValidators = [
     body('partyCode')
         .optional()
         .isString()
-        .withMessage('Party Code must be a string')
-        .bail()
-        .isLength({ min: 3, max: 100 })
-        .withMessage('Party Code must be 3 to 100 characters long'),
+        .withMessage('Party Code must be a string'),
 
     body('nameOfTransport')
         .optional()
         .isString()
         .withMessage('Name of Transport must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .withMessage('Name of Transport must be a string')
+        .bail()
+        .isLength({ min: 1, max: 100 })
         .withMessage('Name of Transport must be 3 to 100 characters long'),
 
     body('lrNo')
@@ -747,7 +746,7 @@ export const createCustomChallanValidators = [
         .isString()
         .withMessage('Lr No must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Lr No must be 3 to 100 characters long'),
 
     body('orderNo')
@@ -755,7 +754,7 @@ export const createCustomChallanValidators = [
         .isString()
         .withMessage('Order No must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Order No must be 3 to 100 characters long'),
 ];
 
@@ -815,7 +814,7 @@ export const editCustomChallanValidators = [
         .isString()
         .withMessage('Party Code must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Party Code must be 3 to 100 characters long'),
 
     body('nameOfTransport')
@@ -823,7 +822,7 @@ export const editCustomChallanValidators = [
         .isString()
         .withMessage('Name of Transport must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Name of Transport must be 3 to 100 characters long'),
 
     body('lrNo')
@@ -831,7 +830,7 @@ export const editCustomChallanValidators = [
         .isString()
         .withMessage('Lr No must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Lr No must be 3 to 100 characters long'),
 
     body('orderNo')
@@ -839,6 +838,6 @@ export const editCustomChallanValidators = [
         .isString()
         .withMessage('Order No must be a string')
         .bail()
-        .isLength({ min: 3, max: 100 })
+        .isLength({ min: 1, max: 100 })
         .withMessage('Order No must be 3 to 100 characters long'),
 ];
