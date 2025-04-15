@@ -23,6 +23,7 @@ interface DeliverySlip {
     footer?: string;
     note?: string;
     logoPath?: string;
+    fraightAndTransport?: number;
 }
 
 class PDFHelper {
@@ -34,6 +35,7 @@ class PDFHelper {
     private readonly maxItemsPerPage = 8;
     private items?: DeliverySlip['items'];
     private total?: number;
+    private freightAndTransport?: number;
 
     constructor(doc: PDFKit.PDFDocument) {
         this.doc = doc;
@@ -46,6 +48,7 @@ class PDFHelper {
             (sum, item) => sum + Number(item.qty),
             0,
         );
+        this.freightAndTransport = data.fraightAndTransport;
         for (let page = 0; page < totalPages; page++) {
             if (page > 0) {
                 this.doc.addPage();
@@ -71,6 +74,7 @@ class PDFHelper {
                     totalPages > 1
                         ? `${data.slipNo} (Page ${page + 1}/${totalPages})`
                         : data.slipNo,
+                freightAndTransport: data.fraightAndTransport,
             };
 
             this.generateSingleSlip(pageData, 0, page === totalPages - 1);
@@ -109,6 +113,7 @@ class PDFHelper {
             )
             .setItems(data.items)
             .setTotal(data.total)
+            .setFreightAndTransport(data.fraightAndTransport)
             .drawTable(xOffset, isLastPage)
             .drawFooter(
                 xOffset,
@@ -118,6 +123,8 @@ class PDFHelper {
                 data.vehicleNo || '',
             )
             .drawWatermark(xOffset, data.logoPath);
+
+        return this;
     }
 
     private drawOuterBox(xOffset: number) {
@@ -129,6 +136,11 @@ class PDFHelper {
                 this.pageHeight - this.margin * 2,
             )
             .stroke();
+        return this;
+    }
+
+    private setFreightAndTransport(freightAndTransport?: number) {
+        this.freightAndTransport = freightAndTransport;
         return this;
     }
 
@@ -319,20 +331,29 @@ class PDFHelper {
             end: this.margin + xOffset + this.slipWidth,
         };
 
+        const particularsWidth = columns.beforeQty - columns.start - 20;
+        const qtyWidth = columns.beforeRate - columns.beforeQty;
+        const rateWidth = columns.beforeTotal - columns.beforeRate;
+        const totalWidth = columns.end - columns.beforeTotal;
+
+        const qtyCenter = columns.beforeQty + qtyWidth / 2;
+        const rateCenter = columns.beforeRate + rateWidth / 2;
+        const totalCenter = columns.beforeTotal + totalWidth / 2;
+
         this.doc
             .fontSize(12)
             .text('Particulars', columns.start + 10, tableTop + 10)
-            .text('Qty.', columns.beforeQty + 10, tableTop + 10, {
-                width: 40,
-                align: 'right',
+            .text('Qty.', qtyCenter - 15, tableTop + 10, {
+                width: 30,
+                align: 'center',
             })
-            .text('Rate', columns.beforeRate + 10, tableTop + 10, {
-                width: 40,
-                align: 'right',
+            .text('Rate', rateCenter - 15, tableTop + 10, {
+                width: 30,
+                align: 'center',
             })
-            .text('Total', columns.beforeTotal + 10, tableTop + 10, {
+            .text('Total', totalCenter - 20, tableTop + 10, {
                 width: 40,
-                align: 'right',
+                align: 'center',
             });
 
         this.drawHorizontalLine(tableTop + 30, xOffset);
@@ -343,7 +364,7 @@ class PDFHelper {
 
         if (this.items && this.items.length > 0) {
             let currentY = tableTop + 40;
-            const rowHeight = 25;
+            const baseRowHeight = 25;
 
             this.items.forEach((item) => {
                 const itemTotal = item.qty * item.rate;
@@ -352,39 +373,98 @@ class PDFHelper {
                     ? `${item.particulars} (${item.description})`
                     : item.particulars;
 
+                const textOptions = {
+                    width: particularsWidth,
+                    align: 'left' as const,
+                };
+
+                const textHeight = this.doc.heightOfString(
+                    particularsText,
+                    textOptions,
+                );
+                const rowHeight = Math.max(baseRowHeight, textHeight + 10);
+
                 this.doc
                     .fontSize(10)
-                    .text(particularsText, columns.start + 10, currentY)
                     .text(
-                        item.qty.toString(),
-                        columns.beforeQty + 10,
+                        particularsText,
+                        columns.start + 10,
                         currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
-                    )
-                    .text(
-                        item.rate.toString(),
-                        columns.beforeRate + 10,
-                        currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
-                    )
-                    .text(
-                        itemTotal.toFixed(2),
-                        columns.beforeTotal + 10,
-                        currentY,
-                        {
-                            width: 40,
-                            align: 'right',
-                        },
+                        textOptions,
                     );
+
+                if (item.qty > 0 || item.rate > 0) {
+                    this.doc
+                        .text(
+                            `${item.qty.toString()}.000`,
+                            qtyCenter - 15,
+                            currentY,
+                            {
+                                width: 40,
+                                align: 'center',
+                            },
+                        )
+                        .text(
+                            `${item.rate.toString()}.00`,
+                            rateCenter - 15,
+                            currentY,
+                            {
+                                width: 40,
+                                align: 'center',
+                            },
+                        )
+                        .text(
+                            itemTotal.toFixed(2),
+                            totalCenter - 20,
+                            currentY,
+                            {
+                                width: 40,
+                                align: 'center',
+                            },
+                        );
+                }
 
                 currentY += rowHeight;
             });
+
+            if (
+                isLastPage &&
+                typeof this.freightAndTransport === 'number' &&
+                this.freightAndTransport > 0
+            ) {
+                const freightText = 'Fraight and Labour Exp.';
+                const textOptions = {
+                    width: particularsWidth,
+                    align: 'left' as const,
+                };
+
+                const textHeight = this.doc.heightOfString(
+                    freightText,
+                    textOptions,
+                );
+                const rowHeight = Math.max(baseRowHeight, textHeight + 10);
+
+                this.doc
+                    .fontSize(10)
+                    .text(
+                        freightText,
+                        columns.start + 10,
+                        currentY,
+                        textOptions,
+                    );
+
+                this.doc.text(
+                    this.freightAndTransport.toFixed(2),
+                    totalCenter - 20,
+                    currentY,
+                    {
+                        width: 40,
+                        align: 'center',
+                    },
+                );
+
+                currentY += rowHeight;
+            }
         }
 
         const totalY = tableBottom - 30;
@@ -401,19 +481,17 @@ class PDFHelper {
         } else {
             this.doc
                 .fontSize(10)
+                .text(this.totalQty.toString(), qtyCenter - 15, totalY + 10, {
+                    width: 30,
+                    align: 'center',
+                })
                 .text(
-                    this.totalQty.toString(),
-                    columns.beforeQty + 10,
-                    totalY + 10,
-                    { width: 40, align: 'right' },
-                )
-                .text(
-                    `₹ ${this.total?.toFixed(2)}`,
-                    columns.beforeTotal + 10,
+                    `${this.total?.toFixed(2)}`,
+                    totalCenter - 20,
                     totalY + 10,
                     {
                         width: 40,
-                        align: 'right',
+                        align: 'center',
                     },
                 );
         }

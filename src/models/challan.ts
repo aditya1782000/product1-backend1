@@ -19,20 +19,18 @@ export interface IChallan extends Document {
     challanUrl: string;
     dCreatedAt?: Date;
     customerMobileNo: number;
+    fraightAndTransport: number;
 }
 
 const challanItemSchema: Schema<IChallanItem> = new Schema<IChallanItem>({
     particulars: {
         type: String,
-        required: true,
     },
     qty: {
         type: Number,
-        required: true,
     },
     rate: {
         type: Number,
-        required: true,
     },
     description: String,
 });
@@ -69,6 +67,7 @@ export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
             required: true,
         },
         challanUrl: String,
+        fraightAndTransport: Number,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );
