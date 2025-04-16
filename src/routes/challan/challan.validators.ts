@@ -754,7 +754,7 @@ export const createCustomChallanValidators = [
         .isString()
         .withMessage('Order No must be a string')
         .bail()
-        .isLength({ min: 1, max: 100 })
+        .isLength({ min: 0, max: 100 })
         .withMessage('Order No must be 3 to 100 characters long'),
 ];
 
