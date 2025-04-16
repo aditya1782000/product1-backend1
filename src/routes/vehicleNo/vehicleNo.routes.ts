@@ -21,7 +21,7 @@ router.post(
 
 router.get(
     '/admin/vehicle/no/list',
-    isAdmin('Products', 'A'),
+    isAdmin('Challan', 'A'),
     listVehicleNosControllers,
 );
 
