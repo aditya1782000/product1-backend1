@@ -738,7 +738,7 @@ export const createCustomChallanValidators = [
         .bail()
         .withMessage('Name of Transport must be a string')
         .bail()
-        .isLength({ min: 1, max: 100 })
+        .isLength({ min: 0, max: 100 })
         .withMessage('Name of Transport must be 3 to 100 characters long'),
 
     body('lrNo')
@@ -746,7 +746,7 @@ export const createCustomChallanValidators = [
         .isString()
         .withMessage('Lr No must be a string')
         .bail()
-        .isLength({ min: 1, max: 100 })
+        .isLength({ min: 0, max: 100 })
         .withMessage('Lr No must be 3 to 100 characters long'),
 
     body('orderNo')
