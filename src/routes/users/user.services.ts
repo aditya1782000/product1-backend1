@@ -8,6 +8,16 @@ import { AsyncResponseType } from '../../types/async';
 import Organisation from '../../models/organisation';
 import dataTable from '../../utils/dataTable';
 import enums from '../../../enum';
+import { deleteFileFromS3, extractS3Key, uploadFileToS3 } from '../../utils/aws';
+import fs from 'fs';
+
+const deleteTempFile = (filePath: string) => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error(`Error deleting file: ${filePath}`, err);
+        }
+    });
+};
 
 interface Permission {
     eKey: string;
@@ -767,7 +777,7 @@ export const userProfile = async (
 ): Promise<AsyncResponseType> => {
     try {
         const oUser = await User.findById(userId)
-            .select('firstName lastName email phoneNumber')
+            .select('firstName lastName email phoneNumber profilePic')
             .lean();
 
         if (!oUser) {
@@ -848,5 +858,71 @@ export const editUserProfile = async (
             success: false,
             message: 'Something went wrong',
         };
+    }
+};
+
+export const setProfilePic = async (
+    req: Request,
+    userId: string,
+): Promise<AsyncResponseType> => {
+    let tempFilePath: string | undefined;
+    try {
+        const oUser = await User.findById(userId);
+
+        if (!oUser) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
+
+        let profileImageUrl: string | undefined;
+
+        if (req.file) {
+            if (oUser.profilePic) {
+                const key = extractS3Key(oUser.profilePic);
+                deleteFileFromS3(key);
+            }
+            tempFilePath = req.file.path;
+            const uploadData = await uploadFileToS3(
+                req.file,
+                `${Date.now().toString()}`,
+                'profile',
+            );
+            profileImageUrl = uploadData.Location;
+        }
+
+        await User.findByIdAndUpdate(
+            userId,
+            {
+                profilePic: profileImageUrl,
+            },
+            { new: true },
+        );
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Profile pic Updated successfully',
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return {
+                statusCode: 500,
+                success: false,
+                message: error.message || 'Something went wrong',
+            };
+        }
+
+        return {
+            statusCode: 500,
+            success: false,
+            message: 'Something went wrong',
+        };
+    } finally {
+        if (tempFilePath) {
+            deleteTempFile(tempFilePath);
+        }
     }
 };

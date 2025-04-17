@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     addUsersControlller,
+    setProfilePicControllers,
     userDeleteController,
     userEditController,
     userPermissionsController,
@@ -78,6 +79,13 @@ router.patch(
     userProfileEditValidators,
     validateOnlyAdmin(),
     userProfileUpdateController,
+);
+
+router.patch(
+    '/admin/profile/pic/upload',
+    uploader.uploadFile('image'),
+    validateOnlyAdmin(),
+    setProfilePicControllers,
 );
 
 export default router;

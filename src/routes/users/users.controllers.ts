@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
     addUsers,
     editUserProfile,
+    setProfilePic,
     userDelete,
     userEdit,
     userPermissions,
@@ -212,6 +213,18 @@ export const userProfileUpdateController = async (
         email,
         phoneNumber,
     );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const setProfilePicControllers = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).userId;
+
+    const oResponse = await setProfilePic(req, userId);
 
     return res.status(oResponse.statusCode).send({
         ...oResponse,

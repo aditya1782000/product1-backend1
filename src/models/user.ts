@@ -24,6 +24,7 @@ export interface IUser extends Document {
     otp?: number;
     otpExpires?: number;
     fcmToken?: string;
+    profilePic?: string;
 }
 
 export interface IPermission extends Document {
@@ -91,6 +92,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         otp: Number,
         otpExpires: Number,
         fcmToken: String,
+        profilePic: String,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );
