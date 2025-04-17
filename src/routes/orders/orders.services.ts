@@ -1075,31 +1075,7 @@ export const deleteOrder = async (
             };
         }
 
-        if (oOrder.status === 'inApproval' || oOrder.status === 'rejected') {
-            const deletedOrder = await Order.findByIdAndDelete(oOrder._id);
-
-            if (!deletedOrder) {
-                return {
-                    statusCode: 400,
-                    success: false,
-                    message: 'Failed to delete order',
-                };
-            }
-        } else {
-            if (oOrder.status === 'approved') {
-                return {
-                    statusCode: 400,
-                    success: false,
-                    message: 'Order is already approved',
-                };
-            } else if (oOrder.status === 'delivered') {
-                return {
-                    statusCode: 400,
-                    success: false,
-                    message: 'Order is already delivered',
-                };
-            }
-        }
+        await Order.findByIdAndDelete(oOrder._id);
 
         return {
             statusCode: 200,
