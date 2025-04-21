@@ -689,6 +689,7 @@ export const verifyCustomerOtp = async (
                 role: oUser.role || '',
                 organization: oUser.organization || '',
                 _id: oUser._id || '',
+                profilePic: oUser.profilePic || '',
             },
         };
     } catch (error: unknown) {

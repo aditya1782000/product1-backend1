@@ -8,7 +8,11 @@ import { AsyncResponseType } from '../../types/async';
 import Organisation from '../../models/organisation';
 import dataTable from '../../utils/dataTable';
 import enums from '../../../enum';
-import { deleteFileFromS3, extractS3Key, uploadFileToS3 } from '../../utils/aws';
+import {
+    deleteFileFromS3,
+    extractS3Key,
+    uploadFileToS3,
+} from '../../utils/aws';
 import fs from 'fs';
 
 const deleteTempFile = (filePath: string) => {
@@ -893,7 +897,7 @@ export const setProfilePic = async (
             profileImageUrl = uploadData.Location;
         }
 
-        await User.findByIdAndUpdate(
+        const profilePic = await User.findByIdAndUpdate(
             userId,
             {
                 profilePic: profileImageUrl,
@@ -904,7 +908,8 @@ export const setProfilePic = async (
         return {
             statusCode: 200,
             success: true,
-            message: 'Profile pic Updated successfully',
+            message: 'Profile Picture Updated successfully',
+            data: profilePic?.profilePic,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
