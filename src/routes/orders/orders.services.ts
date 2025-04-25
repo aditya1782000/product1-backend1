@@ -1112,6 +1112,7 @@ export const customerList = async (
             $and: [oData.oSearchData],
             role: 'customer',
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
         })
             .select(
                 '_id firstName lastName phoneNumber type addressLineOne addressLineTwo city state pinCode',
@@ -1153,6 +1154,7 @@ export const productsList = async (
         const products = await Product.find({
             $and: [oData.oSearchData],
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
         })
             .select('_id productName productImageUrl price')
             .lean();

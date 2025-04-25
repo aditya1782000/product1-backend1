@@ -25,6 +25,7 @@ export interface IUser extends Document {
     otpExpires?: number;
     fcmToken?: string;
     profilePic?: string;
+    isDeleted?: boolean;
 }
 
 export interface IPermission extends Document {
@@ -52,7 +53,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         },
         email: {
             type: String,
-            unique: true,
+            // unique: true,
         },
         phoneNumber: {
             type: Number,
@@ -93,6 +94,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         otpExpires: Number,
         fcmToken: String,
         profilePic: String,
+        isDeleted: Boolean,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );

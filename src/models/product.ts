@@ -20,6 +20,7 @@ export interface IProduct extends Document {
     price: IAreaPrice[];
     organization: mongoose.Types.ObjectId;
     isActive?: boolean;
+    isDeleted?: boolean;
 }
 
 export const quantityPriceSchema: Schema<IQuantityPrice> =
@@ -70,6 +71,7 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>(
             type: Boolean,
             default: true,
         },
+        isDeleted: Boolean,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );

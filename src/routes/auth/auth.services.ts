@@ -14,7 +14,15 @@ export const userLogin = async (
     password: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email, isDeleted: { $ne: true } });
+
+        if (oUser?.role === 'customer') {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
 
         if (!oUser) {
             return {
@@ -107,10 +115,21 @@ export const verifyOtp = async (
     try {
         let token: string = '';
 
-        const oUser = await User.findOne({ email }).populate(
+        const oUser = await User.findOne({
+            email,
+            isDeleted: { $ne: true },
+        }).populate(
             'organization',
             'organisationName addressLineone addressLineTwo city state pinCode',
         );
+
+        if (oUser?.role === 'customer') {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
 
         if (!oUser) {
             return {
@@ -189,7 +208,15 @@ export const verifyOtp = async (
 
 export const resendOtp = async (email: string): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email, isDeleted: { $ne: true } });
+
+        if (oUser?.role === 'customer') {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'User not found',
+            };
+        }
 
         if (!oUser) {
             return {
@@ -256,7 +283,7 @@ export const userPasswordReset = async (
     email: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email, isDeleted: { $ne: true } });
 
         if (!oUser) {
             return {
@@ -328,6 +355,7 @@ export const userResetPasswordGet = async (
         const oUser = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() },
+            isDeleted: { $ne: true },
         });
 
         if (!oUser) {
@@ -385,6 +413,7 @@ export const userReserPasswordPost = async (
         const oUser = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() },
+            isDeleted: { $ne: true },
         });
 
         if (!oUser) {
@@ -462,7 +491,10 @@ export const userChangePassword = async (
     confirmPassword: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findById(userId);
+        const oUser = await User.findOne({
+            _id: userId,
+            isDeleted: { $ne: true },
+        });
 
         if (!oUser) {
             return {
@@ -523,7 +555,7 @@ export const customerLogin = async (
     password: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email, isDeleted: { $ne: true } });
 
         if (!oUser) {
             return {
@@ -625,7 +657,10 @@ export const verifyCustomerOtp = async (
     try {
         let token: string = '';
 
-        const oUser = await User.findOne({ email }).populate(
+        const oUser = await User.findOne({
+            email,
+            isDeleted: { $ne: true },
+        }).populate(
             'organization',
             'organisationName gstNumber addressLineone addressLineTwo city state pinCode',
         );
@@ -713,7 +748,7 @@ export const resendCustomerOtp = async (
     email: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findOne({ email });
+        const oUser = await User.findOne({ email, isDeleted: { $ne: true } });
 
         if (!oUser) {
             return {

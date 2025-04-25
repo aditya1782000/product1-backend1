@@ -114,11 +114,13 @@ export const listProducts = async (
 
         const nRecordsTotal = await Product.countDocuments({
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
         });
 
         const productList = await Product.find({
             $and: [oData.oSearchData],
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
         })
             .select('productName description isActive')
             .collation({ locale: 'en', strength: 1 })
@@ -161,7 +163,10 @@ export const productView = async (
         const selectedFields =
             'productName description howToUse productImageUrl unitType price isActive organization';
 
-        const oProduct = await Product.findById({ _id: productId })
+        const oProduct = await Product.findOne({
+            _id: productId,
+            isDeleted: { $ne: true },
+        })
             .select(selectedFields)
             .lean();
 
@@ -212,10 +217,10 @@ export const productToggleStatus = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const oProduct = await Product.findById({ _id: productId }).populate(
-            'organization',
-            '_id',
-        );
+        const oProduct = await Product.findOne({
+            _id: productId,
+            isDeleted: { $ne: true },
+        }).populate('organization', '_id');
 
         if (!oProduct) {
             return {
@@ -286,10 +291,10 @@ export const productEdit = async (
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
-        const oProduct = await Product.findById({ _id: productId }).populate(
-            'organization',
-            '_id',
-        );
+        const oProduct = await Product.findOne({
+            _id: productId,
+            isDeleted: { $ne: true },
+        }).populate('organization', '_id');
 
         if (!oProduct) {
             return {
@@ -374,9 +379,10 @@ export const productDelete = async (
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     try {
-        const oProduct = await Product.findById({ _id: productId }).select(
-            'organization productImageUrl',
-        );
+        const oProduct = await Product.findOne({
+            _id: productId,
+            isDeleted: { $ne: true },
+        }).select('organization productImageUrl');
 
         if (!oProduct) {
             return {
@@ -397,12 +403,9 @@ export const productDelete = async (
             };
         }
 
-        if (oProduct.productImageUrl) {
-            const key = extractS3Key(oProduct.productImageUrl);
-            deleteFileFromS3(key);
-        }
-
-        const deleteProduct = await Product.findByIdAndDelete(productId);
+        const deleteProduct = await Product.findByIdAndUpdate(productId, {
+            isDeleted: true,
+        });
 
         if (!deleteProduct) {
             return {
@@ -445,6 +448,7 @@ export const customerProductList = async (
             {
                 organization: { $in: organisation },
                 isActive: true,
+                isDeleted: { $ne: true },
                 'price.area': pinCode,
             },
             {
@@ -499,6 +503,7 @@ export const customerProductView = async (
                 _id: productId,
                 organization: { $in: organisation },
                 isActive: true,
+                isDeleted: { $ne: true },
             },
             {
                 price: {

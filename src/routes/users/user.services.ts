@@ -58,7 +58,10 @@ const handleSubAdminCreation = async (
     pinCode: number,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
-    const exisitngUser = await User.findOne({ email });
+    const exisitngUser = await User.findOne({
+        email,
+        isDeleted: { $ne: true },
+    });
 
     if (exisitngUser) {
         return {
@@ -140,7 +143,10 @@ const handleCutomerCreation = async (
     orgnaizationName: string,
     gstNumber: string,
 ): Promise<AsyncResponseType> => {
-    const exisitngUser = await User.findOne({ email });
+    const exisitngUser = await User.findOne({
+        email,
+        isDeleted: { $ne: true },
+    });
 
     if (exisitngUser) {
         return {
@@ -213,7 +219,10 @@ const handleEmployeeCreation = async (
     role: string,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
-    const exisitngUser = await User.findOne({ email });
+    const exisitngUser = await User.findOne({
+        email,
+        isDeleted: { $ne: true },
+    });
 
     if (exisitngUser) {
         return {
@@ -379,12 +388,14 @@ export const usersList = async (
 
         const nRecordsTotal = await User.countDocuments({
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
             role,
         });
 
         const userList = await User.find({
             $and: [oData.oSearchData],
             organization: { $in: organisation },
+            isDeleted: { $ne: true },
             role,
         })
             .select(selectedFields)
@@ -428,8 +439,9 @@ export const userView = async (
         const selectedFields =
             'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber';
 
-        const oUser = await User.findById({
+        const oUser = await User.findOne({
             _id: userId,
+            isDeleted: { $ne: true },
         })
             .populate('organization', '_id')
             .select(selectedFields)
@@ -484,10 +496,10 @@ export const userToggleStatus = async (
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findById({ _id: userId }).populate(
-            'organization',
-            '_id',
-        );
+        const oUser = await User.findOne({
+            _id: userId,
+            isDeleted: { $ne: true },
+        }).populate('organization', '_id');
 
         if (!oUser) {
             return {
@@ -552,10 +564,16 @@ const updateUser = async (
     updateUser: UpdateUserOption,
     organisation: mongoose.Types.ObjectId[],
 ): Promise<AsyncResponseType> => {
-    const oUser = await User.findById(userId).lean();
+    const oUser = await User.findOne({
+        _id: userId,
+        isDeleted: { $ne: true },
+    }).lean();
 
     if (updateUser.email && updateUser.email !== oUser?.email) {
-        const emailInUse = await User.findOne({ email: updateUser.email });
+        const emailInUse = await User.findOne({
+            email: updateUser.email,
+            isDeleted: { $ne: true },
+        });
         if (emailInUse) {
             return {
                 statusCode: 409,
@@ -715,7 +733,9 @@ export const userDelete = async (
             };
         }
 
-        const deleteUser = await User.findByIdAndDelete(userId);
+        const deleteUser = await User.findByIdAndUpdate(userId, {
+            isDeleted: true,
+        });
 
         if (!deleteUser) {
             return {
@@ -780,7 +800,10 @@ export const userProfile = async (
     userId: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const oUser = await User.findById(userId)
+        const oUser = await User.findOne({
+            _id: userId,
+            isDeleted: { $ne: true },
+        })
             .select('firstName lastName email phoneNumber profilePic')
             .lean();
 
@@ -871,7 +894,10 @@ export const setProfilePic = async (
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
-        const oUser = await User.findById(userId);
+        const oUser = await User.findOne({
+            _id: userId,
+            isDeleted: { $ne: true },
+        });
 
         if (!oUser) {
             return {
