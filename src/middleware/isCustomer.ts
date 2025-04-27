@@ -39,9 +39,10 @@ export const isCustomer = () => {
                 }
             }
 
-            const oUser = await User.findById(decoded.id).select(
-                'organization role isActive pinCode orgnaizationName',
-            );
+            const oUser = await User.findOne({
+                _id: decoded.id,
+                isDeleted: { $ne: true },
+            }).select('organization role isActive pinCode orgnaizationName');
 
             if (!oUser) {
                 return res.status(401).json({

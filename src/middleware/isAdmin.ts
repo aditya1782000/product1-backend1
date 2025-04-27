@@ -42,9 +42,10 @@ export const isAdmin = (
                 }
             }
 
-            const oUser = await User.findById(decoded.id).select(
-                'organization isActive',
-            );
+            const oUser = await User.findOne({
+                _id: decoded.id,
+                isDeleted: { $ne: true },
+            }).select('organization isActive');
 
             if (!oUser) {
                 return res.status(401).json({

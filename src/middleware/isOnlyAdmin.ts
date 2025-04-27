@@ -36,7 +36,10 @@ export const validateOnlyAdmin = (bSuper: boolean = false) => {
                 }
             }
 
-            const oUser = await User.findById(decoded.id);
+            const oUser = await User.findOne({
+                _id: decoded.id,
+                isDeleted: { $ne: true },
+            });
 
             if (!oUser) {
                 return res.status(401).json({
