@@ -17,6 +17,7 @@ import statement from './statement/statement.routes';
 import deilveryAddress from './deliveryAddress/deliveryAddress.routes';
 import vehicleNo from './vehicleNo/vehicleNo.routes';
 import typeOfPacking from './typeOfPacking/typeOfPacking.routes';
+import productCategory from './productCategory/productCategory.routes';
 
 const router = express.Router();
 
@@ -39,6 +40,7 @@ router.use('/', [
     deilveryAddress,
     vehicleNo,
     typeOfPacking,
+    productCategory,
 ]);
 
 export default router;

@@ -6,9 +6,14 @@ export interface IQuantityPrice extends Document {
     price: number;
 }
 
+export interface ICustomerTypePrice extends Document {
+    customerType: string;
+    prices: IQuantityPrice[];
+}
+
 export interface IAreaPrice extends Document {
     area: string;
-    prices: IQuantityPrice[];
+    customerTypePrices: ICustomerTypePrice[];
 }
 
 export interface IProduct extends Document {
@@ -18,6 +23,7 @@ export interface IProduct extends Document {
     productImageUrl: string;
     unitType: string;
     price: IAreaPrice[];
+    category: string;
     organization: mongoose.Types.ObjectId;
     isActive?: boolean;
     isDeleted?: boolean;
@@ -35,12 +41,18 @@ export const quantityPriceSchema: Schema<IQuantityPrice> =
         },
     });
 
+export const customerTypePriceSchema: Schema<ICustomerTypePrice> =
+    new Schema<ICustomerTypePrice>({
+        customerType: String,
+        prices: [quantityPriceSchema],
+    });
+
 export const areaPriceSchema: Schema<IAreaPrice> = new Schema<IAreaPrice>({
     area: {
         type: String,
         required: true,
     },
-    prices: [quantityPriceSchema],
+    customerTypePrices: [customerTypePriceSchema],
 });
 
 export const productSchema: Schema<IProduct> = new Schema<IProduct>(
@@ -63,6 +75,10 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>(
             // enum: data.unitType,
         },
         price: [areaPriceSchema],
+        category: {
+            type: String,
+            required: true,
+        },
         organization: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'organisation',

@@ -3,13 +3,15 @@ import { body, param } from 'express-validator';
 export const createTypeofPackingValidators = [
     body('typeOfPacking')
         .notEmpty()
-        .withMessage('Unit Type is required')
+        .withMessage('Type of Packing is required')
         .bail()
         .isString()
-        .withMessage('Unit Type must be a string')
+        .withMessage('Type of Packing must be a string')
         .bail()
         .isLength({ min: 1, max: 25 })
-        .withMessage('Unit Type must be at least 1 to 25 characters long'),
+        .withMessage(
+            'Type of Packing must be at least 1 to 25 characters long',
+        ),
 ];
 
 export const deleteTypeOfPackingValidators = [

@@ -42,7 +42,9 @@ export const isCustomer = () => {
             const oUser = await User.findOne({
                 _id: decoded.id,
                 isDeleted: { $ne: true },
-            }).select('organization role isActive pinCode orgnaizationName');
+            }).select(
+                'organization role isActive pinCode orgnaizationName type',
+            );
 
             if (!oUser) {
                 return res.status(401).json({
@@ -69,6 +71,7 @@ export const isCustomer = () => {
             req.sEmail = oUser.email;
             (req as any).sOrganization = oUser.organization;
             (req as any).pinCode = oUser.pinCode;
+            (req as any).type = oUser.type;
             (req as any).sOrgnaizationName = oUser.orgnaizationName;
 
             const errors = validationResult(req);

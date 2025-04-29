@@ -14,9 +14,8 @@ export const addProductsController = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { productName, description, howToUse, unitType } = req.body;
+    const { productName, description, howToUse, unitType, category } = req.body;
 
-    // This need to change when connecting to the React(This is for post man only)
     let price;
     if (typeof req.body.price === 'string') {
         try {
@@ -38,6 +37,7 @@ export const addProductsController = async (req: Request, res: Response) => {
         howToUse,
         unitType,
         price,
+        category,
         organization,
     );
 
@@ -95,7 +95,7 @@ export const editProductController = async (req: Request, res: Response) => {
     const organization = (req as any).sOrganization;
 
     const { id } = req.params;
-    const { productName, description, howToUse, unitType } = req.body;
+    const { productName, description, howToUse, unitType, category } = req.body;
 
     let price;
     if (typeof req.body.price === 'string') {
@@ -119,6 +119,7 @@ export const editProductController = async (req: Request, res: Response) => {
         description,
         howToUse,
         unitType,
+        category,
         price,
     );
 
@@ -152,12 +153,16 @@ export const customerProductListController = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pinCode = (req as any).pinCode;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const type = (req as any).type;
+
     const offSet = Number(req.query.start);
     const limit = Number(req.query.length);
 
     const oResponse = await customerProductList(
         organization,
         pinCode,
+        type,
         offSet,
         limit,
     );

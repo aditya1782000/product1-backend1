@@ -15,9 +15,14 @@ interface QuantityPrice {
     price: number;
 }
 
+interface CustomerTypePrice {
+    customerType: string;
+    prices: QuantityPrice[];
+}
+
 interface AreaPrice {
     area: string;
-    prices: QuantityPrice[];
+    customerTypePrices: CustomerTypePrice[];
 }
 
 const deleteTempFile = (filePath: string) => {
@@ -35,6 +40,7 @@ export const addProduct = async (
     howToUse: string,
     unitType: string,
     price: AreaPrice[],
+    category: string,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
@@ -71,6 +77,7 @@ export const addProduct = async (
             productImageUrl,
             unitType,
             price,
+            category,
             organization: organisation,
         });
 
@@ -122,7 +129,7 @@ export const listProducts = async (
             organization: { $in: organisation },
             isDeleted: { $ne: true },
         })
-            .select('productName description isActive')
+            .select('productName description isActive category')
             .collation({ locale: 'en', strength: 1 })
             .sort(oData.oSortingOrder)
             .skip(start)
@@ -161,7 +168,7 @@ export const productView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'productName description howToUse productImageUrl unitType price isActive organization';
+            'productName description howToUse productImageUrl unitType price isActive organization category';
 
         const oProduct = await Product.findOne({
             _id: productId,
@@ -287,6 +294,7 @@ export const productEdit = async (
     description?: string,
     howToUse?: string,
     unitType?: string,
+    category?: string,
     price?: AreaPrice[],
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
@@ -338,6 +346,7 @@ export const productEdit = async (
             productImageUrl,
             unitType,
             price,
+            category,
         });
 
         if (!updateProduct) {
@@ -440,6 +449,7 @@ export const productDelete = async (
 export const customerProductList = async (
     organisation: mongoose.Types.ObjectId,
     pinCode: number,
+    customerType: string,
     start: number,
     limit: number,
 ): Promise<AsyncResponseType> => {
@@ -449,13 +459,16 @@ export const customerProductList = async (
                 organization: { $in: organisation },
                 isActive: true,
                 isDeleted: { $ne: true },
-                'price.area': pinCode,
+                'price.area': pinCode.toString(),
             },
             {
-                'price.$': 1,
+                productName: 1,
+                description: 1,
+                howToUse: 1,
+                productImageUrl: 1,
+                price: 1,
             },
         )
-            .select('productName description howToUse productImageUrl')
             .skip(start)
             .limit(limit)
             .sort({ dCreatedAt: 1 })
@@ -469,11 +482,64 @@ export const customerProductList = async (
             };
         }
 
+        const processedProducts = products
+            .map((product) => {
+                const areaPrice = product.price.find(
+                    (p) => p.area === pinCode.toString(),
+                );
+
+                if (!areaPrice) {
+                    return null;
+                }
+
+                if (
+                    !areaPrice.customerTypePrices ||
+                    !Array.isArray(areaPrice.customerTypePrices)
+                ) {
+                    return null;
+                }
+
+                const customerTypePrice = areaPrice.customerTypePrices.find(
+                    (ctp) => ctp.customerType === customerType,
+                );
+
+                if (
+                    !customerTypePrice ||
+                    !customerTypePrice.prices ||
+                    !Array.isArray(customerTypePrice.prices)
+                ) {
+                    return null;
+                }
+
+                return {
+                    _id: product._id,
+                    productName: product.productName,
+                    description: product.description,
+                    howToUse: product.howToUse,
+                    productImageUrl: product.productImageUrl,
+                    price: [
+                        {
+                            area: areaPrice.area,
+                            prices: customerTypePrice.prices,
+                        },
+                    ],
+                };
+            })
+            .filter((product) => product !== null);
+
+        if (!processedProducts.length) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'No products found for the specified customer type',
+            };
+        }
+
         return {
             statusCode: 200,
             success: true,
             message: 'Products fetched successfully',
-            data: products,
+            data: processedProducts,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

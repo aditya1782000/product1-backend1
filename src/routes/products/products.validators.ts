@@ -43,20 +43,36 @@ export const addProductValidators = [
         .withMessage('Area is required')
         .bail()
         .isString()
-        .withMessage('area must be a string'),
+        .withMessage('Area must be a string'),
 
-    body('price.*.prices')
+    body('price.*.customerTypePrices')
         .isArray({ min: 1 })
-        .withMessage('Price must be an array and cannot be empty'),
+        .withMessage(
+            'Customer type prices must be an array and cannot be empty',
+        ),
 
-    body('price.*.prices.*.quantityType')
+    body('price.*.customerTypePrices.*.customerType')
         .notEmpty()
-        .withMessage('Quantity Type IS required')
+        .withMessage('Customer type is required')
         .bail()
         .isString()
-        .withMessage('Quantity Type Is required'),
+        .withMessage('Customer type must be a string'),
 
-    body('price.*.prices.*.price')
+    body('price.*.customerTypePrices.*.prices')
+        .isArray({ min: 1 })
+        .withMessage('Prices must be an array and cannot be empty'),
+
+    body('price.*.customerTypePrices.*.prices.*.quantityType')
+        .notEmpty()
+        .withMessage('Quantity type is required')
+        .bail()
+        .isString()
+        .withMessage('Quantity type must be a string'),
+
+    body('price.*.customerTypePrices.*.prices.*.price')
+        .notEmpty()
+        .withMessage('Price is required')
+        .bail()
         .isFloat({ gt: 0 })
         .withMessage('Price must be greater than zero'),
 ];
