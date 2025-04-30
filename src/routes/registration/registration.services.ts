@@ -81,11 +81,12 @@ export const registerUser = async (
                 USERNAME: `${firstName} ${lastName}`,
                 EMAIL: email,
                 PASSWORD: password,
+                ADMINPANELLINK: process.env.CLIENT_URL,
             },
             {
                 from: process.env.SMTP_USERNAME,
                 to: email,
-                subject: '`Registration Successful',
+                subject: 'Registration Successful',
             },
         );
 

@@ -112,6 +112,7 @@ const handleSubAdminCreation = async (
                 (permission) => `${permission.eKey} ${permission.eType}`,
             ),
             ORGANIZATIONS: organisations.map((org) => org.organisationName),
+            ADMINPANELLINK: process.env.CLIENT_URL,
         },
         {
             from: process.env.SMTP_USERNAME,
