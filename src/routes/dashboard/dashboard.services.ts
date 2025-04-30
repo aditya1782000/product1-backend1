@@ -15,6 +15,7 @@ export const countData = async (
         });
         const totalProducts = await Product.countDocuments({
             organization: { $in: [organisation] },
+            isDeleted: { $ne: true },
         });
         const totalOrders = await Order.countDocuments({
             status: { $in: ['approved', 'rejected', 'delivered'] },
