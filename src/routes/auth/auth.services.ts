@@ -81,7 +81,7 @@ export const userLogin = async (
             {
                 from: process.env.SMTP_USERNAME,
                 to: oUser.email,
-                subject: '`OTP Verification',
+                subject: 'OTP Verification',
             },
         );
 
@@ -253,7 +253,7 @@ export const resendOtp = async (email: string): Promise<AsyncResponseType> => {
             {
                 from: process.env.SMTP_USERNAME,
                 to: oUser.email,
-                subject: '`OTP Verification',
+                subject: 'OTP Verification',
             },
         );
 
@@ -630,7 +630,7 @@ export const customerLogin = async (
             {
                 from: process.env.SMTP_USERNAME,
                 to: oUser.email,
-                subject: '`OTP Verification',
+                subject: 'OTP Verification',
             },
         );
 
@@ -840,7 +840,7 @@ export const resendCustomerOtp = async (
             {
                 from: process.env.SMTP_USERNAME,
                 to: oUser.email,
-                subject: '`OTP Verification',
+                subject: 'OTP Verification',
             },
         );
 

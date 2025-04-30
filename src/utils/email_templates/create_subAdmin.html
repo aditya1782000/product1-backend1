@@ -1,14 +1,95 @@
 <!doctype html>
-<html lang="en">
+<html>
     <head>
-        SaaS
-    </head>
+        <meta charset="UTF-8" />
+        <style>
+            body {
+                margin: 0;
+                padding: 30px;
+                background-color: #f0f4f8;
+                font-family: 'Segoe UI', sans-serif;
+                color: #333;
+            }
 
+            .email-box {
+                max-width: 500px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 10px;
+                padding: 40px 30px;
+                text-align: center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .header img {
+                width: 200px;
+                height: auto;
+            }
+
+            .info {
+                font-size: 16px;
+                line-height: 1.8;
+                padding: 0 20px;
+            }
+
+            .info p {
+                margin: 10px 0;
+            }
+
+            .info strong {
+                color: #000;
+            }
+
+            .playstore {
+                text-align: center;
+                margin-top: 40px;
+            }
+
+            .playstore p {
+                margin-bottom: 10px;
+                font-weight: 500;
+                color: #6b7280;
+            }
+
+            .playstore img {
+                width: 180px;
+                height: auto;
+            }
+
+            .reset-link {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 14px 24px;
+                background-color: #2563eb;
+                color: #ffffff !important;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 16px;
+            }
+        </style>
+    </head>
     <body>
-        <p><%= USERNAME %></p>
-        <p><%= EMAIL %></p>
-        <p><%= PASSWORD %></p>
-        <p><%= PERMISSIONS %></p>
-        <p><%= ORGANIZATIONS %></p>
+        <div class="email-box">
+            <div class="header">
+                <img
+                    src="https://saas-product-one.s3.ap-south-1.amazonaws.com/email_logo.png"
+                    alt="Udhyogsathi Logo"
+                />
+            </div>
+
+            <div class="info">
+                <p><strong>Username:</strong> <%= USERNAME %></p>
+                <p><strong>Email:</strong> <%= EMAIL %></p>
+                <p><strong>Password:</strong> <%= PASSWORD %></p>
+                <p><strong>Organization(s):</strong> <%= ORGANIZATIONS %></p>
+            </div>
+            <a href="<%= ADMINPANELLINK %>" class="reset-link">Admin Panel</a>
+        </div>
     </body>
 </html>
