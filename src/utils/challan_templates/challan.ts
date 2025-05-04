@@ -394,25 +394,26 @@ class PDFHelper {
                     );
 
                 if (item.qty > 0 || item.rate > 0) {
+                    const qtyNum = Number(item.qty);
+                    const rateNum = Number(item.rate);
+
+                    const formattedQty = Number.isInteger(qtyNum)
+                        ? `${qtyNum}.000`
+                        : qtyNum.toFixed(3);
+
+                    const formattedRate = Number.isInteger(rateNum)
+                        ? `${rateNum}.00`
+                        : rateNum.toFixed(2);
+
                     this.doc
-                        .text(
-                            `${item.qty.toString()}.000`,
-                            qtyCenter - 15,
-                            currentY,
-                            {
-                                width: 40,
-                                align: 'center',
-                            },
-                        )
-                        .text(
-                            `${item.rate.toString()}.00`,
-                            rateCenter - 15,
-                            currentY,
-                            {
-                                width: 40,
-                                align: 'center',
-                            },
-                        )
+                        .text(formattedQty, qtyCenter - 15, currentY, {
+                            width: 40,
+                            align: 'center',
+                        })
+                        .text(formattedRate, rateCenter - 15, currentY, {
+                            width: 40,
+                            align: 'center',
+                        })
                         .text(
                             itemTotal.toFixed(2),
                             totalCenter - 20,
@@ -479,9 +480,15 @@ class PDFHelper {
                     totalY + 10,
                 );
         } else {
+            const totalQtyNum = Number(this.totalQty);
+
+            const formattedTotalQty = Number.isInteger(totalQtyNum)
+                ? `${totalQtyNum}.000`
+                : totalQtyNum.toFixed(3);
+
             this.doc
                 .fontSize(10)
-                .text(this.totalQty.toString(), qtyCenter - 15, totalY + 10, {
+                .text(formattedTotalQty, qtyCenter - 15, totalY + 10, {
                     width: 30,
                     align: 'center',
                 })
@@ -502,12 +509,16 @@ class PDFHelper {
     }
 
     setItems(items: DeliverySlip['items']) {
-        this.items = items;
+        this.items = items.map((item) => ({
+            ...item,
+            qty: Number(item.qty),
+            rate: Number(item.rate),
+        }));
         return this;
     }
 
     setTotal(total: number) {
-        this.total = total;
+        this.total = Number(total);
         return this;
     }
 
@@ -635,8 +646,21 @@ export const generateDeliverySlip = (
         margin: 0,
     });
 
+    const processedData = {
+        ...data,
+        items: data.items.map((item) => ({
+            ...item,
+            qty: Number(item.qty),
+            rate: Number(item.rate),
+        })),
+        total: Number(data.total),
+        fraightAndTransport: data.fraightAndTransport
+            ? Number(data.fraightAndTransport)
+            : undefined,
+    };
+
     const helper = new PDFHelper(doc);
-    helper.generateDualSlips(data);
+    helper.generateDualSlips(processedData);
 
     return doc;
 };
