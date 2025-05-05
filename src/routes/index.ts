@@ -18,6 +18,7 @@ import deilveryAddress from './deliveryAddress/deliveryAddress.routes';
 import vehicleNo from './vehicleNo/vehicleNo.routes';
 import typeOfPacking from './typeOfPacking/typeOfPacking.routes';
 import productCategory from './productCategory/productCategory.routes';
+import billingOption from './BillingOptions/billingOptions.routes';
 
 const router = express.Router();
 
@@ -41,6 +42,7 @@ router.use('/', [
     vehicleNo,
     typeOfPacking,
     productCategory,
+    billingOption,
 ]);
 
 export default router;
