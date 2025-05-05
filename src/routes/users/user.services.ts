@@ -42,6 +42,7 @@ type UpdateUserOption = {
     city?: string;
     state?: string;
     pinCode?: number;
+    isBillingOption?: boolean;
 };
 
 const handleSubAdminCreation = async (
@@ -143,6 +144,7 @@ const handleCutomerCreation = async (
     pinCode: number,
     orgnaizationName: string,
     gstNumber: string,
+    isBillingOption: boolean,
 ): Promise<AsyncResponseType> => {
     const exisitngUser = await User.findOne({
         email,
@@ -183,6 +185,7 @@ const handleCutomerCreation = async (
         pinCode,
         orgnaizationName,
         gstNumber,
+        isBillingOption,
     });
 
     const organisations = await Organisation.find({
@@ -296,6 +299,7 @@ export const addUsers = async (
     pinCode: number,
     orgnaizationName: string,
     gstNumber: string,
+    isBillingOption: boolean,
 ): Promise<AsyncResponseType> => {
     try {
         if (role === 'customer') {
@@ -314,6 +318,7 @@ export const addUsers = async (
                 pinCode,
                 orgnaizationName,
                 gstNumber,
+                isBillingOption,
             );
         } else if (role == 'employee') {
             return await handleEmployeeCreation(
@@ -438,7 +443,7 @@ export const userView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber';
+            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber isBillingOption';
 
         const oUser = await User.findOne({
             _id: userId,
@@ -648,6 +653,7 @@ export const userEdit = async (
     pinCode: number,
     orgnaizationName: string,
     gstNumber: string,
+    isBillingOption: boolean,
 ): Promise<AsyncResponseType> => {
     try {
         if (role === 'customer') {
@@ -666,6 +672,7 @@ export const userEdit = async (
                     pinCode,
                     orgnaizationName,
                     gstNumber,
+                    isBillingOption,
                 },
                 organisation,
             );

@@ -39,6 +39,7 @@ export const addUsersControlller = async (
         pinCode,
         orgnaizationName,
         gstNumber,
+        isBillingOption,
     } = req.body;
 
     const oResponse = await addUsers(
@@ -57,6 +58,7 @@ export const addUsersControlller = async (
         pinCode,
         orgnaizationName,
         gstNumber,
+        isBillingOption,
     );
 
     return res.status(oResponse.statusCode).send({
@@ -132,6 +134,7 @@ export const userEditController = async (req: Request, res: Response) => {
         pinCode,
         orgnaizationName,
         gstNumber,
+        isBillingOption,
     } = req.body;
 
     const oResponse = await userEdit(
@@ -151,6 +154,7 @@ export const userEditController = async (req: Request, res: Response) => {
         pinCode,
         orgnaizationName,
         gstNumber,
+        isBillingOption,
     );
 
     return res.status(oResponse.statusCode).send({

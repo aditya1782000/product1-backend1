@@ -26,6 +26,7 @@ export interface IUser extends Document {
     fcmToken?: string;
     profilePic?: string;
     isDeleted?: boolean;
+    isBillingOption?: boolean;
 }
 
 export interface IPermission extends Document {
@@ -95,6 +96,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         fcmToken: String,
         profilePic: String,
         isDeleted: Boolean,
+        isBillingOption: Boolean,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );
