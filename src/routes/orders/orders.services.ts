@@ -90,6 +90,7 @@ export const createCustomerOrder = async (
             organization: organisation,
             orderNumber,
             deliveryAddress: new ObjectId(deliveryAddress),
+            orderFrom: 'Customer',
         };
 
         const producer = myKafka.producer();
@@ -345,7 +346,9 @@ export const listCompletedOrders = async (
 
         const orders = await Order.find(orderQuery)
             .populate('customer', '_id firstName lastName phoneNumber')
-            .select('totalAmount dCreatedAt dUpdatedAt status orderNumber')
+            .select(
+                'totalAmount dCreatedAt dUpdatedAt status orderNumber orderFrom',
+            )
             .collation({ locale: 'en', strength: 1 })
             .sort({ dCreatedAt: -1 })
             .skip(start)
@@ -506,8 +509,12 @@ export const viewAdminOrder = async (
                 '_id firstName lastName phoneNumber addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber',
             )
             .populate('orderItems.product', 'productName productImageUrl')
+            .populate(
+                'deliveryAddress',
+                '_id addressLineOne addressLineTwo city state pinCode customer organization',
+            )
             .select(
-                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt orderNumber invoiceUrl',
+                'orderItems totalAmount status type deliveredAt dCreatedAt dUpdatedAt orderNumber invoiceUrl orderFrom',
             )
             .lean();
 
@@ -963,6 +970,7 @@ export const createAdminOrders = async (
     orderItems: OrderItems[],
     totalAmount: number,
     organisation: mongoose.Types.ObjectId,
+    deliveryAddress: string,
 ): Promise<AsyncResponseType> => {
     try {
         const oCustomer = await User.findById({ _id: customer })
@@ -1006,7 +1014,6 @@ export const createAdminOrders = async (
         const ficalYearEnd = new Date(`${endYear}-03-31`);
 
         const nOrderTotal = await Order.countDocuments({
-            customer,
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
             status: { $ne: 'rejected' },
         });
@@ -1021,6 +1028,8 @@ export const createAdminOrders = async (
             type: 'admin',
             organization: organisation,
             orderNumber,
+            orderFrom: 'Admin',
+            deliveryAddress: new ObjectId(deliveryAddress),
         });
 
         return {

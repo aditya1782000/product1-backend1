@@ -12,6 +12,7 @@ export const countData = async (
         const totalCustomers = await User.countDocuments({
             role: 'customer',
             organization: { $in: [organisation] },
+            isDeleted: { $ne: true },
         });
         const totalProducts = await Product.countDocuments({
             organization: { $in: [organisation] },

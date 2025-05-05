@@ -267,13 +267,14 @@ export const createAdminOrdersControllers = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { orderItems, totalAmount, customer } = req.body;
+    const { orderItems, totalAmount, customer, deliveryAddress } = req.body;
 
     const oResponse = await createAdminOrders(
         customer,
         orderItems,
         totalAmount,
         organization,
+        deliveryAddress,
     );
 
     return res.status(oResponse.statusCode).send({
