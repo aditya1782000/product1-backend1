@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { AsyncResponseType } from '../../types/async';
-import BillingOption from '../../models/billingoptions';
+import BillingOption from '../../models/billingOptions';
 import User from '../../models/user';
 
 export const createBillingOption = async (
