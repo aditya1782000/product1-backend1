@@ -171,7 +171,7 @@ export const productView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'productName description howToUse productImageUrl unitType price isActive organization category';
+            'productName description howToUse productImageUrl unitType price isActive organization category gstPercentage';
 
         const oProduct = await Product.findOne({
             _id: productId,
