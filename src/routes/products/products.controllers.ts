@@ -14,7 +14,14 @@ export const addProductsController = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { productName, description, howToUse, unitType, category } = req.body;
+    const {
+        productName,
+        description,
+        howToUse,
+        unitType,
+        category,
+        gstPercentage,
+    } = req.body;
 
     let price;
     if (typeof req.body.price === 'string') {
@@ -38,6 +45,7 @@ export const addProductsController = async (req: Request, res: Response) => {
         unitType,
         price,
         category,
+        Number(gstPercentage),
         organization,
     );
 
@@ -95,7 +103,14 @@ export const editProductController = async (req: Request, res: Response) => {
     const organization = (req as any).sOrganization;
 
     const { id } = req.params;
-    const { productName, description, howToUse, unitType, category } = req.body;
+    const {
+        productName,
+        description,
+        howToUse,
+        unitType,
+        category,
+        gstPercentage,
+    } = req.body;
 
     let price;
     if (typeof req.body.price === 'string') {
@@ -120,6 +135,7 @@ export const editProductController = async (req: Request, res: Response) => {
         howToUse,
         unitType,
         category,
+        Number(gstPercentage),
         price,
     );
 

@@ -34,6 +34,15 @@ export const addProductValidators = [
 
     body('unitType').notEmpty().withMessage('Unit Type is required'),
 
+    body('category').notEmpty().withMessage('Category is required'),
+
+    body('gstPercentage')
+        .notEmpty()
+        .withMessage('Gst Percentage is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Product Percentage must be a number'),
+
     body('price')
         .isArray({ min: 1 })
         .withMessage('Price must be an array and cannot be empty'),
@@ -190,6 +199,13 @@ export const editProductValidators = [
         .bail()
         .isIn(enums.unitType)
         .withMessage('Invalid Unit Type'),
+
+    body('gstPercentage')
+        .notEmpty()
+        .withMessage('Gst Percentage is required')
+        .bail()
+        .isNumeric()
+        .withMessage('Product Percentage must be a number'),
 
     //UnComment when integrate the React
 
