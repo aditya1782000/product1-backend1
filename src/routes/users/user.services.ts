@@ -43,6 +43,8 @@ type UpdateUserOption = {
     state?: string;
     pinCode?: number;
     isBillingOption?: boolean;
+    isAppAccess?: boolean;
+    hash?: string;
 };
 
 const handleSubAdminCreation = async (
@@ -145,6 +147,7 @@ const handleCutomerCreation = async (
     orgnaizationName: string,
     gstNumber: string,
     isBillingOption: boolean,
+    isAppAccess: boolean,
 ): Promise<AsyncResponseType> => {
     const exisitngUser = await User.findOne({
         email,
@@ -159,54 +162,84 @@ const handleCutomerCreation = async (
         };
     }
 
-    const password: string = generatepassword.generate({
-        length: 10,
-        numbers: true,
-        uppercase: true,
-        lowercase: true,
-        symbols: true,
-    });
+    if (isAppAccess === true && !email) {
+        return {
+            statusCode: 400,
+            success: false,
+            message: 'Email is required for app access',
+        };
+    }
 
-    const hash = await bcrypt.hash(password, 10);
+    if (isAppAccess === true) {
+        const password: string = generatepassword.generate({
+            length: 10,
+            numbers: true,
+            uppercase: true,
+            lowercase: true,
+            symbols: true,
+        });
 
-    await User.create({
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        hash,
-        role,
-        type,
-        organization: [organisation],
-        addressLineOne,
-        addressLineTwo,
-        city,
-        state,
-        pinCode,
-        orgnaizationName,
-        gstNumber,
-        isBillingOption,
-    });
+        const hash = await bcrypt.hash(password, 10);
 
-    const organisations = await Organisation.find({
-        _id: { $in: organisation },
-    });
+        await User.create({
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            hash,
+            role,
+            type,
+            organization: [organisation],
+            addressLineOne,
+            addressLineTwo,
+            city,
+            state,
+            pinCode,
+            orgnaizationName,
+            gstNumber,
+            isBillingOption,
+            isAppAccess: isAppAccess,
+        });
 
-    await nodemailer.send(
-        'create_customer.html',
-        {
-            SITENAME: process.env.SITE_NAME,
-            USERNAME: `${firstName} ${lastName}`,
-            EMAIL: email,
-            PASSWORD: password,
-            ORGANIZATIONS: organisations.map((org) => org.organisationName),
-        },
-        {
-            from: process.env.SMTP_USERNAME,
-            to: email,
-            subject: 'Customer Account Created',
-        },
-    );
+        const organisations = await Organisation.find({
+            _id: { $in: organisation },
+        });
+
+        await nodemailer.send(
+            'create_customer.html',
+            {
+                SITENAME: process.env.SITE_NAME,
+                USERNAME: `${firstName} ${lastName}`,
+                EMAIL: email,
+                PASSWORD: password,
+                ORGANIZATIONS: organisations.map((org) => org.organisationName),
+            },
+            {
+                from: process.env.SMTP_USERNAME,
+                to: email,
+                subject: 'Customer Account Created',
+            },
+        );
+    } else {
+        await User.create({
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            role,
+            type,
+            organization: [organisation],
+            addressLineOne,
+            addressLineTwo,
+            city,
+            state,
+            pinCode,
+            orgnaizationName,
+            gstNumber,
+            isBillingOption,
+            isAppAccess: false,
+        });
+    }
 
     return {
         statusCode: 200,
@@ -300,6 +333,7 @@ export const addUsers = async (
     orgnaizationName: string,
     gstNumber: string,
     isBillingOption: boolean,
+    isAppAccess: boolean,
 ): Promise<AsyncResponseType> => {
     try {
         if (role === 'customer') {
@@ -319,6 +353,7 @@ export const addUsers = async (
                 orgnaizationName,
                 gstNumber,
                 isBillingOption,
+                isAppAccess,
             );
         } else if (role == 'employee') {
             return await handleEmployeeCreation(
@@ -443,7 +478,7 @@ export const userView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber isBillingOption';
+            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber isBillingOption isAppAccess';
 
         const oUser = await User.findOne({
             _id: userId,
@@ -609,6 +644,59 @@ const updateUser = async (
         };
     }
 
+    if (updateUser.isAppAccess === true && !updateUser.email) {
+        return {
+            statusCode: 400,
+            success: false,
+            message: 'Email is required for app access',
+        };
+    }
+
+    if (updateUser.isAppAccess === true && oUser.role === 'customer') {
+        if (!oUser.isAppAccess && !oUser.hash) {
+            const password: string = generatepassword.generate({
+                length: 10,
+                numbers: true,
+                uppercase: true,
+                lowercase: true,
+                symbols: true,
+            });
+
+            const hash = await bcrypt.hash(password, 10);
+
+            const organisations = await Organisation.find({
+                _id: { $in: organisation },
+            });
+
+            updateUser.hash = hash;
+            updateUser.isAppAccess = true;
+
+            await nodemailer.send(
+                'create_customer.html',
+                {
+                    SITENAME: process.env.SITE_NAME,
+                    USERNAME: `${oUser.firstName} ${oUser.lastName}`,
+                    EMAIL: updateUser.email,
+                    PASSWORD: password,
+                    ORGANIZATIONS: organisations.map(
+                        (org) => org.organisationName,
+                    ),
+                },
+                {
+                    from: process.env.SMTP_USERNAME,
+                    to: updateUser.email,
+                    subject: 'Customer Account Created',
+                },
+            );
+        } else {
+            return {
+                statusCode: 400,
+                success: false,
+                message: 'Customer already have app access.',
+            };
+        }
+    }
+
     const updateUserData = await User.findByIdAndUpdate(oUser._id, updateUser, {
         new: true,
     });
@@ -654,6 +742,7 @@ export const userEdit = async (
     orgnaizationName: string,
     gstNumber: string,
     isBillingOption: boolean,
+    isAppAccess: boolean,
 ): Promise<AsyncResponseType> => {
     try {
         if (role === 'customer') {
@@ -673,6 +762,7 @@ export const userEdit = async (
                     orgnaizationName,
                     gstNumber,
                     isBillingOption,
+                    isAppAccess,
                 },
                 organisation,
             );

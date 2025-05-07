@@ -27,6 +27,7 @@ export interface IUser extends Document {
     profilePic?: string;
     isDeleted?: boolean;
     isBillingOption?: boolean;
+    isAppAccess?: boolean;
 }
 
 export interface IPermission extends Document {
@@ -97,6 +98,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         profilePic: String,
         isDeleted: Boolean,
         isBillingOption: Boolean,
+        isAppAccess: Boolean,
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );

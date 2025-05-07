@@ -24,6 +24,7 @@ export const addUsersValidators = [
 
     body('email')
         .trim()
+        .if(body('role').not().equals('customer'))
         .notEmpty()
         .withMessage('Email is required')
         .bail()
@@ -265,16 +266,14 @@ export const addUsersValidators = [
                 );
             }
 
-            if (!body.gstNumber) {
-                throw new Error('GST number is required');
-            }
-
-            if (
-                !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
-                    body.gstNumber,
-                )
-            ) {
-                throw new Error('Invalid GST number');
+            if (body.gstNumber) {
+                if (
+                    !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
+                        body.gstNumber,
+                    )
+                ) {
+                    throw new Error('Invalid GST number');
+                }
             }
         }
 
@@ -394,6 +393,7 @@ export const userEditValidators = [
         .isLength({ min: 3, max: 25 }),
 
     body('email')
+        .if(body('role').not().equals('customer'))
         .notEmpty()
         .withMessage('Email is required')
         .bail()
@@ -627,16 +627,14 @@ export const userEditValidators = [
                 );
             }
 
-            if (!body.gstNumber) {
-                throw new Error('GST number is required');
-            }
-
-            if (
-                !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
-                    body.gstNumber,
-                )
-            ) {
-                throw new Error('Invalid GST number');
+            if (body.gstNumber) {
+                if (
+                    !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
+                        body.gstNumber,
+                    )
+                ) {
+                    throw new Error('Invalid GST number');
+                }
             }
         }
 

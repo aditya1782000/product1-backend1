@@ -40,6 +40,7 @@ export const addUsersControlller = async (
         orgnaizationName,
         gstNumber,
         isBillingOption,
+        isAppAccess,
     } = req.body;
 
     const oResponse = await addUsers(
@@ -59,6 +60,7 @@ export const addUsersControlller = async (
         orgnaizationName,
         gstNumber,
         isBillingOption,
+        isAppAccess,
     );
 
     return res.status(oResponse.statusCode).send({
@@ -135,6 +137,7 @@ export const userEditController = async (req: Request, res: Response) => {
         orgnaizationName,
         gstNumber,
         isBillingOption,
+        isAppAccess,
     } = req.body;
 
     const oResponse = await userEdit(
@@ -155,6 +158,7 @@ export const userEditController = async (req: Request, res: Response) => {
         orgnaizationName,
         gstNumber,
         isBillingOption,
+        isAppAccess,
     );
 
     return res.status(oResponse.statusCode).send({
