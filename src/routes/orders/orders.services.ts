@@ -78,6 +78,7 @@ export const createCustomerOrder = async (
         const nOrderTotal = await Order.countDocuments({
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
             status: { $ne: 'rejected' },
+            organization: organisation,
         });
 
         const orderNumber = `order ${nOrderTotal + 1}`;
@@ -1019,6 +1020,7 @@ export const createAdminOrders = async (
         const nOrderTotal = await Order.countDocuments({
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
             status: { $ne: 'rejected' },
+            organization: organisation,
         });
 
         const orderNumber = `order ${nOrderTotal + 1}`;
