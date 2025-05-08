@@ -19,6 +19,7 @@ import vehicleNo from './vehicleNo/vehicleNo.routes';
 import typeOfPacking from './typeOfPacking/typeOfPacking.routes';
 import productCategory from './productCategory/productCategory.routes';
 import billingOption from './BillingOptions/billingOptions.routes';
+import gstPercentage from './gstPercentage/gstPercentage.routes';
 
 const router = express.Router();
 
@@ -43,6 +44,7 @@ router.use('/', [
     typeOfPacking,
     productCategory,
     billingOption,
+    gstPercentage,
 ]);
 
 export default router;
