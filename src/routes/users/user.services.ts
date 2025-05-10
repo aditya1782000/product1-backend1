@@ -478,7 +478,7 @@ export const userView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber isBillingOption isAppAccess';
+            'firstName lastName email phoneNumber role permissions type isActive addressLineOne addressLineTwo city state pinCode orgnaizationName gstNumber isBillingOption isAppAccess profilePic';
 
         const oUser = await User.findOne({
             _id: userId,
