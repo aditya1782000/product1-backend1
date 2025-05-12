@@ -149,20 +149,23 @@ const handleCutomerCreation = async (
     isBillingOption: boolean,
     isAppAccess: boolean,
 ): Promise<AsyncResponseType> => {
-    const exisitngUser = await User.findOne({
-        email,
-        isDeleted: { $ne: true },
-    });
+    const normalizedEmail = email && email.trim() !== '' ? email.trim() : null;
 
-    if (exisitngUser) {
-        return {
-            statusCode: 409,
-            success: false,
-            message: 'User with this email already exists',
-        };
+    if (normalizedEmail) {
+        const existingUser = await User.findOne({
+            email: normalizedEmail,
+            isDeleted: { $ne: true },
+        });
+        if (existingUser) {
+            return {
+                statusCode: 409,
+                success: false,
+                message: 'User with this email already exists',
+            };
+        }
     }
 
-    if (isAppAccess === true && !email) {
+    if (isAppAccess && !normalizedEmail) {
         return {
             statusCode: 400,
             success: false,
@@ -184,8 +187,8 @@ const handleCutomerCreation = async (
         await User.create({
             firstName,
             lastName,
-            email,
             phoneNumber,
+            email: normalizedEmail,
             hash,
             role,
             type,
@@ -210,7 +213,7 @@ const handleCutomerCreation = async (
             {
                 SITENAME: process.env.SITE_NAME,
                 USERNAME: `${firstName} ${lastName}`,
-                EMAIL: email,
+                EMAIL: normalizedEmail,
                 PASSWORD: password,
                 ORGANIZATIONS: organisations.map((org) => org.organisationName),
             },
