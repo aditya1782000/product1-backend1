@@ -175,10 +175,15 @@ export const customerProductListController = async (
     const offSet = Number(req.query.start);
     const limit = Number(req.query.length);
 
+    const category = req.query.category
+        ? String(req.query.category)
+        : undefined;
+
     const oResponse = await customerProductList(
         organization,
         pinCode,
         type,
+        category,
         offSet,
         limit,
     );

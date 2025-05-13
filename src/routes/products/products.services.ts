@@ -455,6 +455,7 @@ export const customerProductList = async (
     organisation: mongoose.Types.ObjectId,
     pinCode: number,
     customerType: string,
+    category: string | undefined,
     start: number,
     limit: number,
 ): Promise<AsyncResponseType> => {
@@ -465,6 +466,7 @@ export const customerProductList = async (
                 isActive: true,
                 isDeleted: { $ne: true },
                 'price.area': pinCode.toString(),
+                ...(category && { category }),
             },
             {
                 productName: 1,
@@ -472,6 +474,7 @@ export const customerProductList = async (
                 howToUse: 1,
                 productImageUrl: 1,
                 price: 1,
+                category: 1,
             },
         )
             .skip(start)
@@ -528,6 +531,7 @@ export const customerProductList = async (
                             prices: customerTypePrice.prices,
                         },
                     ],
+                    category: product.category,
                 };
             })
             .filter((product) => product !== null);

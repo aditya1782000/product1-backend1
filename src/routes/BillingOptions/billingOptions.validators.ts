@@ -20,12 +20,3 @@ export const deleteBillingOptionValidators = [
         .isMongoId()
         .withMessage('Invalid id'),
 ];
-
-export const customerBillingOptionValidators = [
-    param('id')
-        .notEmpty()
-        .withMessage('id is required')
-        .bail()
-        .isMongoId()
-        .withMessage('Invalid id'),
-];

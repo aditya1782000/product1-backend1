@@ -126,7 +126,7 @@ export const customerBillingOptions = async (
 
         if (!customer?.isBillingOption) {
             return {
-                statusCode: 403,
+                statusCode: 404,
                 success: false,
                 message: 'No Billing options access for this user',
             };
