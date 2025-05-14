@@ -8,6 +8,7 @@ export interface INotifications extends Document {
     organization: mongoose.Types.ObjectId;
     user: mongoose.Types.ObjectId;
     type: string;
+    isActive: boolean;
     dCreatedAt?: Date;
 }
 
@@ -39,6 +40,7 @@ export const notificationSchema: Schema<INotifications> =
                 type: String,
                 required: true,
             },
+            isActive: Boolean,
         },
         { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
     );

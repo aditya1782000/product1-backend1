@@ -45,7 +45,7 @@ export const isAdmin = (
             const oUser = await User.findOne({
                 _id: decoded.id,
                 isDeleted: { $ne: true },
-            }).select('organization isActive');
+            }).select('organization isActive role');
 
             if (!oUser) {
                 return res.status(401).json({
@@ -64,6 +64,7 @@ export const isAdmin = (
             (req as any).userId = oUser._id;
             req.sEmail = oUser.email;
             (req as any).sOrganization = oUser.organization;
+            (req as any).role = oUser.role;
 
             if (oUser.role === 'superAdmin') {
                 const errors = validationResult(req);
