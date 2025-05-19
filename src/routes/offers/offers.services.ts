@@ -1,22 +1,32 @@
 import mongoose from 'mongoose';
+import Notification from '../../models/notifications';
 import { AsyncResponseType } from '../../types/async';
-import BillingOption from '../../models/billingOptions';
-import User from '../../models/user';
 
-export const createBillingOption = async (
-    billingOption: string,
+export const offerBanner = async (
     organisation: mongoose.Types.ObjectId,
+    role: string,
 ): Promise<AsyncResponseType> => {
     try {
-        await BillingOption.create({
-            billingOption,
-            organization: organisation,
-        });
+        let offerBanners;
+
+        if (role === 'superAdmin' || role === 'subAdmin') {
+            offerBanners = await Notification.find({
+                type: 'Offer',
+                organization: { $in: organisation },
+            });
+        } else if (role === 'customer') {
+            offerBanners = await Notification.find({
+                type: 'Offer',
+                organization: { $in: organisation },
+                isActive: true,
+            });
+        }
 
         return {
             statusCode: 200,
             success: true,
-            message: 'Billing Option created successfully',
+            message: 'Offer banners have been retrived successfully',
+            data: offerBanners,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -35,56 +45,24 @@ export const createBillingOption = async (
     }
 };
 
-export const listBillingOptions = async (
-    organisation: mongoose.Types.ObjectId,
-): Promise<AsyncResponseType> => {
-    try {
-        const billingOptions = await BillingOption.find({
-            organization: organisation,
-        });
-
-        return {
-            statusCode: 200,
-            success: true,
-            message: 'Billing Options retrived successfully',
-            data: billingOptions,
-        };
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            return {
-                statusCode: 500,
-                success: false,
-                message: error.message || 'Something went wrong',
-            };
-        }
-
-        return {
-            statusCode: 500,
-            success: false,
-            message: 'Something went wrong',
-        };
-    }
-};
-
-export const deleteBillingOption = async (
+export const toggleOfferBannerStatus = async (
     id: string,
+    status: boolean,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const deleteBillingOption = await BillingOption.findById(id);
+        const offerBanner = await Notification.findById(id);
 
-        if (!deleteBillingOption) {
+        if (!offerBanner || offerBanner.type !== 'Offer') {
             return {
                 statusCode: 404,
                 success: false,
-                message: 'Billing Options not found',
+                message: 'Offer banner not found',
             };
         }
-
         if (
-            deleteBillingOption.organization &&
-            deleteBillingOption.organization._id.toString() !==
-                organisation.toString()
+            offerBanner.organization &&
+            offerBanner.organization._id.toString() !== organisation.toString()
         ) {
             return {
                 statusCode: 403,
@@ -93,12 +71,16 @@ export const deleteBillingOption = async (
             };
         }
 
-        await BillingOption.findByIdAndDelete(id);
+        if (status === true) {
+            await Notification.findByIdAndUpdate(id, { isActive: true });
+        } else if (status === false) {
+            await Notification.findByIdAndUpdate(id, { isActive: false });
+        }
 
         return {
             statusCode: 200,
             success: true,
-            message: 'Billing option Deleted successfully',
+            message: 'Offer banner status has been changed',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -117,30 +99,38 @@ export const deleteBillingOption = async (
     }
 };
 
-export const customerBillingOptions = async (
-    customerId: string,
+export const deleteOfferBanner = async (
+    id: string,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const customer = await User.findById(customerId);
+        const offerBanner = await Notification.findById(id);
 
-        if (!customer?.isBillingOption) {
+        if (!offerBanner || offerBanner.type !== 'Offer') {
             return {
                 statusCode: 404,
                 success: false,
-                message: 'No Billing options access for this user',
+                message: 'Offer banner not found',
             };
         }
 
-        const billingOptions = await BillingOption.find({
-            organization: organisation,
-        });
+        if (
+            offerBanner.organization &&
+            offerBanner.organization._id.toString() !== organisation.toString()
+        ) {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Unauthorized access',
+            };
+        }
+
+        await Notification.findByIdAndDelete(id);
 
         return {
             statusCode: 200,
-            success: true,
-            message: 'Billing Options retrived successfully',
-            data: billingOptions,
+            success: false,
+            message: 'Offer banner has been deleted successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

@@ -1,5 +1,4 @@
 import { body, param, query } from 'express-validator';
-import enums from '../../../enum';
 
 export const sendNotificationsValidators = [
     body('customers')
@@ -32,8 +31,8 @@ export const sendNotificationsValidators = [
         .notEmpty()
         .withMessage('Type is required')
         .bail()
-        .isIn(enums.notificationType)
-        .withMessage('Type msut be valid string'),
+        .isString()
+        .withMessage('Type must be a string'),
 ];
 
 export const customerNotificationListValidators = [

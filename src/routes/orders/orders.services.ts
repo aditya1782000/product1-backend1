@@ -48,6 +48,7 @@ interface OrderItems {
     quantityType: string;
     unitPrice: number;
     totalPrice: number;
+    color?: string;
 }
 
 export const createCustomerOrder = async (
@@ -1176,7 +1177,7 @@ export const productsList = async (
             organization: { $in: organisation },
             isDeleted: { $ne: true },
         })
-            .select('_id productName productImageUrl price')
+            .select('_id productName productImageUrl price colors')
             .lean();
 
         return {

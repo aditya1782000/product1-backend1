@@ -1,7 +1,6 @@
 import express from 'express';
 import {
     createBillingOptionValidators,
-    customerBillingOptionValidators,
     deleteBillingOptionValidators,
 } from './billingOptions.validators';
 import { isAdmin } from '../../middleware/isAdmin';
@@ -37,7 +36,6 @@ router.delete(
 
 router.get(
     '/customer/billing/option/list',
-    customerBillingOptionValidators,
     isCustomer(),
     adminOrderCustomerBillingOptionControllers,
 );

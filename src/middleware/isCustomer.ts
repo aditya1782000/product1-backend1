@@ -73,6 +73,7 @@ export const isCustomer = () => {
             (req as any).pinCode = oUser.pinCode;
             (req as any).type = oUser.type;
             (req as any).sOrgnaizationName = oUser.orgnaizationName;
+            (req as any).role = oUser.role;
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

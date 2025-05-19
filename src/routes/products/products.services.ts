@@ -43,6 +43,7 @@ export const addProduct = async (
     category: string,
     gstPercentage: number,
     organisation: mongoose.Types.ObjectId,
+    colors?: string[],
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
@@ -82,6 +83,7 @@ export const addProduct = async (
             category,
             gstPercentage,
             organization: organisation,
+            colors,
         });
 
         return {
@@ -171,7 +173,7 @@ export const productView = async (
 ): Promise<AsyncResponseType> => {
     try {
         const selectedFields =
-            'productName description howToUse productImageUrl unitType price isActive organization category gstPercentage';
+            'productName description howToUse productImageUrl unitType price isActive organization category gstPercentage colors';
 
         const oProduct = await Product.findOne({
             _id: productId,
@@ -300,6 +302,7 @@ export const productEdit = async (
     category?: string,
     gstPercentage?: number,
     price?: AreaPrice[],
+    colors?: string[],
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
@@ -352,6 +355,7 @@ export const productEdit = async (
             price,
             category,
             gstPercentage,
+            colors,
         });
 
         if (!updateProduct) {
@@ -455,25 +459,33 @@ export const customerProductList = async (
     organisation: mongoose.Types.ObjectId,
     pinCode: number,
     customerType: string,
+    category: string | undefined,
     start: number,
     limit: number,
 ): Promise<AsyncResponseType> => {
     try {
-        const products = await Product.find(
-            {
-                organization: { $in: organisation },
-                isActive: true,
-                isDeleted: { $ne: true },
-                'price.area': pinCode.toString(),
+        const queryConditions = {
+            organization: organisation,
+            isActive: true,
+            isDeleted: { $ne: true },
+            ...(category && { category }),
+            price: {
+                $elemMatch: {
+                    area: pinCode.toString(),
+                    'customerTypePrices.customerType': customerType,
+                },
             },
-            {
-                productName: 1,
-                description: 1,
-                howToUse: 1,
-                productImageUrl: 1,
-                price: 1,
-            },
-        )
+        };
+
+        const products = await Product.find(queryConditions, {
+            productName: 1,
+            description: 1,
+            howToUse: 1,
+            productImageUrl: 1,
+            price: 1,
+            category: 1,
+            colors: 1,
+        })
             .skip(start)
             .limit(limit)
             .sort({ dCreatedAt: 1 })
@@ -493,28 +505,13 @@ export const customerProductList = async (
                     (p) => p.area === pinCode.toString(),
                 );
 
-                if (!areaPrice) {
-                    return null;
-                }
-
-                if (
-                    !areaPrice.customerTypePrices ||
-                    !Array.isArray(areaPrice.customerTypePrices)
-                ) {
-                    return null;
-                }
+                if (!areaPrice) return null;
 
                 const customerTypePrice = areaPrice.customerTypePrices.find(
                     (ctp) => ctp.customerType === customerType,
                 );
 
-                if (
-                    !customerTypePrice ||
-                    !customerTypePrice.prices ||
-                    !Array.isArray(customerTypePrice.prices)
-                ) {
-                    return null;
-                }
+                if (!customerTypePrice?.prices?.length) return null;
 
                 return {
                     _id: product._id,
@@ -528,6 +525,8 @@ export const customerProductList = async (
                             prices: customerTypePrice.prices,
                         },
                     ],
+                    category: product.category,
+                    colors: product.colors,
                 };
             })
             .filter((product) => product !== null);

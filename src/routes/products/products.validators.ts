@@ -36,6 +36,12 @@ export const addProductValidators = [
 
     body('category').notEmpty().withMessage('Category is required'),
 
+    body('colors')
+        .optional()
+        .bail()
+        .isArray()
+        .withMessage('Colors must be an array'),
+
     body('gstPercentage')
         .notEmpty()
         .withMessage('Gst Percentage is required')
@@ -206,6 +212,12 @@ export const editProductValidators = [
         .bail()
         .isNumeric()
         .withMessage('Product Percentage must be a number'),
+
+    body('colors')
+        .optional()
+        .bail()
+        .isArray()
+        .withMessage('Colors must be an array'),
 
     //UnComment when integrate the React
 

@@ -26,6 +26,21 @@ export const sendNotifications = async (
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
+        if (type === 'Offer') {
+            const activeOffersCount = await Notification.countDocuments({
+                organization: organisation,
+                type: 'Offer',
+            });
+
+            if (activeOffersCount >= 5) {
+                return {
+                    statusCode: 400,
+                    success: false,
+                    message: 'You can only add five offers at the same time',
+                };
+            }
+        }
+
         const messaging = getMessaging();
 
         const users = await User.find({
@@ -78,15 +93,30 @@ export const sendNotifications = async (
             ),
         );
 
-        const notifications = users.map((user) => ({
-            title,
-            description: body,
-            imageurl: imageUrl,
-            isRead: false,
-            organization: organisation,
-            user: user._id,
-            type,
-        }));
+        const notifications =
+            type === 'Offer'
+                ? [
+                    {
+                        title,
+                        description: body,
+                        imageurl: imageUrl,
+                        isRead: false,
+                        organization: organisation,
+                        user: null,
+                        type,
+                        isActive: true,
+                    },
+                ]
+                : users.map((user) => ({
+                    title,
+                    description: body,
+                    imageurl: imageUrl,
+                    isRead: false,
+                    organization: organisation,
+                    user: user._id,
+                    type,
+                    isActive: false,
+                }));
 
         await Notification.insertMany(notifications);
 

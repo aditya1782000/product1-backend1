@@ -24,6 +24,7 @@ export interface IProduct extends Document {
     unitType: string;
     price: IAreaPrice[];
     category: string;
+    colors: string[];
     gstPercentage: number;
     organization: mongoose.Types.ObjectId;
     isActive?: boolean;
@@ -80,6 +81,7 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>(
             type: String,
             required: true,
         },
+        colors: [String],
         gstPercentage: Number,
         organization: {
             type: mongoose.Schema.Types.ObjectId,

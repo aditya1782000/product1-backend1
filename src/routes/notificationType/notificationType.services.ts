@@ -1,22 +1,21 @@
 import mongoose from 'mongoose';
 import { AsyncResponseType } from '../../types/async';
-import BillingOption from '../../models/billingOptions';
-import User from '../../models/user';
+import NotificationType from '../../models/notificationType';
 
-export const createBillingOption = async (
-    billingOption: string,
+export const createNotificationType = async (
+    notificationType: string,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        await BillingOption.create({
-            billingOption,
+        await NotificationType.create({
+            notificationType,
             organization: organisation,
         });
 
         return {
             statusCode: 200,
             success: true,
-            message: 'Billing Option created successfully',
+            message: 'Notification Type created successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -35,19 +34,19 @@ export const createBillingOption = async (
     }
 };
 
-export const listBillingOptions = async (
+export const listNotificationType = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const billingOptions = await BillingOption.find({
-            organization: organisation,
+        const notificationTypes = await NotificationType.find({
+            $or: [{ organization: organisation }, { isAll: true }],
         });
 
         return {
             statusCode: 200,
             success: true,
-            message: 'Billing Options retrived successfully',
-            data: billingOptions,
+            message: 'Notification types retrieved successfully',
+            data: notificationTypes,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -66,24 +65,32 @@ export const listBillingOptions = async (
     }
 };
 
-export const deleteBillingOption = async (
+export const deleteNotificationType = async (
     id: string,
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const deleteBillingOption = await BillingOption.findById(id);
+        const notificationType = await NotificationType.findById(id);
 
-        if (!deleteBillingOption) {
+        if (!notificationType) {
             return {
                 statusCode: 404,
                 success: false,
-                message: 'Billing Options not found',
+                message: 'Notification Type not found',
+            };
+        }
+
+        if (notificationType.notificationType === 'Offer') {
+            return {
+                statusCode: 403,
+                success: false,
+                message: 'Offer type can not be deleted',
             };
         }
 
         if (
-            deleteBillingOption.organization &&
-            deleteBillingOption.organization._id.toString() !==
+            notificationType.organization &&
+            notificationType.organization._id.toString() !==
                 organisation.toString()
         ) {
             return {
@@ -93,54 +100,12 @@ export const deleteBillingOption = async (
             };
         }
 
-        await BillingOption.findByIdAndDelete(id);
+        await NotificationType.findByIdAndDelete(id);
 
         return {
             statusCode: 200,
             success: true,
-            message: 'Billing option Deleted successfully',
-        };
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            return {
-                statusCode: 500,
-                success: false,
-                message: error.message || 'Something went wrong',
-            };
-        }
-
-        return {
-            statusCode: 500,
-            success: false,
-            message: 'Something went wrong',
-        };
-    }
-};
-
-export const customerBillingOptions = async (
-    customerId: string,
-    organisation: mongoose.Types.ObjectId,
-): Promise<AsyncResponseType> => {
-    try {
-        const customer = await User.findById(customerId);
-
-        if (!customer?.isBillingOption) {
-            return {
-                statusCode: 404,
-                success: false,
-                message: 'No Billing options access for this user',
-            };
-        }
-
-        const billingOptions = await BillingOption.find({
-            organization: organisation,
-        });
-
-        return {
-            statusCode: 200,
-            success: true,
-            message: 'Billing Options retrived successfully',
-            data: billingOptions,
+            message: 'Notification Type deleted successfully',
         };
     } catch (error: unknown) {
         if (error instanceof Error) {

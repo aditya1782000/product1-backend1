@@ -6,6 +6,7 @@ import {
     deleteProductCategoryContorllers,
     listProductCategoryControllers,
 } from './productCategory.controllers';
+import { isCustomer } from '../../middleware/isCustomer';
 
 const router = express.Router();
 
@@ -26,6 +27,12 @@ router.delete(
     '/admin/delete/:id/product/category',
     isAdmin('Products', 'A'),
     deleteProductCategoryContorllers,
+);
+
+router.get(
+    '/customer/products/category/list',
+    isCustomer(),
+    listProductCategoryControllers,
 );
 
 export default router;

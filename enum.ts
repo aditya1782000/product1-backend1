@@ -11,6 +11,7 @@ const enums = {
         'Challan',
         'Attendance',
         'Statements',
+        'Offers'
     ],
     permissionType: ['ALL', 'A', 'E', 'D', 'V', 'AD'],
     unitType: ['KG', 'LTR', 'MT', 'PC', 'TIN', 'BOX', 'BUNDLE'],

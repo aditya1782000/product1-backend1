@@ -20,6 +20,8 @@ import typeOfPacking from './typeOfPacking/typeOfPacking.routes';
 import productCategory from './productCategory/productCategory.routes';
 import billingOption from './BillingOptions/billingOptions.routes';
 import gstPercentage from './gstPercentage/gstPercentage.routes';
+import notificationType from './notificationType/notificationType.routes';
+import offers from './offers/offers.routes';
 
 const router = express.Router();
 
@@ -45,6 +47,8 @@ router.use('/', [
     productCategory,
     billingOption,
     gstPercentage,
+    notificationType,
+    offers,
 ]);
 
 export default router;
