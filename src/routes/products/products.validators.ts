@@ -1,5 +1,4 @@
 import { body, param, query } from 'express-validator';
-import enums from '../../../enum';
 
 export const addProductValidators = [
     body('productName')
@@ -199,12 +198,7 @@ export const editProductValidators = [
         .isString()
         .withMessage('How To Use must be string'),
 
-    body('unitType')
-        .notEmpty()
-        .withMessage('Unit Type is required')
-        .bail()
-        .isIn(enums.unitType)
-        .withMessage('Invalid Unit Type'),
+    body('unitType').notEmpty().withMessage('Unit Type is required'),
 
     body('gstPercentage')
         .notEmpty()
