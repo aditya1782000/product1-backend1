@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
-// import data from '../../enum';
+import data from '../../enum';
 
 export interface IQuantityPrice extends Document {
     quantityType: string;
@@ -26,6 +26,7 @@ export interface IProduct extends Document {
     category: string;
     colors: string[];
     gstPercentage: number;
+    productType: string;
     organization: mongoose.Types.ObjectId;
     isActive?: boolean;
     isDeleted?: boolean;
@@ -83,6 +84,11 @@ export const productSchema: Schema<IProduct> = new Schema<IProduct>(
         },
         colors: [String],
         gstPercentage: Number,
+        productType: {
+            type: String,
+            required: true,
+            enum: data.productType,
+        },
         organization: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'organisation',

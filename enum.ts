@@ -11,7 +11,7 @@ const enums = {
         'Challan',
         'Attendance',
         'Statements',
-        'Offers'
+        'Offers',
     ],
     permissionType: ['ALL', 'A', 'E', 'D', 'V', 'AD'],
     unitType: ['KG', 'LTR', 'MT', 'PC', 'TIN', 'BOX', 'BUNDLE'],
@@ -33,6 +33,7 @@ const enums = {
     leaveStatus: ['pending', 'approved', 'rejected'],
     leaveActions: ['approved', 'rejected'],
     customerType: ['REATILER', 'NON TRADE', 'UTCL'],
+    productType: ['Good', 'Services', 'Both'],
 };
 
 export default enums;
