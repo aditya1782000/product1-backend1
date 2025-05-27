@@ -33,7 +33,13 @@ const enums = {
     leaveStatus: ['pending', 'approved', 'rejected'],
     leaveActions: ['approved', 'rejected'],
     customerType: ['REATILER', 'NON TRADE', 'UTCL'],
-    productType: ['Good', 'Services', 'Both'],
+    productType: ['Goods', 'Services', 'Both'],
+    pricingType: [
+        'areaCustomerType',
+        'singlePrice',
+        'areaSinglePrice',
+        'customerTypeSingleAreaPrice',
+    ],
 };
 
 export default enums;

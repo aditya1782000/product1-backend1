@@ -25,6 +25,16 @@ interface AreaPrice {
     customerTypePrices: CustomerTypePrice[];
 }
 
+interface AreaSinglePrice {
+    area: string;
+    prices: QuantityPrice;
+}
+
+interface CustomerTypeSingleAreaPrice {
+    customerType: string;
+    prices: QuantityPrice[];
+}
+
 const deleteTempFile = (filePath: string) => {
     fs.unlink(filePath, (err) => {
         if (err) {
@@ -39,11 +49,16 @@ export const addProduct = async (
     description: string,
     howToUse: string,
     unitType: string,
+    pricingType: string,
     price: AreaPrice[],
     category: string,
     gstPercentage: number,
+    productType: string,
     organisation: mongoose.Types.ObjectId,
     colors?: string[],
+    singlePrice?: QuantityPrice[],
+    areaSinglePrice?: AreaSinglePrice[],
+    customerTypeSingleAreaPrice?: CustomerTypeSingleAreaPrice[],
 ): Promise<AsyncResponseType> => {
     let tempFilePath: string | undefined;
     try {
@@ -73,18 +88,69 @@ export const addProduct = async (
             productImageUrl = uploadData.Location;
         }
 
-        const oProduct = await Product.create({
-            productName,
-            description,
-            howToUse,
-            productImageUrl,
-            unitType,
-            price,
-            category,
-            gstPercentage,
-            organization: organisation,
-            colors,
-        });
+        let oProduct;
+
+        if (pricingType === 'areaCustomerType') {
+            oProduct = await Product.create({
+                productName,
+                description,
+                howToUse,
+                productImageUrl,
+                unitType,
+                price,
+                category,
+                gstPercentage,
+                organization: organisation,
+                colors,
+                productType,
+                pricingType,
+            });
+        } else if (pricingType === 'singlePrice') {
+            oProduct = await Product.create({
+                productName,
+                description,
+                howToUse,
+                productImageUrl,
+                unitType,
+                category,
+                gstPercentage,
+                organization: organisation,
+                colors,
+                singlePrice,
+                productType,
+                pricingType,
+            });
+        } else if (pricingType === 'areaSinglePrice') {
+            oProduct = await Product.create({
+                productName,
+                description,
+                howToUse,
+                productImageUrl,
+                unitType,
+                category,
+                gstPercentage,
+                organization: organisation,
+                colors,
+                areaSinglePrice,
+                productType,
+                pricingType,
+            });
+        } else if (pricingType === 'customerTypeSingleAreaPrice') {
+            oProduct = await Product.create({
+                productName,
+                description,
+                howToUse,
+                productImageUrl,
+                unitType,
+                category,
+                gstPercentage,
+                organization: organisation,
+                colors,
+                customerTypeSingleAreaPrice,
+                productType,
+                pricingType,
+            });
+        }
 
         return {
             statusCode: 200,
@@ -501,7 +567,7 @@ export const customerProductList = async (
 
         const processedProducts = products
             .map((product) => {
-                const areaPrice = product.price.find(
+                const areaPrice = product?.price?.find(
                     (p) => p.area === pinCode.toString(),
                 );
 

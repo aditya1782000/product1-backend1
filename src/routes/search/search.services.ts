@@ -56,7 +56,7 @@ export const productSearch = async (
 
         const processedProducts = products
             .map((product) => {
-                const areaPrice = product.price.find(
+                const areaPrice = product?.price?.find(
                     (p) => p.area === pinCode.toString(),
                 );
 
