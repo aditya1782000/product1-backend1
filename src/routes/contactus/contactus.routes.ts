@@ -28,21 +28,21 @@ router.post(
 router.post(
     '/admin/contactus/list',
     listContactUsValidators,
-    isAdmin('contact', 'V'),
+    isAdmin('Contact Forms', 'V'),
     listContactUsControllers,
 );
 
 router.delete(
     '/admin/contactus/:id/delete',
     deleteContactUsValidators,
-    isAdmin('contact', 'V'),
+    isAdmin('Contact Forms', 'V'),
     deleteContactUsControllers,
 );
 
 router.patch(
     '/admin/contactus/:id/resolve',
     resolveContactUsValidators,
-    isAdmin('contact', 'E'),
+    isAdmin('Contact Forms', 'E'),
     resolveContactUscontrollers,
 );
 

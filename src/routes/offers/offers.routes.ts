@@ -14,7 +14,7 @@ const router = express.Router();
 // Admin APIs
 router.get(
     '/admin/offers/banner/list',
-    isAdmin('Offers', 'A'),
+    isAdmin('Offers', 'V'),
     offerbannersControllers,
 );
 

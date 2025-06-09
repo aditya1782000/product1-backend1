@@ -43,82 +43,82 @@ const router = express.Router();
 // Admin panel APIs
 router.get(
     '/admin/orders/receive',
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     receiveCustomerOrdersControllers,
 );
 
 router.post(
     '/admin/orders/pending/list',
     listPendingOrdersValidators,
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     listPendingOrdersControllers,
 );
 
 router.post(
     '/admin/orders/completed/list',
     listCompletedOrdersValidators,
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     listCompletedOrdersControllers,
 );
 
 router.get(
     '/admin/order/:id/view',
     viewAdminOrderValidators,
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     viewAdminOrderControllers,
 );
 
 router.patch(
     '/admin/order/:id/edit',
     editOrderValidators,
-    isAdmin('orders', 'E'),
+    isAdmin('Orders', 'E'),
     editOrderControllers,
 );
 
 router.patch(
     '/admin/order/:id/approve',
     acceptOrderValidators,
-    isAdmin('orders', 'E'),
+    isAdmin('Orders', 'E'),
     acceptOrderControllers,
 );
 
 router.patch(
     '/admin/order/:id/reject',
     rejectOrderValidators,
-    isAdmin('orders', 'E'),
+    isAdmin('Orders', 'E'),
     rejectedOrderControllers,
 );
 
 router.patch(
     '/admin/order/:id/deliever',
     changeOrderStatusValidators,
-    isAdmin('orders', 'E'),
+    isAdmin('Orders', 'E'),
     changeOrderStatusControllers,
 );
 
 router.post(
     '/admin/orders/add',
     createAdminOrdersValidators,
-    isAdmin('orders', 'A'),
+    isAdmin('Orders', 'A'),
     createAdminOrdersControllers,
 );
 
 router.delete(
     '/admin/order/:id/delete',
     deleteOrderValidators,
-    isAdmin('orders', 'D'),
+    isAdmin('Orders', 'D'),
     deleteOrderControllers,
 );
 
 router.post(
     '/admin/order/customers/list',
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     customerListControllers,
 );
 
 router.post(
     '/admin/order/products/list',
-    isAdmin('orders', 'V'),
+    isAdmin('Orders', 'V'),
     productsListControllers,
 );
 

@@ -13,6 +13,7 @@ const enums = {
         'Statements',
         'Offers',
     ],
+    invetoryPermission: ['Warehouse', 'Vendor', 'Receipt', 'PO'],
     permissionType: ['ALL', 'A', 'E', 'D', 'V', 'AD'],
     unitType: ['KG', 'LTR', 'MT', 'PC', 'TIN', 'BOX', 'BUNDLE'],
     supportedUploadType: [
@@ -40,6 +41,7 @@ const enums = {
         'areaSinglePrice',
         'customerTypeSingleAreaPrice',
     ],
+    inventoryAccessLevel: ['Global', 'Warehouse'],
 };
 
 export default enums;

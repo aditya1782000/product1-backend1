@@ -21,7 +21,7 @@ router.post(
     '/admin/send/notifications',
     uploader.uploadFile('image'),
     sendNotificationsValidators,
-    isAdmin('notifications', 'A'),
+    isAdmin('Notification', 'A'),
     sendNotificationControllers,
 );
 

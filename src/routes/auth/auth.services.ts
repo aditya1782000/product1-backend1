@@ -163,9 +163,22 @@ export const verifyOtp = async (
             };
         }
 
-        token = jwt.sign({ id: oUser._id }, jwtSecret as string, {
-            expiresIn: process.env.JWT_EXPIRES_IN as string,
-        });
+        token = jwt.sign(
+            {
+                id: oUser._id,
+                email: oUser.email || '',
+                role: oUser.role || '',
+                permissions: oUser.permissions || '',
+                inventoryPermissions: oUser.inventoryPermission || '',
+                organization: oUser.organization || '',
+                warehouseIds: oUser.warehouseIds || '',
+                invetoryAccessLevel: oUser.inventoryAccessLevel || '',
+            },
+            jwtSecret as string,
+            {
+                expiresIn: process.env.JWT_EXPIRES_IN as string,
+            },
+        );
 
         oUser.otp = undefined;
         oUser.otpExpires = undefined;
@@ -183,10 +196,13 @@ export const verifyOtp = async (
                 phoneNumber: oUser.phoneNumber || '',
                 role: oUser.role || '',
                 permissions: oUser.permissions || '',
+                inventoryPermissions: oUser.inventoryPermission || '',
                 organization: oUser.organization || '',
                 addressLineOne: oUser.addressLineOne || '',
                 addressLineTwo: oUser.addressLineTwo || '',
                 _id: oUser._id || '',
+                warehouseIds: oUser.warehouseIds || '',
+                invetoryAccessLevel: oUser.inventoryAccessLevel || '',
             },
         };
     } catch (error: unknown) {

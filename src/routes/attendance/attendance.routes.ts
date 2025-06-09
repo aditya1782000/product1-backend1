@@ -19,19 +19,20 @@ import {
     listUserLeaveRequestsValidators,
     requestLeaveValidators,
 } from './attendance.validators';
+import { validateOnlyAdmin } from '../../middleware/isOnlyAdmin';
 
 const router = express.Router();
 
 router.post(
     '/admin/attendance/clockin/clockout',
     clockInClockOutValidators,
-    isAdmin('Attendance', 'A'),
+    validateOnlyAdmin(),
     clockInClockOutControllers,
 );
 
 router.get(
     '/admin/list/attendance/records',
-    isAdmin('Attendance', 'V'),
+    validateOnlyAdmin(),
     listClockInClockOutTimesControllers,
 );
 
@@ -52,14 +53,14 @@ router.post(
 router.post(
     '/admin/leave/request',
     requestLeaveValidators,
-    isAdmin('Attendance', 'A'),
+    validateOnlyAdmin(),
     requestLeaveControllers,
 );
 
 router.post(
     '/admin/leave/user/requests',
     listUserLeaveRequestsValidators,
-    isAdmin('Attendance', 'V'),
+    validateOnlyAdmin(),
     listUserLeaveRequestsControllers,
 );
 

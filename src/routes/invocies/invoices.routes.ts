@@ -15,7 +15,7 @@ const router = express.Router();
 router.post(
     '/admin/invoices/delivered/orders/list',
     listDeliveredOrdersValidators,
-    isAdmin('invoices', 'V'),
+    isAdmin('Invoices', 'V'),
     listDeliveredOrdersControllers,
 );
 
@@ -23,7 +23,7 @@ router.patch(
     '/admin/invoice/:id/add',
     uploader.uploadFile('pdf'),
     addInvoiceValidator,
-    isAdmin('invoices', 'A'),
+    isAdmin('Invoices', 'A'),
     addInvoiceControllers,
 );
 

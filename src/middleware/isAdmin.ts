@@ -19,7 +19,7 @@ export const isAdmin = (
         try {
             let token = req.headers.authorization;
 
-            const role = req.body.role || req.query.role || req.params.role;
+            // const role = req.body.role || req.query.role || req.params.role;
 
             if (!token) {
                 return res.status(403).json({
@@ -45,7 +45,7 @@ export const isAdmin = (
             const oUser = await User.findOne({
                 _id: decoded.id,
                 isDeleted: { $ne: true },
-            }).select('organization isActive role');
+            }).select('organization isActive role permissions');
 
             if (!oUser) {
                 return res.status(401).json({
@@ -81,22 +81,36 @@ export const isAdmin = (
                 return next();
             }
 
-            if (role === 'subAdmin') {
+            if (oUser.role === 'subAdmin') {
                 const aPermissions = oUser.permissions || [];
 
-                const hasPermissions = aPermissions.filter(
-                    (Permissions: any) => {
-                        return (
-                            Permissions.eKey === eKey &&
-                            Permissions.eType.includes(eType)
-                        );
-                    },
-                );
+                if (eKey === '') {
+                    const errors = validationResult(req);
+                    if (!errors.isEmpty()) {
+                        const errorMessages = errors
+                            .array()
+                            .map((error: ValidationError) => error.msg)
+                            .join(', ');
+                        return res.status(422).json({
+                            success: false,
+                            message: errorMessages,
+                        });
+                    }
+
+                    return next();
+                }
+
+                const hasPermissions = aPermissions.some((Permissions: any) => {
+                    return (
+                        Permissions.eKey === eKey &&
+                        Permissions.eType.includes(eType)
+                    );
+                });
 
                 if (!hasPermissions) {
                     return res.status(403).json({
                         success: false,
-                        message: 'Permission access',
+                        message: 'Permission access denied',
                     });
                 }
 
@@ -115,29 +129,29 @@ export const isAdmin = (
                 return next();
             }
 
-            if (role === 'employee') {
-                if (eKey === 'attendance') {
-                    if (req.body.userId === decoded.id) {
-                        const errors = validationResult(req);
-                        if (!errors.isEmpty()) {
-                            const errorMessages = errors
-                                .array()
-                                .map((error: ValidationError) => error.msg)
-                                .join(', ');
-                            return res.status(422).json({
-                                success: false,
-                                message: errorMessages,
-                            });
-                        }
-                        return next();
-                    } else {
-                        return res.status(403).json({
-                            success: false,
-                            message: 'Unauthorized access',
-                        });
-                    }
-                }
-            }
+            // if (role === 'employee') {
+            //     if (eKey === 'attendance') {
+            //         if (req.body.userId === decoded.id) {
+            //             const errors = validationResult(req);
+            //             if (!errors.isEmpty()) {
+            //                 const errorMessages = errors
+            //                     .array()
+            //                     .map((error: ValidationError) => error.msg)
+            //                     .join(', ');
+            //                 return res.status(422).json({
+            //                     success: false,
+            //                     message: errorMessages,
+            //                 });
+            //             }
+            //             return next();
+            //         } else {
+            //             return res.status(403).json({
+            //                 success: false,
+            //                 message: 'Unauthorized access',
+            //             });
+            //         }
+            //     }
+            // }
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

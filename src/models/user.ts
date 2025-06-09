@@ -10,6 +10,7 @@ export interface IUser extends Document {
     role: string;
     type: string;
     permissions: IPermission[];
+    inventoryPermission: IInventoryPermission[];
     organization: mongoose.Types.ObjectId[];
     orgnaizationName?: string;
     resetPasswordToken?: string;
@@ -28,9 +29,16 @@ export interface IUser extends Document {
     isDeleted?: boolean;
     isBillingOption?: boolean;
     isAppAccess?: boolean;
+    warehouseIds?: string[];
+    inventoryAccessLevel: string;
 }
 
 export interface IPermission extends Document {
+    eKey: string;
+    eType: string[];
+}
+
+export interface IInventoryPermission extends Document {
     eKey: string;
     eType: string[];
 }
@@ -42,6 +50,12 @@ const permissionSchema: Schema<IPermission> = new Schema<IPermission>(
     },
     { _id: false },
 );
+
+const inventoryPermissionSchema: Schema<IInventoryPermission> =
+    new Schema<IInventoryPermission>({
+        eKey: { type: String, enum: data.invetoryPermission },
+        eType: { type: [String], enum: data.permissionType },
+    });
 
 const UserSchema: Schema<IUser> = new Schema<IUser>(
     {
@@ -71,6 +85,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
             // enum: data.customerType
         },
         permissions: { type: [permissionSchema] },
+        inventoryPermission: { type: [inventoryPermissionSchema] },
         organization: {
             type: [
                 {
@@ -99,6 +114,13 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
         isDeleted: Boolean,
         isBillingOption: Boolean,
         isAppAccess: Boolean,
+        warehouseIds: {
+            type: [String],
+        },
+        inventoryAccessLevel: {
+            type: String,
+            enum: data.inventoryAccessLevel,
+        },
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },
 );

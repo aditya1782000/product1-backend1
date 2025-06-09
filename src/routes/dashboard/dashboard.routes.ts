@@ -1,5 +1,4 @@
 import express from 'express';
-import { isAdmin } from '../../middleware/isAdmin';
 import {
     customerOrdercountsControllers,
     customerRecentDeliveredOrdersController,
@@ -14,29 +13,34 @@ import {
     recentOrdersValidators,
 } from './dashboard.validators';
 import { isCustomer } from '../../middleware/isCustomer';
+import { validateOnlyAdmin } from '../../middleware/isOnlyAdmin';
 
 const router = express.Router();
 
 // Admin Panle Apis
-router.get('/admin/dashboard/count/data', isAdmin(), getCountDataControllers);
+router.get(
+    '/admin/dashboard/count/data',
+    validateOnlyAdmin(),
+    getCountDataControllers,
+);
 
 router.post(
     '/admin/dashboard/orders/recent',
     recentOrdersValidators,
-    isAdmin(),
+    validateOnlyAdmin(),
     getRecentOrdersControllers,
 );
 
 router.post(
     '/admin/dashboard/orders/count/month',
     orderCountsMonthYearValidators,
-    isAdmin(),
+    validateOnlyAdmin(),
     orderCountsMonthYearControllers,
 );
 
 router.post(
     '/admin/dashboard/orders/status/count',
-    isAdmin(),
+    validateOnlyAdmin(),
     orderStatusCountControllers,
 );
 

@@ -36,21 +36,21 @@ router.post(
 router.post(
     '/admin/products/list',
     listProductsValidators,
-    isAdmin('products', 'V'),
+    isAdmin('Products', 'V'),
     listProdutsController,
 );
 
 router.get(
     '/admin/product/:id/view',
     viewProductValidators,
-    isAdmin('products', 'V'),
+    isAdmin('Products', 'V'),
     viewProductsController,
 );
 
 router.patch(
     '/admin/product/:id/toggle',
     toggleProductStatusValidators,
-    isAdmin('products', 'AD'),
+    isAdmin('Products', 'AD'),
     toggleProductStatus,
 );
 
@@ -58,14 +58,14 @@ router.patch(
     '/admin/product/:id/edit',
     uploader.uploadFile('image'),
     editProductValidators,
-    isAdmin('products', 'E'),
+    isAdmin('Products', 'E'),
     editProductController,
 );
 
 router.delete(
     '/admin/product/:id/delete',
     deleteProductValidators,
-    isAdmin('products', 'D'),
+    isAdmin('Products', 'D'),
     deleteProductController,
 );
 

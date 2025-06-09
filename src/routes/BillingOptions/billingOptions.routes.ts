@@ -17,20 +17,20 @@ const router = express.Router();
 router.post(
     '/admin/create/billing/option',
     createBillingOptionValidators,
-    isAdmin('', 'A'),
+    isAdmin('Orders', 'A'),
     createBillingOptionControllers,
 );
 
 router.get(
     '/admin/billing/options/list',
-    isAdmin('', 'A'),
+    isAdmin('Orders', 'A'),
     listBillingOptionsControllers,
 );
 
 router.delete(
     '/admin/billin/option/:id/delete',
     deleteBillingOptionValidators,
-    isAdmin('', 'A'),
+    isAdmin('Orders', 'A'),
     deleteBillingOptionControllers,
 );
 
