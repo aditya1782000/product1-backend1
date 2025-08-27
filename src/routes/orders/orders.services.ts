@@ -97,20 +97,20 @@ export const createCustomerOrder = async (
             billingOption,
         };
 
-        const producer = myKafka.producer();
-        await producer.connect();
+        // const producer = myKafka.producer();
+        // await producer.connect();
 
-        await producer.send({
-            topic: process.env.TOPIC_ONE || '',
-            messages: [
-                {
-                    value: JSON.stringify(orderData),
-                    key: orderData.organization.toString(),
-                },
-            ],
-        });
+        // await producer.send({
+        //     topic: process.env.TOPIC_ONE || '',
+        //     messages: [
+        //         {
+        //             value: JSON.stringify(orderData),
+        //             key: orderData.organization.toString(),
+        //         },
+        //     ],
+        // });
 
-        await producer.disconnect();
+        // await producer.disconnect();
 
         const newOrder = new Order(orderData);
         await newOrder.save();
