@@ -172,7 +172,7 @@ export const createChallan = async (
         }
 
         const ficalYearStart = new Date(`${startYear}-04-01`);
-        const ficalYearEnd = new Date(`${endYear}-03-31`);
+        const ficalYearEnd = new Date(`${endYear}-04-01`);
 
         const nChallanTotal = await Challan.countDocuments({
             challanOrg: organisation,
@@ -916,7 +916,7 @@ export const createCustomChallan = async (
         }
 
         const ficalYearStart = new Date(`${startYear}-04-01`);
-        const ficalYearEnd = new Date(`${endYear}-03-31`);
+        const ficalYearEnd = new Date(`${endYear}-04-01`);
 
         const nChallanTotal = await CustomChallan.countDocuments({
             customChallanOrg: organisation,
