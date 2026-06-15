@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { AsyncResponseType } from '../../types/async';
-import { myKafka } from '../../utils/kafka';
+// import { myKafka } from '../../utils/kafka';
 import Order from '../../models/orders';
 import { Request } from 'express';
 import User from '../../models/user';
@@ -139,70 +139,33 @@ export const createCustomerOrder = async (
 };
 
 export const recieveCustomerOrders = async (
-    organisation: mongoose.Types.ObjectId,
+    _organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
-    try {
-        const consumer = myKafka.consumer({
-            groupId: `${process.env.GROUP_ID || 'order'}-${organisation}`,
-            sessionTimeout: 30000,
-            heartbeatInterval: 3000,
-        });
-        await consumer.connect();
-
-        await consumer.subscribe({
-            topic: process.env.TOPIC_ONE || '',
-            fromBeginning: true,
-        });
-
-        await consumer.run({
-            eachMessage: async ({ message }) => {
-                try {
-                    const orderData = JSON.parse(`${message.value}` || '');
-
-                    if (
-                        orderData.organization.toString() ===
-                        organisation.toString()
-                    ) {
-                        const order = await Order.findOne({
-                            orderNumber: orderData.orderNumber,
-                            organization: orderData.organization,
-                        });
-
-                        if (order) {
-                            global.io
-                                .to(organisation.toString())
-                                .emit('Order-recieved', {
-                                    message: 'A new order has been received.',
-                                    orderDetails: order,
-                                });
-                        }
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            },
-        });
-
-        return {
-            statusCode: 200,
-            success: true,
-            message: 'Order notification service started successfully',
-        };
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            return {
-                statusCode: 500,
-                success: false,
-                message: error.message || 'Something went wrong',
-            };
-        }
-
-        return {
-            statusCode: 500,
-            success: false,
-            message: 'Something went wrong',
-        };
-    }
+    return {
+        statusCode: 200,
+        success: true,
+        message: 'Order notification service is disabled',
+    };
+    // const consumer = myKafka.consumer({
+    //     groupId: `${process.env.GROUP_ID || 'order'}-${_organisation}`,
+    //     sessionTimeout: 30000,
+    //     heartbeatInterval: 3000,
+    // });
+    // await consumer.connect();
+    // await consumer.subscribe({ topic: process.env.TOPIC_ONE || '', fromBeginning: true });
+    // await consumer.run({
+    //     eachMessage: async ({ message }) => {
+    //         try {
+    //             const orderData = JSON.parse(`${message.value}` || '');
+    //             if (orderData.organization.toString() === _organisation.toString()) {
+    //                 const order = await Order.findOne({ orderNumber: orderData.orderNumber, organization: orderData.organization });
+    //                 if (order) {
+    //                     global.io.to(_organisation.toString()).emit('Order-recieved', { message: 'A new order has been received.', orderDetails: order });
+    //                 }
+    //             }
+    //         } catch (error) { console.error(error); }
+    //     },
+    // });
 };
 
 export const listPendingOrders = async (

@@ -1,6 +1,6 @@
 import http from 'http';
 import app from './app';
-import { init } from './utils/kafka';
+// import { init } from './utils/kafka';
 import { createSocketServer } from './utils/socket';
 
 const server = http.createServer(app);
@@ -20,11 +20,11 @@ function connectToDbAndRunServer() {
         mongoose.connection.on('error', (error: Error) => console.log(error));
         console.log('Connect to database successfully...');
 
-        await init();
-        console.log('Kafka initialized successfully...');
+        // await init();
+        // console.log('Kafka initialized successfully...');
 
         console.log('Web socket connected', !!io);
-        
+
     });
 }
 
