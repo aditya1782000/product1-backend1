@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>OTP Verification</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 30px;
+                background-color: #f3f4f6;
+                font-family: 'Segoe UI', sans-serif;
+                color: #333;
+            }
+
+            .email-box {
+                max-width: 500px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 10px;
+                padding: 40px 30px;
+                text-align: center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .logo {
+                margin-bottom: 30px;
+            }
+
+            .logo img {
+                width: 180px;
+                height: auto;
+            }
+
+            .message {
+                font-size: 16px;
+                color: #4b5563;
+                margin-bottom: 10px;
+            }
+
+            .otp-text {
+                font-size: 26px;
+                font-weight: bold;
+                letter-spacing: 2px;
+                color: #1f2937;
+                margin: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="email-box">
+            <div class="logo">
+                <img
+                    src="https://saas-product-one.s3.ap-south-1.amazonaws.com/email_logo.png"
+                    alt="Udhyogsathi Logo"
+                />
+            </div>
+
+            <p class="message">Your One-Time Password (OTP) is:</p>
+            <p class="otp-text"><%= OTP %></p>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2016",                                 
+    "module": "commonjs",
+    "lib": ["es2016", "dom"],     
+    "sourceMap": true,     
+    "outDir": "./build",                     
+    
+    "strict": true,                                      
+    "strictPropertyInitialization": false,
+    
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true, 
+    
+    "moduleResolution": "node",
+    "types": ["node", "jest"],
+    "esModuleInterop": true,
+    "inlineSources": false,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true   ,
+  },
+  "include": ["src"],
+}
