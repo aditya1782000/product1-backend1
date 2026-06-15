@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 import {
     deleteFileFromS3,
     extractS3Key,
-    uploadFileBufferToS3,
     uploadFileToS3,
 } from '../../utils/aws';
 import ChallanOrganization from '../../models/challanOrganization';
@@ -188,44 +187,6 @@ export const createChallan = async (
             formattedDate = date.toISOString().split('T')[0];
         }
 
-        const challanFile = generateDeliverySlip({
-            gstNo: existingChallanOrganisation.gstNo,
-            mobileNo: existingChallanOrganisation.mobileNo,
-            headingOne: existingChallanOrganisation.headingOne,
-            headingTwo: existingChallanOrganisation.headingTwo,
-            addressLineOne: existingChallanOrganisation.addressLineOne,
-            addressLineTwo: existingChallanOrganisation.addressLineTwo,
-            logoPath: processedLogoPath,
-            footer: existingChallanOrganisation.footer,
-            note: existingChallanOrganisation.note,
-            total,
-            slipNo: ChallanNo,
-            date: formatDate(formattedDate),
-            name: customerName,
-            address,
-            items,
-            customerMobileNo: Number(customerMobileNo),
-            vehicleNo: vehicleNo,
-            fraightAndTransport: Number(fraightAndTransport),
-        });
-
-        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-            const chunks: Uint8Array[] = [];
-
-            challanFile.on('data', (chunk) => chunks.push(chunk));
-            challanFile.on('end', () => resolve(Buffer.concat(chunks)));
-            challanFile.on('error', reject);
-
-            challanFile.end();
-        });
-
-        const uploadData = await uploadFileBufferToS3(
-            pdfBuffer,
-            `${Date.now().toString()}`,
-            'challans',
-            'application/pdf',
-        );
-
         const oChallan = await Challan.create({
             challanOrg: existingChallanOrganisation.organization,
             challanNo: ChallanNo,
@@ -234,7 +195,6 @@ export const createChallan = async (
             address,
             items,
             total,
-            challanUrl: uploadData.Location,
             vehicleNo: vehicleNo,
             customerMobileNo: customerMobileNo,
             fraightAndTransport: fraightAndTransport,
@@ -549,66 +509,12 @@ export const editChallan = async (
             };
         }
 
-        let processedLogoPath = existingChallanOrganisation.logoPath;
-        if (processedLogoPath) {
-            try {
-                processedLogoPath =
-                    await convertImageUrlToBase64(processedLogoPath);
-            } catch (error) {
-                throw error;
-            }
-        }
-
         let formattedDate: string;
         if (typeof date === 'string') {
             formattedDate = date;
         } else {
             formattedDate = date?.toISOString().split('T')[0] || '';
         }
-
-        const challanFile = generateDeliverySlip({
-            gstNo: existingChallanOrganisation.gstNo,
-            mobileNo: existingChallanOrganisation.mobileNo,
-            headingOne: existingChallanOrganisation.headingOne,
-            headingTwo: existingChallanOrganisation.headingTwo,
-            addressLineOne: existingChallanOrganisation.addressLineOne,
-            addressLineTwo: existingChallanOrganisation.addressLineTwo,
-            logoPath: processedLogoPath,
-            footer: existingChallanOrganisation.footer,
-            note: existingChallanOrganisation.note,
-            total: total || oChallan.total || 0,
-            slipNo: oChallan.challanNo,
-            date: formatDate(formattedDate),
-            name: customerName || oChallan.customerName || '',
-            customerMobileNo:
-                Number(customerMobileNo) || oChallan.customerMobileNo,
-            address: address || oChallan.address || '',
-            items: items || oChallan.items || [],
-            vehicleNo: vehicleNo || oChallan.vehicleNo || '',
-            fraightAndTransport:
-                Number(fraightAndTransport) ||
-                Number(oChallan.fraightAndTransport),
-        });
-
-        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-            const chunks: Uint8Array[] = [];
-
-            challanFile.on('data', (chunk) => chunks.push(chunk));
-            challanFile.on('end', () => resolve(Buffer.concat(chunks)));
-            challanFile.on('error', reject);
-
-            challanFile.end();
-        });
-        if (oChallan.challanUrl) {
-            const key = extractS3Key(oChallan.challanUrl);
-            deleteFileFromS3(key);
-        }
-        const uploadData = await uploadFileBufferToS3(
-            pdfBuffer,
-            `${Date.now().toString()}`,
-            'challans',
-            'application/pdf',
-        );
 
         await Challan.findByIdAndUpdate(challanId, {
             challanOrg: existingChallanOrganisation.organization,
@@ -618,7 +524,6 @@ export const editChallan = async (
             address: address || oChallan.address,
             items: items || oChallan.items,
             total: total || oChallan.total,
-            challanUrl: uploadData.Location,
             customerMobileNo: customerMobileNo || oChallan.customerMobileNo,
             vehicleNo: vehicleNo || oChallan.vehicleNo,
             fraightAndTransport: fraightAndTransport,
@@ -674,11 +579,6 @@ export const deleteChallan = async (
 
         await Challan.findByIdAndDelete(challanId);
 
-        if (oChallan.challanUrl) {
-            const key = extractS3Key(oChallan.challanUrl);
-            deleteFileFromS3(key);
-        }
-
         return {
             statusCode: 200,
             success: true,
@@ -720,7 +620,7 @@ export const listChallans = async (
             $and: [oData.oSearchData],
             challanOrg: { $in: organisation },
         })
-            .select('challanNo customerName total challanUrl date')
+            .select('challanNo customerName total date')
             .collation({ locale: 'en', strength: 1 })
             .sort({ dCreatedAt: -1 })
             .skip(start)
@@ -939,59 +839,6 @@ export const createCustomChallan = async (
             formattedDated = dated.toISOString().split('T')[0];
         }
 
-        const formattedItems = items.map((item, index) => ({
-            srNo: index + 1,
-            productName: item.productName,
-            packingType: item.typeOfPacking || '',
-            bagsBoxes: item.bagBoxes || 0,
-            totalQty: item.qty,
-            rate: item.rate,
-            amount: item.qty * item.rate,
-        }));
-
-        const customChallanFile = generateDeliveryChallan({
-            companyName: existingCustomChallanOrganisation.challanOrg,
-            title: existingCustomChallanOrganisation.title,
-            companyAddress: existingCustomChallanOrganisation.address,
-            contactNumber: customerMobileNo,
-            gstNo: existingCustomChallanOrganisation.gstNo,
-            panNo: existingCustomChallanOrganisation.panNo,
-            partyCode: partyCode,
-            challanNo: ChallanNo,
-            dateNo: formatDate(formattedDate),
-            consigneeName: customerName,
-            address: address,
-            transportName: nameOfTransport,
-            lrNo: lrNo,
-            truckNo: vehicleNo,
-            orderNo: orderNo,
-            dated: formatDate(formattedDated),
-            items: formattedItems,
-            footerOne: existingCustomChallanOrganisation.footerOne,
-            footerTwo: existingCustomChallanOrganisation.footerTwo,
-            footerThree: existingCustomChallanOrganisation.footerThree,
-            footerFour: existingCustomChallanOrganisation.footerFour,
-            footerFive: existingCustomChallanOrganisation.footerFive,
-            total: String(total),
-        });
-
-        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-            const chunks: Uint8Array[] = [];
-
-            customChallanFile.on('data', (chunk) => chunks.push(chunk));
-            customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
-            customChallanFile.on('error', reject);
-
-            customChallanFile.end();
-        });
-
-        const uploadData = await uploadFileBufferToS3(
-            pdfBuffer,
-            `${Date.now().toString()}`,
-            'customChallans',
-            'application/pdf',
-        );
-
         const oCustomChallan = await CustomChallan.create({
             customChallanOrg: existingCustomChallanOrganisation.organization,
             challanNo: ChallanNo,
@@ -1007,7 +854,6 @@ export const createCustomChallan = async (
             items,
             vehicleNo,
             total,
-            challanUrl: uploadData.Location,
         });
 
         return {
@@ -1331,64 +1177,6 @@ export const editCustomChallan = async (
             formattedDated = dated.toISOString().split('T')[0];
         }
 
-        const formattedItems = items.map((item, index) => ({
-            srNo: index + 1,
-            productName: item.productName,
-            packingType: item.typeOfPacking || '',
-            bagsBoxes: item.bagBoxes || 0,
-            totalQty: item.qty,
-            rate: item.rate,
-            amount: item.qty * item.rate,
-        }));
-
-        const customChallanFile = generateDeliveryChallan({
-            companyName: existingCustomChallanOrganisation.challanOrg,
-            title: existingCustomChallanOrganisation.title,
-            companyAddress: existingCustomChallanOrganisation.address,
-            contactNumber: customerMobileNo || oChallan.customerMobileNo,
-            gstNo: existingCustomChallanOrganisation.gstNo,
-            panNo: existingCustomChallanOrganisation.panNo,
-            partyCode: partyCode || oChallan.partyCode,
-            challanNo: oChallan.challanNo,
-            dateNo: formatDate(formattedDate),
-            consigneeName: customerName || oChallan.customerName,
-            address: address || oChallan.address,
-            transportName: nameOfTransport || oChallan.nameOfTransport,
-            lrNo: lrNo || oChallan.lrNo,
-            truckNo: vehicleNo || oChallan.vehicleNo,
-            orderNo: orderNo || oChallan.orderNo,
-            dated: formatDate(formattedDated),
-            items: formattedItems || oChallan.items,
-            footerOne: existingCustomChallanOrganisation.footerOne,
-            footerTwo: existingCustomChallanOrganisation.footerTwo,
-            footerThree: existingCustomChallanOrganisation.footerThree,
-            footerFour: existingCustomChallanOrganisation.footerFour,
-            footerFive: existingCustomChallanOrganisation.footerFive,
-            total: String(total) || String(oChallan.total),
-        });
-
-        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-            const chunks: Uint8Array[] = [];
-
-            customChallanFile.on('data', (chunk) => chunks.push(chunk));
-            customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
-            customChallanFile.on('error', reject);
-
-            customChallanFile.end();
-        });
-
-        if (oChallan.challanUrl) {
-            const key = extractS3Key(oChallan.challanUrl);
-            deleteFileFromS3(key);
-        }
-
-        const uploadData = await uploadFileBufferToS3(
-            pdfBuffer,
-            `${Date.now().toString()}`,
-            'customChallans',
-            'application/pdf',
-        );
-
         const oCusomChallan = await CustomChallan.findByIdAndUpdate(challanId, {
             customChallanOrg: existingCustomChallanOrganisation.organization,
             challanNo: oChallan.challanNo,
@@ -1404,7 +1192,6 @@ export const editCustomChallan = async (
             items: items || oChallan.items,
             vehicleNo: vehicleNo || oChallan.vehicleNo,
             total: total || oChallan.total,
-            challanUrl: uploadData.Location,
         });
 
         return {
@@ -1457,11 +1244,6 @@ export const deleteCustomChallan = async (
         }
 
         await CustomChallan.findByIdAndDelete(challanId);
-
-        if (oChallan.challanUrl) {
-            const key = extractS3Key(oChallan.challanUrl);
-            deleteFileFromS3(key);
-        }
 
         return {
             statusCode: 200,
@@ -1558,7 +1340,7 @@ export const listCustomChallan = async (
             $and: [oData.oSearchData],
             customChallanOrg: { $in: organisation },
         })
-            .select('challanNo customerName total challanUrl date')
+            .select('challanNo customerName total date')
             .collation({ locale: 'en', strength: 1 })
             .sort({ dCreatedAt: -1 })
             .skip(start)
@@ -1588,5 +1370,176 @@ export const listCustomChallan = async (
             success: false,
             message: 'Something went wrong',
         };
+    }
+};
+
+export const downloadChallan = async (
+    challanId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await Challan.findById(challanId);
+
+        if (!oChallan) {
+            return { statusCode: 404, success: false, message: 'Challan not found' };
+        }
+
+        if (
+            oChallan.challanOrg &&
+            oChallan.challanOrg._id.toString() !== organisation.toString()
+        ) {
+            return { statusCode: 403, success: false, message: 'Unauthorized access' };
+        }
+
+        const existingChallanOrganisation = await ChallanOrganization.findOne({
+            organization: organisation,
+        });
+
+        if (!existingChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Challan organization not found',
+            };
+        }
+
+        let processedLogoPath = existingChallanOrganisation.logoPath;
+        if (processedLogoPath) {
+            processedLogoPath = await convertImageUrlToBase64(processedLogoPath);
+        }
+
+        const formattedDate = oChallan.date as unknown as string;
+
+        const challanFile = generateDeliverySlip({
+            gstNo: existingChallanOrganisation.gstNo,
+            mobileNo: existingChallanOrganisation.mobileNo,
+            headingOne: existingChallanOrganisation.headingOne,
+            headingTwo: existingChallanOrganisation.headingTwo,
+            addressLineOne: existingChallanOrganisation.addressLineOne,
+            addressLineTwo: existingChallanOrganisation.addressLineTwo,
+            logoPath: processedLogoPath,
+            footer: existingChallanOrganisation.footer,
+            note: existingChallanOrganisation.note,
+            total: oChallan.total || 0,
+            slipNo: oChallan.challanNo,
+            date: formatDate(formattedDate),
+            name: oChallan.customerName || '',
+            customerMobileNo: Number(oChallan.customerMobileNo),
+            address: oChallan.address || '',
+            items: oChallan.items || [],
+            vehicleNo: oChallan.vehicleNo || '',
+            fraightAndTransport: Number(oChallan.fraightAndTransport),
+        });
+
+        const buffer = await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Uint8Array[] = [];
+            challanFile.on('data', (chunk) => chunks.push(chunk));
+            challanFile.on('end', () => resolve(Buffer.concat(chunks)));
+            challanFile.on('error', reject);
+            challanFile.end();
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan PDF generated',
+            data: { buffer, filename: `challan-${oChallan.challanNo}.pdf` },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return { statusCode: 500, success: false, message: error.message || 'Something went wrong' };
+        }
+        return { statusCode: 500, success: false, message: 'Something went wrong' };
+    }
+};
+
+export const downloadCustomChallan = async (
+    challanId: string,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await CustomChallan.findById(challanId);
+
+        if (!oChallan) {
+            return { statusCode: 404, success: false, message: 'Challan not found' };
+        }
+
+        if (
+            oChallan.customChallanOrg &&
+            oChallan.customChallanOrg._id.toString() !== organisation.toString()
+        ) {
+            return { statusCode: 403, success: false, message: 'Unauthorized access' };
+        }
+
+        const existingCustomChallanOrganisation = await CustomChallanOrg.findOne({
+            organization: organisation,
+        });
+
+        if (!existingCustomChallanOrganisation) {
+            return {
+                statusCode: 404,
+                success: false,
+                message: 'Custom Challan organization not found',
+            };
+        }
+
+        const formattedDate = oChallan.date as unknown as string;
+        const formattedDated = oChallan.dated as unknown as string;
+
+        const formattedItems = (oChallan.items as CustomItem[]).map((item, index) => ({
+            srNo: index + 1,
+            productName: item.productName,
+            packingType: item.typeOfPacking || '',
+            bagsBoxes: item.bagBoxes || 0,
+            totalQty: item.qty,
+            rate: item.rate,
+            amount: item.qty * item.rate,
+        }));
+
+        const customChallanFile = generateDeliveryChallan({
+            companyName: existingCustomChallanOrganisation.challanOrg,
+            title: existingCustomChallanOrganisation.title,
+            companyAddress: existingCustomChallanOrganisation.address,
+            contactNumber: oChallan.customerMobileNo,
+            gstNo: existingCustomChallanOrganisation.gstNo,
+            panNo: existingCustomChallanOrganisation.panNo,
+            partyCode: oChallan.partyCode,
+            challanNo: oChallan.challanNo,
+            dateNo: formatDate(formattedDate),
+            consigneeName: oChallan.customerName,
+            address: oChallan.address,
+            transportName: oChallan.nameOfTransport,
+            lrNo: oChallan.lrNo,
+            truckNo: oChallan.vehicleNo,
+            orderNo: oChallan.orderNo,
+            dated: formatDate(formattedDated),
+            items: formattedItems,
+            footerOne: existingCustomChallanOrganisation.footerOne,
+            footerTwo: existingCustomChallanOrganisation.footerTwo,
+            footerThree: existingCustomChallanOrganisation.footerThree,
+            footerFour: existingCustomChallanOrganisation.footerFour,
+            footerFive: existingCustomChallanOrganisation.footerFive,
+            total: String(oChallan.total),
+        });
+
+        const buffer = await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Uint8Array[] = [];
+            customChallanFile.on('data', (chunk) => chunks.push(chunk));
+            customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
+            customChallanFile.on('error', reject);
+            customChallanFile.end();
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'Challan PDF generated',
+            data: { buffer, filename: `challan-${oChallan.challanNo}.pdf` },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return { statusCode: 500, success: false, message: error.message || 'Something went wrong' };
+        }
+        return { statusCode: 500, success: false, message: 'Something went wrong' };
     }
 };

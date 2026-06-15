@@ -28,6 +28,8 @@ import {
     deleteChallanOrganizationControllers,
     deleteCustomChallanOrganizationControllers,
     deleteCutomChallanControllers,
+    downloadChallanController,
+    downloadCustomChallanController,
     editChallanControllers,
     editChallanOrganizationControllers,
     editCustomChallanControllers,
@@ -183,6 +185,20 @@ router.post(
     listCustomChallanValidators,
     isAdmin('Challan', 'V'),
     listCustomChallanControllers,
+);
+
+router.get(
+    '/admin/download/:id/challan',
+    viewChallanValidators,
+    isAdmin('Challan', 'V'),
+    downloadChallanController,
+);
+
+router.get(
+    '/admin/custom/challan/:id/download',
+    viewCustomChallanValidators,
+    isAdmin('Challan', 'V'),
+    downloadCustomChallanController,
 );
 
 export default router;

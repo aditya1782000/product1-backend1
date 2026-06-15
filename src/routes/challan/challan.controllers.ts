@@ -8,6 +8,8 @@ import {
     deleteChallanOrganization,
     deleteCustomChallan,
     deleteCustomChallanOrgnization,
+    downloadChallan,
+    downloadCustomChallan,
     editChallan,
     editChallanOrganization,
     editCustomChallan,
@@ -520,4 +522,48 @@ export const listCustomChallanControllers = async (
         ...oResponse,
         statusCode: undefined,
     });
+};
+
+export const downloadChallanController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+    const { id } = req.params;
+
+    const oResponse = await downloadChallan(id, organization);
+
+    if (!oResponse.success) {
+        return res.status(oResponse.statusCode).send({
+            success: false,
+            message: oResponse.message,
+        });
+    }
+
+    const { buffer, filename } = oResponse.data as { buffer: Buffer; filename: string };
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    return res.send(buffer);
+};
+
+export const downloadCustomChallanController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+    const { id } = req.params;
+
+    const oResponse = await downloadCustomChallan(id, organization);
+
+    if (!oResponse.success) {
+        return res.status(oResponse.statusCode).send({
+            success: false,
+            message: oResponse.message,
+        });
+    }
+
+    const { buffer, filename } = oResponse.data as { buffer: Buffer; filename: string };
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    return res.send(buffer);
 };
