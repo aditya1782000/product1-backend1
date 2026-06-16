@@ -148,16 +148,6 @@ export const createChallan = async (
             };
         }
 
-        let processedLogoPath = existingChallanOrganisation.logoPath;
-        if (processedLogoPath) {
-            try {
-                processedLogoPath =
-                    await convertImageUrlToBase64(processedLogoPath);
-            } catch (error) {
-                throw error;
-            }
-        }
-
         const currentDate = new Date();
         let startYear: number;
         let endYear: number;
