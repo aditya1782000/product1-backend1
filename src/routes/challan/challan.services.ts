@@ -1416,7 +1416,12 @@ export const downloadChallan = async (
             name: oChallan.customerName || '',
             customerMobileNo: Number(oChallan.customerMobileNo),
             address: oChallan.address || '',
-            items: oChallan.items || [],
+            items: (oChallan.items || []).map((item: Item) => ({
+                particulars: item.particulars || '',
+                description: item.description,
+                qty: Number(item.qty),
+                rate: Number(item.rate),
+            })),
             vehicleNo: oChallan.vehicleNo || '',
             fraightAndTransport: Number(oChallan.fraightAndTransport),
         });
