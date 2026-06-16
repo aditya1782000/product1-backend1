@@ -1393,9 +1393,13 @@ export const downloadChallan = async (
             };
         }
 
-        let processedLogoPath = existingChallanOrganisation.logoPath;
+        let processedLogoPath: string | undefined = existingChallanOrganisation.logoPath;
         if (processedLogoPath) {
-            processedLogoPath = await convertImageUrlToBase64(processedLogoPath);
+            try {
+                processedLogoPath = await convertImageUrlToBase64(processedLogoPath);
+            } catch {
+                processedLogoPath = undefined;
+            }
         }
 
         const formattedDate = oChallan.date as unknown as string;
