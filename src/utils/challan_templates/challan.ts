@@ -97,10 +97,6 @@ class PDFHelper {
             .drawHeader(
                 data.gstNo || '',
                 data.mobileNo || 0,
-                data.headingOne || '',
-                data.headingTwo || '',
-                data.addressLineOne || '',
-                data.addressLineTwo || '',
                 data.logoPath || '',
                 xOffset,
             )
@@ -147,10 +143,6 @@ class PDFHelper {
     private drawHeader(
         gstNo: string,
         mobileNo: number,
-        headingOne: string,
-        headingTwo: string,
-        addressLineOne: string,
-        addressLineTwo: string,
         logoPath: string,
         xOffset: number,
     ) {
@@ -172,13 +164,12 @@ class PDFHelper {
             .text(`GSTN. : ${gstNo}`, boxStart + 10, headerTop)
             .text(`Mobile No.: +${mobileNo}`, boxStart + 10, headerTop + 15);
 
-        const rightSectionStart = boxStart + boxWidth - 235;
-
         if (logoPath) {
-            const logoWidth = 50;
-            const logoHeight = 50;
-            const logoX = rightSectionStart;
-            const logoY = headerTop;
+            const logoWidth = 140;
+            const logoHeight = 80;
+            const rightSectionStart = boxStart + boxWidth - 235;
+            const logoX = rightSectionStart + (235 - logoWidth) / 2;
+            const logoY = headerTop + (90 - logoHeight) / 2;
 
             try {
                 this.doc.image(logoPath, logoX, logoY, {
@@ -188,52 +179,6 @@ class PDFHelper {
             } catch (error) {
                 console.error('Error loading logo:', error);
             }
-
-            const headingsStart = logoX + logoWidth + 20;
-
-            this.doc
-                .fontSize(20)
-                .text(headingOne, headingsStart, headerTop, {
-                    width: 250,
-                    align: 'left',
-                })
-                .fontSize(14)
-                .text(headingTwo, headingsStart, headerTop + 25, {
-                    width: 250,
-                    align: 'left',
-                })
-                .fontSize(10)
-                .text(addressLineOne, headingsStart, headerTop + 45, {
-                    width: 250,
-                    align: 'left',
-                })
-                .text(addressLineTwo, headingsStart, headerTop + 60, {
-                    width: 250,
-                    align: 'left',
-                });
-        } else {
-            const rightSection = boxStart + boxWidth - 165;
-
-            this.doc
-                .fontSize(20)
-                .text(headingOne, rightSection, headerTop, {
-                    width: 300,
-                    align: 'left',
-                })
-                .fontSize(14)
-                .text(headingTwo, rightSection, headerTop + 25, {
-                    width: 300,
-                    align: 'left',
-                })
-                .fontSize(10)
-                .text(addressLineOne, rightSection, headerTop + 45, {
-                    width: 300,
-                    align: 'left',
-                })
-                .text(addressLineTwo, rightSection, headerTop + 60, {
-                    width: 300,
-                    align: 'left',
-                });
         }
 
         this.drawHorizontalLine(headerTop + 90, xOffset);
