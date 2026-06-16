@@ -1376,7 +1376,7 @@ export const downloadChallan = async (
 
         if (
             oChallan.challanOrg &&
-            oChallan.challanOrg._id.toString() !== organisation.toString()
+            oChallan.challanOrg.toString() !== organisation.toString()
         ) {
             return { statusCode: 403, success: false, message: 'Unauthorized access' };
         }
@@ -1456,7 +1456,7 @@ export const downloadCustomChallan = async (
 
         if (
             oChallan.customChallanOrg &&
-            oChallan.customChallanOrg._id.toString() !== organisation.toString()
+            oChallan.customChallanOrg.toString() !== organisation.toString()
         ) {
             return { statusCode: 403, success: false, message: 'Unauthorized access' };
         }
