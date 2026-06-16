@@ -54,7 +54,7 @@ export const isAdmin = (
                 });
             }
 
-            if (!oUser.isActive) {
+            if (oUser.isActive === false) {
                 return res.status(403).json({
                     success: false,
                     message: 'User is inactive',
