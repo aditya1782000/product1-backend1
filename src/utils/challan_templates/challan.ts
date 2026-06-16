@@ -98,6 +98,8 @@ class PDFHelper {
                 data.gstNo || '',
                 data.mobileNo || 0,
                 data.logoPath || '',
+                data.addressLineOne || '',
+                data.addressLineTwo || '',
                 xOffset,
             )
             .drawSlipDetails(data.slipNo, data.date, xOffset)
@@ -144,6 +146,8 @@ class PDFHelper {
         gstNo: string,
         mobileNo: number,
         logoPath: string,
+        addressLineOne: string,
+        addressLineTwo: string,
         xOffset: number,
     ) {
         const headerTop = this.margin + 10;
@@ -165,11 +169,11 @@ class PDFHelper {
             .text(`Mobile No.: +${mobileNo}`, boxStart + 10, headerTop + 15);
 
         if (logoPath) {
-            const logoWidth = 140;
-            const logoHeight = 80;
+            const logoWidth = 120;
+            const logoHeight = 55;
             const rightSectionStart = boxStart + boxWidth - 235;
             const logoX = rightSectionStart + (235 - logoWidth) / 2;
-            const logoY = headerTop + (90 - logoHeight) / 2;
+            const logoY = headerTop + 2;
 
             try {
                 this.doc.image(logoPath, logoX, logoY, {
@@ -178,6 +182,24 @@ class PDFHelper {
                 });
             } catch (error) {
                 console.error('Error loading logo:', error);
+            }
+
+            const addressX = rightSectionStart;
+            const addressWidth = 220;
+            const addressY = logoY + logoHeight + 4;
+
+            this.doc.fontSize(8).fillColor('black');
+            if (addressLineOne) {
+                this.doc.text(addressLineOne, addressX, addressY, {
+                    width: addressWidth,
+                    align: 'center',
+                });
+            }
+            if (addressLineTwo) {
+                this.doc.text(addressLineTwo, addressX, addressY + 11, {
+                    width: addressWidth,
+                    align: 'center',
+                });
             }
         }
 
