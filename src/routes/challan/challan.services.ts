@@ -10,10 +10,10 @@ import ChallanOrganization from '../../models/challanOrganization';
 import Organisation from '../../models/organisation';
 import Challan from '../../models/challan';
 import { generateDeliverySlip } from '../../utils/challan_templates/challan';
-import { convertImageUrlToBase64 } from '../../utils/imageConverter';
 import formatDate from '../../utils/date';
 import dataTable from '../../utils/dataTable';
 import fs from 'fs';
+import path from 'path';
 import CustomChallanOrg from '../../models/customChallanOrg';
 import { generateDeliveryChallan } from '../../utils/challan_templates/challan2';
 import CustomChallan from '../../models/customChallan';
@@ -1393,14 +1393,10 @@ export const downloadChallan = async (
             };
         }
 
-        let processedLogoPath: string | undefined = existingChallanOrganisation.logoPath;
-        if (processedLogoPath) {
-            try {
-                processedLogoPath = await convertImageUrlToBase64(processedLogoPath);
-            } catch {
-                processedLogoPath = undefined;
-            }
-        }
+        const hardcodedLogoPath = path.join(process.cwd(), 'assets', 'hk-logo.jpg');
+        const processedLogoPath: string | undefined = fs.existsSync(hardcodedLogoPath)
+            ? hardcodedLogoPath
+            : undefined;
 
         const formattedDate = oChallan.date as unknown as string;
 
@@ -1427,7 +1423,7 @@ export const downloadChallan = async (
 
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             const chunks: Uint8Array[] = [];
-            challanFile.on('data', (chunk) => chunks.push(chunk));
+            challanFile.on('data', (chunk: Uint8Array) => chunks.push(chunk));
             challanFile.on('end', () => resolve(Buffer.concat(chunks)));
             challanFile.on('error', reject);
             challanFile.end();
@@ -1518,7 +1514,7 @@ export const downloadCustomChallan = async (
 
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             const chunks: Uint8Array[] = [];
-            customChallanFile.on('data', (chunk) => chunks.push(chunk));
+            customChallanFile.on('data', (chunk: Uint8Array) => chunks.push(chunk));
             customChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
             customChallanFile.on('error', reject);
             customChallanFile.end();
