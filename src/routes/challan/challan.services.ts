@@ -133,6 +133,7 @@ export const createChallan = async (
     organisation: mongoose.Types.ObjectId,
     vehicleNo?: string,
     fraightAndTransport?: number,
+    challanType?: string,
 ): Promise<AsyncResponseType> => {
     try {
         const existingChallanOrganisation = await ChallanOrganization.findOne({
@@ -188,6 +189,7 @@ export const createChallan = async (
             vehicleNo: vehicleNo,
             customerMobileNo: customerMobileNo,
             fraightAndTransport: fraightAndTransport,
+            challanType: challanType || 'sales',
         });
 
         return {
@@ -463,6 +465,7 @@ export const editChallan = async (
     total?: number,
     vehicleNo?: string,
     fraightAndTransport?: number,
+    challanType?: string,
 ): Promise<AsyncResponseType> => {
     try {
         const oChallan = await Challan.findById(challanId);
@@ -517,6 +520,7 @@ export const editChallan = async (
             customerMobileNo: customerMobileNo || oChallan.customerMobileNo,
             vehicleNo: vehicleNo || oChallan.vehicleNo,
             fraightAndTransport: fraightAndTransport,
+            challanType: challanType || oChallan.challanType || 'sales',
         });
 
         return {
@@ -1424,6 +1428,7 @@ export const downloadChallan = async (
             })),
             vehicleNo: oChallan.vehicleNo || '',
             fraightAndTransport: Number(oChallan.fraightAndTransport),
+            challanType: oChallan.challanType || 'sales',
         });
 
         const buffer = await new Promise<Buffer>((resolve, reject) => {

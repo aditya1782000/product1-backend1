@@ -60,6 +60,7 @@ export const createChallanControllers = async (req: Request, res: Response) => {
         vehicleNo,
         customerMobileNo,
         fraightAndTransport,
+        challanType,
     } = req.body;
 
     const oResponse = await createChallan(
@@ -72,6 +73,7 @@ export const createChallanControllers = async (req: Request, res: Response) => {
         organization,
         vehicleNo,
         fraightAndTransport,
+        challanType,
     );
 
     return res.status(oResponse.statusCode).send({
@@ -166,6 +168,7 @@ export const editChallanControllers = async (req: Request, res: Response) => {
         customerMobileNo,
         vehicleNo,
         fraightAndTransport,
+        challanType,
     } = req.body;
 
     const oResponse = await editChallan(
@@ -179,6 +182,7 @@ export const editChallanControllers = async (req: Request, res: Response) => {
         total,
         vehicleNo,
         fraightAndTransport,
+        challanType,
     );
 
     return res.status(oResponse.statusCode).send({

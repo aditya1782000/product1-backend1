@@ -24,6 +24,7 @@ interface DeliverySlip {
     note?: string;
     logoPath?: string;
     fraightAndTransport?: number;
+    challanType?: string;
 }
 
 class PDFHelper {
@@ -100,6 +101,7 @@ class PDFHelper {
                 data.logoPath || '',
                 data.addressLineOne || '',
                 data.addressLineTwo || '',
+                data.challanType || 'sales',
                 xOffset,
             )
             .drawSlipDetails(data.slipNo, data.date, xOffset)
@@ -148,18 +150,21 @@ class PDFHelper {
         logoPath: string,
         addressLineOne: string,
         addressLineTwo: string,
+        challanType: string,
         xOffset: number,
     ) {
         const headerTop = this.margin + 10;
         const boxStart = this.margin + xOffset;
         const boxWidth = this.slipWidth;
 
+        const typeLabel = challanType === 'salesReturn' ? 'SALES RETURN' : 'SALES';
+
         this.doc
             .fontSize(12)
             .fillColor('black')
-            .text('ESTIMATE', boxStart + boxWidth - 80, this.margin - 15, {
+            .text(typeLabel, boxStart + boxWidth - 100, this.margin - 15, {
                 align: 'right',
-                width: 70,
+                width: 90,
             })
             .fillColor('black');
 
