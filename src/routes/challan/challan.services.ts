@@ -602,7 +602,7 @@ export const listChallans = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const searchFields = ['customerName'];
+        const searchFields = ['customerName', 'vehicleNo'];
 
         const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
 
@@ -614,7 +614,7 @@ export const listChallans = async (
             $and: [oData.oSearchData],
             challanOrg: { $in: organisation },
         })
-            .select('challanNo customerName total date challanType')
+            .select('challanNo customerName total date challanType vehicleNo')
             .collation({ locale: 'en', strength: 1 })
             .sort({ dCreatedAt: -1 })
             .skip(start)
