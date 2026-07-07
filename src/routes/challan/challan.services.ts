@@ -1628,7 +1628,7 @@ export const createVtcChallan = async (
             dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
         });
 
-        const ChallanNo = `VTC-${nChallanTotal + 1}`;
+        const ChallanNo = nChallanTotal + 1;
 
         let formattedDate: string;
         if (typeof date === 'string') {
