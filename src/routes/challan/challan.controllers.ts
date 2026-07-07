@@ -4,6 +4,7 @@ import {
     createChallanOrganization,
     createCustomChallan,
     createCustomChallanOrganization,
+    createVtcChallan,
     deleteChallan,
     deleteChallanOrganization,
     deleteCustomChallan,
@@ -14,10 +15,12 @@ import {
     editChallanOrganization,
     editCustomChallan,
     editCustomChallanOrganization,
+    editVtcChallan,
     listChallanOrgnaization,
     listChallans,
     listCustomChallan,
     listCustomChallanOrg,
+    listVtcChallans,
     viewChallan,
     viewChallanOrganization,
     viewCustomChallan,
@@ -570,4 +573,91 @@ export const downloadCustomChallanController = async (req: Request, res: Respons
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', buffer.length);
     return res.send(buffer);
+};
+
+export const createVtcChallanController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const {
+        customerName,
+        date,
+        address,
+        items,
+        total,
+        vehicleNo,
+        customerMobileNo,
+        fraightAndTransport,
+        challanType,
+    } = req.body;
+
+    const oResponse = await createVtcChallan(
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        items,
+        total,
+        organization,
+        vehicleNo,
+        fraightAndTransport,
+        challanType,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const editVtcChallanController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { id } = req.params;
+
+    const {
+        customerName,
+        date,
+        address,
+        items,
+        total,
+        customerMobileNo,
+        vehicleNo,
+        fraightAndTransport,
+        challanType,
+    } = req.body;
+
+    const oResponse = await editVtcChallan(
+        id,
+        organization,
+        customerName,
+        customerMobileNo,
+        date,
+        address,
+        items,
+        total,
+        vehicleNo,
+        fraightAndTransport,
+        challanType,
+    );
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
+};
+
+export const listVtcChallansController = async (req: Request, res: Response) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const organization = (req as any).sOrganization;
+
+    const { start, length: limit } = req.body;
+
+    const oResponse = await listVtcChallans(req, start, limit, organization);
+
+    return res.status(oResponse.statusCode).send({
+        ...oResponse,
+        statusCode: undefined,
+    });
 };

@@ -21,6 +21,7 @@ export interface IChallan extends Document {
     customerMobileNo: number;
     fraightAndTransport: number;
     challanType: string;
+    company?: string;
 }
 
 const challanItemSchema: Schema<IChallanItem> = new Schema<IChallanItem>({
@@ -73,6 +74,11 @@ export const challanSchema: Schema<IChallan> = new Schema<IChallan>(
             type: String,
             enum: ['sales', 'salesReturn'],
             default: 'sales',
+        },
+        company: {
+            type: String,
+            enum: ['hk', 'vtc'],
+            default: 'hk',
         },
     },
     { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } },

@@ -24,6 +24,7 @@ import {
     createChallanOrganizationControllers,
     createCustomChallanControllers,
     createCustomChallanOrganizationControllers,
+    createVtcChallanController,
     deleteChallanControllers,
     deleteChallanOrganizationControllers,
     deleteCustomChallanOrganizationControllers,
@@ -34,10 +35,12 @@ import {
     editChallanOrganizationControllers,
     editCustomChallanControllers,
     editCustomChallOrganizationControllers,
+    editVtcChallanController,
     listChallanOrgnaizationControllers,
     listChallansControllers,
     listCustomChallanControllers,
     listCustomChallanOrgControllers,
+    listVtcChallansController,
     viewChallanControllers,
     viewChallanOrganizationControlllers,
     viewCustomChallanControllers,
@@ -199,6 +202,27 @@ router.get(
     viewCustomChallanValidators,
     isAdmin('Challan', 'V'),
     downloadCustomChallanController,
+);
+
+router.post(
+    '/admin/create/vtc/challan',
+    createChallanValidators,
+    isAdmin('Challan', 'A'),
+    createVtcChallanController,
+);
+
+router.patch(
+    '/admin/edit/:id/vtc/challan',
+    editChallanValidators,
+    isAdmin('Challan', 'E'),
+    editVtcChallanController,
+);
+
+router.post(
+    '/admin/list/vtc/challans',
+    listChallansValidaors,
+    isAdmin('Challan', 'V'),
+    listVtcChallansController,
 );
 
 export default router;

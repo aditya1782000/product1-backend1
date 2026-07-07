@@ -608,11 +608,13 @@ export const listChallans = async (
 
         const nRecordsTotal = await Challan.countDocuments({
             challanOrg: { $in: organisation },
+            company: { $ne: 'vtc' },
         });
 
         const challanList = await Challan.find({
             $and: [oData.oSearchData],
             challanOrg: { $in: organisation },
+            company: { $ne: 'vtc' },
         })
             .select('challanNo customerName total date challanType vehicleNo')
             .collation({ locale: 'en', strength: 1 })
@@ -1385,6 +1387,54 @@ export const downloadChallan = async (
             return { statusCode: 403, success: false, message: 'Unauthorized access' };
         }
 
+        if (oChallan.company === 'vtc') {
+            const vtcLogoPath = path.join(process.cwd(), 'assets', 'vtc-logo.jpg');
+            const vtcProcessedLogoPath = fs.existsSync(vtcLogoPath) ? vtcLogoPath : undefined;
+            const vtcFormattedDate = oChallan.date as unknown as string;
+
+            const vtcChallanFile = generateDeliverySlip({
+                gstNo: '',
+                mobileNo: 9924036899,
+                headingOne: 'Vaishvi Trading Co.',
+                headingTwo: '',
+                addressLineOne: 'S-6 Second Floor, Apana Bazar, Nr Indian Oil Petrol Pump',
+                addressLineTwo: 'Sector 6, Gandhinagar',
+                logoPath: vtcProcessedLogoPath,
+                footer: '',
+                note: '',
+                total: oChallan.total || 0,
+                slipNo: oChallan.challanNo,
+                date: formatDate(vtcFormattedDate),
+                name: oChallan.customerName || '',
+                customerMobileNo: Number(oChallan.customerMobileNo),
+                address: oChallan.address || '',
+                items: (oChallan.items || []).map((item: Item) => ({
+                    particulars: item.particulars || '',
+                    description: item.description,
+                    qty: Number(item.qty),
+                    rate: Number(item.rate),
+                })),
+                vehicleNo: oChallan.vehicleNo || '',
+                fraightAndTransport: Number(oChallan.fraightAndTransport),
+                challanType: oChallan.challanType || 'sales',
+            });
+
+            const vtcBuffer = await new Promise<Buffer>((resolve, reject) => {
+                const chunks: Uint8Array[] = [];
+                vtcChallanFile.on('data', (chunk: Uint8Array) => chunks.push(chunk));
+                vtcChallanFile.on('end', () => resolve(Buffer.concat(chunks)));
+                vtcChallanFile.on('error', reject);
+                vtcChallanFile.end();
+            });
+
+            return {
+                statusCode: 200,
+                success: true,
+                message: 'Challan PDF generated',
+                data: { buffer: vtcBuffer, filename: `vtc-challan-${oChallan.challanNo}.pdf` },
+            };
+        }
+
         const existingChallanOrganisation = await ChallanOrganization.findOne({
             organization: organisation,
         });
@@ -1535,6 +1585,177 @@ export const downloadCustomChallan = async (
             success: true,
             message: 'Challan PDF generated',
             data: { buffer, filename: `challan-${oChallan.challanNo}.pdf` },
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return { statusCode: 500, success: false, message: error.message || 'Something went wrong' };
+        }
+        return { statusCode: 500, success: false, message: 'Something went wrong' };
+    }
+};
+
+export const createVtcChallan = async (
+    customerName: string,
+    customerMobileNo: string,
+    date: Date,
+    address: string,
+    items: Item[],
+    total: number,
+    organisation: mongoose.Types.ObjectId,
+    vehicleNo?: string,
+    fraightAndTransport?: number,
+    challanType?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const currentDate = new Date();
+        let startYear: number;
+        let endYear: number;
+
+        if (currentDate.getMonth() >= 3) {
+            startYear = currentDate.getFullYear();
+            endYear = currentDate.getFullYear() + 1;
+        } else {
+            startYear = currentDate.getFullYear() - 1;
+            endYear = currentDate.getFullYear();
+        }
+
+        const ficalYearStart = new Date(`${startYear}-04-01`);
+        const ficalYearEnd = new Date(`${endYear}-04-01`);
+
+        const nChallanTotal = await Challan.countDocuments({
+            challanOrg: organisation,
+            company: 'vtc',
+            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+        });
+
+        const ChallanNo = `VTC-${nChallanTotal + 1}`;
+
+        let formattedDate: string;
+        if (typeof date === 'string') {
+            formattedDate = date;
+        } else {
+            formattedDate = date.toISOString().split('T')[0];
+        }
+
+        const oChallan = await Challan.create({
+            challanOrg: organisation,
+            challanNo: ChallanNo,
+            customerName,
+            date: formattedDate,
+            address,
+            items,
+            total,
+            vehicleNo,
+            customerMobileNo,
+            fraightAndTransport,
+            challanType: challanType || 'sales',
+            company: 'vtc',
+        });
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'VTC Challan has been created',
+            data: oChallan,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return { statusCode: 500, success: false, message: error.message || 'Something went wrong' };
+        }
+        return { statusCode: 500, success: false, message: 'Something went wrong' };
+    }
+};
+
+export const editVtcChallan = async (
+    challanId: string,
+    organisation: mongoose.Types.ObjectId,
+    customerName?: string,
+    customerMobileNo?: string,
+    date?: Date,
+    address?: string,
+    items?: Item[],
+    total?: number,
+    vehicleNo?: string,
+    fraightAndTransport?: number,
+    challanType?: string,
+): Promise<AsyncResponseType> => {
+    try {
+        const oChallan = await Challan.findById(challanId);
+
+        if (!oChallan) {
+            return { statusCode: 404, success: false, message: 'Challan not found' };
+        }
+
+        if (
+            oChallan.challanOrg &&
+            oChallan.challanOrg.toString() !== organisation.toString()
+        ) {
+            return { statusCode: 403, success: false, message: 'Unauthorized access' };
+        }
+
+        let formattedDate: string;
+        if (typeof date === 'string') {
+            formattedDate = date;
+        } else {
+            formattedDate = date?.toISOString().split('T')[0] || '';
+        }
+
+        await Challan.findByIdAndUpdate(challanId, {
+            customerName: customerName || oChallan.customerName,
+            date: formattedDate || oChallan.date,
+            address: address || oChallan.address,
+            items: items || oChallan.items,
+            total: total || oChallan.total,
+            customerMobileNo: customerMobileNo || oChallan.customerMobileNo,
+            vehicleNo: vehicleNo || oChallan.vehicleNo,
+            fraightAndTransport,
+            challanType: challanType || oChallan.challanType || 'sales',
+        });
+
+        return { statusCode: 200, success: true, message: 'VTC Challan updated successfully' };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return { statusCode: 500, success: false, message: error.message || 'Something went wrong' };
+        }
+        return { statusCode: 500, success: false, message: 'Something went wrong' };
+    }
+};
+
+export const listVtcChallans = async (
+    req: Request,
+    start: number,
+    limit: number,
+    organisation: mongoose.Types.ObjectId,
+): Promise<AsyncResponseType> => {
+    try {
+        const searchFields = ['customerName', 'vehicleNo'];
+        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
+
+        const nRecordsTotal = await Challan.countDocuments({
+            challanOrg: { $in: organisation },
+            company: 'vtc',
+        });
+
+        const challanList = await Challan.find({
+            $and: [oData.oSearchData],
+            challanOrg: { $in: organisation },
+            company: 'vtc',
+        })
+            .select('challanNo customerName total date challanType vehicleNo')
+            .collation({ locale: 'en', strength: 1 })
+            .sort({ dCreatedAt: -1 })
+            .skip(start)
+            .limit(limit)
+            .lean();
+
+        return {
+            statusCode: 200,
+            success: true,
+            message: 'VTC Challan list fetched successfully',
+            data: challanList,
+            draw: req.body.draw,
+            recordsTotal: nRecordsTotal,
+            recordsFiltered: nRecordsTotal,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
