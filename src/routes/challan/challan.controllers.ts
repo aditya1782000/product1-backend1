@@ -652,12 +652,13 @@ export const listVtcChallansController = async (req: Request, res: Response) => 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const organization = (req as any).sOrganization;
 
-    const { start, length: limit } = req.body;
+    const offSet = Number(req.body.start);
+    const limit = Number(req.body.length);
 
-    const oResponse = await listVtcChallans(req, start, limit, organization);
+    const oResponse = await listVtcChallans(req, offSet, limit, organization);
 
     return res.status(oResponse.statusCode).send({
-        ...oResponse,
+        data: oResponse,
         statusCode: undefined,
     });
 };
