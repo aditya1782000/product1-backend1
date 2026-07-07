@@ -1393,8 +1393,9 @@ export const downloadChallan = async (
             const vtcFormattedDate = oChallan.date as unknown as string;
 
             const vtcChallanFile = generateDeliverySlip({
-                gstNo: '',
+                gstNo: '24AOGPP5422D1Z9',
                 mobileNo: 9924036899,
+                rightSlipLabel: 'ESTIMATE',
                 headingOne: 'Vaishvi Trading Co.',
                 headingTwo: '',
                 addressLineOne: 'S-6 Second Floor, Apana Bazar, Nr Indian Oil Petrol Pump',

@@ -25,6 +25,7 @@ interface DeliverySlip {
     logoPath?: string;
     fraightAndTransport?: number;
     challanType?: string;
+    rightSlipLabel?: string;
 }
 
 class PDFHelper {
@@ -94,6 +95,7 @@ class PDFHelper {
         xOffset: number,
         isLastPage: boolean,
     ) {
+        const isRightSlip = xOffset > 0;
         this.drawOuterBox(xOffset)
             .drawHeader(
                 data.gstNo || '',
@@ -103,6 +105,7 @@ class PDFHelper {
                 data.addressLineTwo || '',
                 data.challanType || 'sales',
                 xOffset,
+                isRightSlip && data.rightSlipLabel ? data.rightSlipLabel : undefined,
             )
             .drawSlipDetails(data.slipNo, data.date, xOffset)
             .drawCustomerInfo(
@@ -152,12 +155,13 @@ class PDFHelper {
         addressLineTwo: string,
         challanType: string,
         xOffset: number,
+        labelOverride?: string,
     ) {
         const headerTop = this.margin + 10;
         const boxStart = this.margin + xOffset;
         const boxWidth = this.slipWidth;
 
-        const typeLabel = challanType === 'salesReturn' ? 'SALES RETURN' : 'SALES';
+        const typeLabel = labelOverride ?? (challanType === 'salesReturn' ? 'SALES RETURN' : 'SALES');
 
         this.doc
             .fontSize(12)
