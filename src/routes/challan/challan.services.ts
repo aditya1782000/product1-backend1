@@ -33,6 +33,77 @@ interface CustomItem {
     rate: number;
 }
 
+// Indian financial year (1 April - 31 March) in IST that contains `date`.
+const getFiscalYearRange = (date: Date = new Date()) => {
+    const istDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+    const startYear =
+        istDate.getUTCMonth() >= 3
+            ? istDate.getUTCFullYear()
+            : istDate.getUTCFullYear() - 1;
+
+    return {
+        start: new Date(`${startYear}-04-01T00:00:00+05:30`),
+        end: new Date(`${startYear + 1}-04-01T00:00:00+05:30`),
+    };
+};
+
+// Next challan number = highest number already used in this category for the
+// current financial year + 1. Using the max (instead of a count) means deleted
+// challans never cause a number to be reused, and each category (regular, VTC,
+// custom) is numbered independently via `filter`.
+const getNextChallanNo = async (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model: mongoose.Model<any>,
+    filter: Record<string, unknown>,
+): Promise<string> => {
+    const { start, end } = getFiscalYearRange();
+
+    const [result] = await model.aggregate([
+        {
+            $match: {
+                ...filter,
+                dCreatedAt: { $gte: start, $lt: end },
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                maxNo: {
+                    $max: {
+                        $convert: {
+                            input: '$challanNo',
+                            to: 'int',
+                            onError: 0,
+                            onNull: 0,
+                        },
+                    },
+                },
+            },
+        },
+    ]);
+
+    return `${(result?.maxNo || 0) + 1}`;
+};
+
+const escapeRegex = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Search on the challan list: customer name / vehicle no (partial) or the
+// exact challan number.
+const buildChallanSearch = (searchValue?: string) => {
+    const value = (searchValue || '').trim();
+    if (!value) return {};
+
+    const regex = new RegExp(escapeRegex(value), 'i');
+    return {
+        $or: [
+            { customerName: regex },
+            { vehicleNo: regex },
+            { challanNo: value },
+        ],
+    };
+};
+
 const deleteTempFile = (filePath: string) => {
     fs.unlink(filePath, (err) => {
         if (err) {
@@ -149,27 +220,10 @@ export const createChallan = async (
             };
         }
 
-        const currentDate = new Date();
-        let startYear: number;
-        let endYear: number;
-
-        if (currentDate.getMonth() >= 3) {
-            startYear = currentDate.getFullYear();
-            endYear = currentDate.getFullYear() + 1;
-        } else {
-            startYear = currentDate.getFullYear() - 1;
-            endYear = currentDate.getFullYear();
-        }
-
-        const ficalYearStart = new Date(`${startYear}-04-01`);
-        const ficalYearEnd = new Date(`${endYear}-04-01`);
-
-        const nChallanTotal = await Challan.countDocuments({
+        const ChallanNo = await getNextChallanNo(Challan, {
             challanOrg: organisation,
-            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
+            company: { $ne: 'vtc' },
         });
-
-        const ChallanNo = `${nChallanTotal + 1}`;
 
         let formattedDate: string;
         if (typeof date === 'string') {
@@ -602,23 +656,23 @@ export const listChallans = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const searchFields = ['customerName', 'vehicleNo'];
-
-        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
-
-        const nRecordsTotal = await Challan.countDocuments({
+        const oBaseQuery = {
             challanOrg: { $in: organisation },
             company: { $ne: 'vtc' },
-        });
+        };
+        const oFilterQuery = {
+            ...oBaseQuery,
+            ...buildChallanSearch(req.body?.search?.value),
+        };
 
-        const challanList = await Challan.find({
-            $and: [oData.oSearchData],
-            challanOrg: { $in: organisation },
-            company: { $ne: 'vtc' },
-        })
+        const [nRecordsTotal, nRecordsFiltered] = await Promise.all([
+            Challan.countDocuments(oBaseQuery),
+            Challan.countDocuments(oFilterQuery),
+        ]);
+
+        const challanList = await Challan.find(oFilterQuery)
             .select('challanNo customerName total date challanType vehicleNo')
-            .collation({ locale: 'en', strength: 1 })
-            .sort({ dCreatedAt: -1 })
+            .sort({ dCreatedAt: -1, _id: -1 })
             .skip(start)
             .limit(limit)
             .lean();
@@ -630,7 +684,7 @@ export const listChallans = async (
             data: challanList,
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
-            recordsFiltered: nRecordsTotal,
+            recordsFiltered: nRecordsFiltered,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -799,27 +853,9 @@ export const createCustomChallan = async (
             };
         }
 
-        const currentDate = new Date();
-        let startYear: number;
-        let endYear: number;
-
-        if (currentDate.getMonth() >= 3) {
-            startYear = currentDate.getFullYear();
-            endYear = currentDate.getFullYear() + 1;
-        } else {
-            startYear = currentDate.getFullYear() - 1;
-            endYear = currentDate.getFullYear();
-        }
-
-        const ficalYearStart = new Date(`${startYear}-04-01`);
-        const ficalYearEnd = new Date(`${endYear}-04-01`);
-
-        const nChallanTotal = await CustomChallan.countDocuments({
+        const ChallanNo = await getNextChallanNo(CustomChallan, {
             customChallanOrg: organisation,
-            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
         });
-
-        const ChallanNo = `${nChallanTotal + 1}`;
 
         let formattedDate: string;
         if (typeof date === 'string') {
@@ -1608,28 +1644,10 @@ export const createVtcChallan = async (
     challanType?: string,
 ): Promise<AsyncResponseType> => {
     try {
-        const currentDate = new Date();
-        let startYear: number;
-        let endYear: number;
-
-        if (currentDate.getMonth() >= 3) {
-            startYear = currentDate.getFullYear();
-            endYear = currentDate.getFullYear() + 1;
-        } else {
-            startYear = currentDate.getFullYear() - 1;
-            endYear = currentDate.getFullYear();
-        }
-
-        const ficalYearStart = new Date(`${startYear}-04-01`);
-        const ficalYearEnd = new Date(`${endYear}-04-01`);
-
-        const nChallanTotal = await Challan.countDocuments({
+        const ChallanNo = await getNextChallanNo(Challan, {
             challanOrg: organisation,
             company: 'vtc',
-            dCreatedAt: { $gte: ficalYearStart, $lt: ficalYearEnd },
         });
-
-        const ChallanNo = nChallanTotal + 1;
 
         let formattedDate: string;
         if (typeof date === 'string') {
@@ -1729,22 +1747,23 @@ export const listVtcChallans = async (
     organisation: mongoose.Types.ObjectId,
 ): Promise<AsyncResponseType> => {
     try {
-        const searchFields = ['customerName', 'vehicleNo'];
-        const oData = dataTable.initDataTable(req.body, searchFields, 'srNo');
-
-        const nRecordsTotal = await Challan.countDocuments({
+        const oBaseQuery = {
             challanOrg: { $in: organisation },
             company: 'vtc',
-        });
+        };
+        const oFilterQuery = {
+            ...oBaseQuery,
+            ...buildChallanSearch(req.body?.search?.value),
+        };
 
-        const challanList = await Challan.find({
-            $and: [oData.oSearchData],
-            challanOrg: { $in: organisation },
-            company: 'vtc',
-        })
+        const [nRecordsTotal, nRecordsFiltered] = await Promise.all([
+            Challan.countDocuments(oBaseQuery),
+            Challan.countDocuments(oFilterQuery),
+        ]);
+
+        const challanList = await Challan.find(oFilterQuery)
             .select('challanNo customerName total date challanType vehicleNo')
-            .collation({ locale: 'en', strength: 1 })
-            .sort({ dCreatedAt: -1 })
+            .sort({ dCreatedAt: -1, _id: -1 })
             .skip(start)
             .limit(limit)
             .lean();
@@ -1756,7 +1775,7 @@ export const listVtcChallans = async (
             data: challanList,
             draw: req.body.draw,
             recordsTotal: nRecordsTotal,
-            recordsFiltered: nRecordsTotal,
+            recordsFiltered: nRecordsFiltered,
         };
     } catch (error: unknown) {
         if (error instanceof Error) {
