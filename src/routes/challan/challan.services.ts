@@ -47,6 +47,13 @@ const getFiscalYearRange = (date: Date = new Date()) => {
     };
 };
 
+// `aggregate` does not cast like `find` does: the organisation coming from the
+// auth middleware is an array of ids, so turn it into ObjectIds for `$in`.
+const toObjectIdList = (value: unknown): mongoose.Types.ObjectId[] =>
+    (Array.isArray(value) ? value : [value]).map(
+        (id) => new mongoose.Types.ObjectId(String(id)),
+    );
+
 // Next challan number = highest number already used in this category for the
 // current financial year + 1. Using the max (instead of a count) means deleted
 // challans never cause a number to be reused, and each category (regular, VTC,
@@ -221,7 +228,7 @@ export const createChallan = async (
         }
 
         const ChallanNo = await getNextChallanNo(Challan, {
-            challanOrg: organisation,
+            challanOrg: { $in: toObjectIdList(organisation) },
             company: { $ne: 'vtc' },
         });
 
@@ -854,7 +861,7 @@ export const createCustomChallan = async (
         }
 
         const ChallanNo = await getNextChallanNo(CustomChallan, {
-            customChallanOrg: organisation,
+            customChallanOrg: { $in: toObjectIdList(organisation) },
         });
 
         let formattedDate: string;
@@ -1645,7 +1652,7 @@ export const createVtcChallan = async (
 ): Promise<AsyncResponseType> => {
     try {
         const ChallanNo = await getNextChallanNo(Challan, {
-            challanOrg: organisation,
+            challanOrg: { $in: toObjectIdList(organisation) },
             company: 'vtc',
         });
 
